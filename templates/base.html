@@ -142,21 +142,13 @@
                     </li>
                 </ul>
             {% else %}
-                {# --- Navbar KHI CHƯA ĐĂNG NHẬP --- #}
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> {# ms-auto đẩy sang phải #}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Đăng nhập</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-light btn-sm" href="{{ url_for('register') }}">Đăng ký</a>
-                    </li>
-                </ul>
+
             {% endif %}
         </div>
     </div>
 </nav>
 
-<main class="container mt-4">
+<main class="container mt-5 mb-5" >
 
     {# Content Block giữ nguyên #}
     {% block content %}{% endblock %}
@@ -184,53 +176,55 @@
 
 {% block scripts %}{% endblock %}
  {# === THÊM ĐOẠN CODE HIỂN THỊ FLASH MESSAGES === #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <script>
-                // Đợi DOM load xong mới chạy script
-                document.addEventListener('DOMContentLoaded', function() {
-                    const toastContainer = document.querySelector('.toast-container');
-                    if (toastContainer) {
-                        {% for category, message in messages %}
-                            const toastId = 'flash-toast-{{ loop.index }}';
-                            // Xác định class màu nền dựa trên category (success, danger, warning, info)
-                            const bgClass = 'text-bg-' + ('{{ category }}' || 'secondary'); // Mặc định là secondary nếu không có category
+   {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toastContainer = document.querySelector('.toast-container');
+                if (toastContainer) {
+                    {% for category, message in messages %}
+                        // --- KIỂM TRA: Chỉ tạo Toast nếu category là 'auth' ---
+                        {% if category == 'auth' %}
+                            const toastId = 'flash-toast-auth-{{ loop.index }}';
 
+                            // Xác định màu nền cho toast 'auth' (tùy chọn)
+                            let bgClass = 'text-bg-info'; // Màu xanh dương mặc định
+                            if ('{{ message }}'.toLowerCase().includes('không đúng') || '{{ message }}'.toLowerCase().includes('thất bại')) {
+                                bgClass = 'text-bg-danger'; // Màu đỏ nếu lỗi
+                            } else if ('{{ message }}'.toLowerCase().includes('thành công')) {
+                                 bgClass = 'text-bg-success'; // Màu xanh lá nếu thành công
+                            }
+
+                            // Tạo HTML cho Toast
                             const toastHTML = `
                             <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
                               <div class="d-flex">
                                 <div class="toast-body">
-                                  {{ message | safe }} {# Dùng safe nếu message có thể chứa HTML #}
+                                  {{ message | safe }}
                                 </div>
                                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                               </div>
                             </div>`;
 
-                            // Thêm toast vào container
+                            // Thêm và hiển thị Toast
                             toastContainer.insertAdjacentHTML('beforeend', toastHTML);
                             const toastElement = document.getElementById(toastId);
-
-                            // Khởi tạo và hiển thị toast
                             if (toastElement) {
-                                const toast = new bootstrap.Toast(toastElement, {
-                                    delay: 5000 // Tự động ẩn sau 5 giây (tùy chỉnh)
-                                });
+                                const toast = new bootstrap.Toast(toastElement, { delay: 3000 }); // Tự ẩn sau 5s
                                 toast.show();
-                                // Optional: Xóa toast khỏi DOM sau khi nó đã ẩn hoàn toàn
-                                toastElement.addEventListener('hidden.bs.toast', function () {
-                                    toastElement.remove();
-                                });
+                                // Xóa khỏi DOM sau khi ẩn (optional)
+                                toastElement.addEventListener('hidden.bs.toast', function () { toastElement.remove(); });
                             }
-                        {% endfor %}
-                    } else {
-                        console.warn('Toast container not found for flash messages.');
-                    }
-                });
-            </script>
-        {% endif %}
-    {% endwith %}
-    {# === KẾT THÚC CODE HIỂN THỊ FLASH MESSAGES === #}
-
+                        {% endif %}
+                        // --- KẾT THÚC KIỂM TRA category == 'auth' ---
+                    {% endfor %}
+                } else {
+                     console.warn('Toast container (.toast-container) not found.');
+                }
+            });
+        </script>
+    {% endif %}
+{% endwith %}
 
 <footer class="bg-dark text-light text-center py-3 mt-auto">
     {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
@@ -241,7 +235,7 @@
         {# <p class="mb-0 small"><a href="#" class="text-light">Liên hệ</a> | <a href="#" class="text-light">Giới thiệu</a></p> #}
     </div>
 </footer>
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
 
 </div>
 </body>
