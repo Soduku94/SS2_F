@@ -132,7 +132,9 @@ class Notification(db.Model):
     is_read = db.Column(db.Boolean, default=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     related_idea_id = db.Column(db.Integer, db.ForeignKey('student_idea.id', ondelete='SET NULL'), nullable=True)
-    # related_post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='SET NULL'), nullable=True)
+
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True)
+    notification_type = db.Column(db.String(50), nullable=True)
     def __repr__(self): ... # Giữ nguyên
 
 
