@@ -1,0 +1,30 @@
+ .fileinput-upload-button {
+            display: none !important;
+        }
+
+
+        body {
+            padding-top: 70px;
+        }
+
+        .navbar-nav .nav-link {
+            margin-right: 5px;
+            margin-left: 5px; /* Điều chỉnh nhẹ khoảng cách nav-link */
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Thêm chút padding cho dropdown user để không quá sát mép phải */
+        .navbar-nav .dropdown-menu-end {
+            margin-right: 5px;}

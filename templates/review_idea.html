@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <article class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h2>Chi tiết Ý tưởng: {{ idea.title }}</h2>
+            </div>
+            <div class="card-body">
+                {# --- Metadata --- #}
+                <div class="mb-3 text-muted small">
+                    <span class="me-3"><i
+                            class="bi bi-person-fill"></i> Gửi bởi: {{ idea.student.full_name }} ({{ idea.student.email }})</span>
+                    <span class="me-3"><i
+                            class="bi bi-calendar3"></i> Ngày gửi: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</span>
+                    <span>
+                     Trạng thái hiện tại:
+                        {% if idea.status == 'approved' %} <span class="badge bg-success">Đã duyệt</span>
+                        {% elif idea.status == 'rejected' %} <span class="badge bg-danger">Đã từ chối</span>
+                        {% elif idea.status == 'reviewed' %} <span class="badge bg-info">Đã xem xét</span>
+                        {% else %} <span class="badge bg-warning text-dark">Đang chờ duyệt</span> {% endif %}
+                 </span>
+                    {# Hiển thị người nhận nếu có #}
+                    <span class="ms-3">
+                    <i class="bi bi-send-fill me-1"></i>Gửi đến:
+                        {% if idea.recipients.count() > 0 %}
+                            {% for lecturer in idea.recipients %}
+                                {{ lecturer.full_name }}{% if not loop.last %}, {% endif %} {% endfor %}
+                        {% else %} Tất cả Giảng viên {% endif %}
+                 </span>
+                </div>
+                <hr>
+                {# --- Nội dung Mô tả --- #}
+                <div class="idea-description mb-4">
+                    <h5>Mô tả chi tiết:</h5>
+                    <div class="border p-3 bg-light rounded"
+                         style="white-space: pre-wrap;">{{ idea.description | safe }}</div>
+                </div>
+
+                {# --- File đính kèm --- #}
+                {% if idea.attachments %}
+                    <div class="attachments-section mb-4">
+                        <h5><i class="bi bi-paperclip"></i> Tệp đính kèm:</h5>
+                        <ul class="list-unstyled">
+                            {% for attachment in idea.attachments %}
+                                <li class="mb-1"><a
+                                        href="{{ url_for('download_idea_attachment', filename=attachment.saved_filename) }}"
+                                        target="_blank" class="text-decoration-none">
+                                    {# === THAY THẾ NỘI DUNG BÊN TRONG THẺ a BẰNG ĐOẠN NÀY === #}
+                                    {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                    {% if extension == 'pdf' %}
+                                        <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                    {% elif extension in ['doc', 'docx'] %}
+                                        <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                    {% elif extension in ['xls', 'xlsx'] %}
+                                        <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                    {% else %}
+                                        <i class="bi bi-file-earmark-text me-1"></i>
+                                    {% endif %}
+                                    {{ attachment.original_filename }}
+                                    {# === KẾT THÚC PHẦN THAY THẾ === #}
+                                </a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+
+        {# --- Form Phản hồi và Cập nhật Trạng thái --- #}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Phản hồi & Duyệt Ý tưởng</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" novalidate>
+                    {{ form.hidden_tag() }}
+                    <fieldset>
+                        <div class="mb-3">
+                            {{ form.feedback.label(class="form-label") }}
+                            {% if form.feedback.errors %}
+                                {{ form.feedback(class="form-control is-invalid", rows="5") }}
+                                <div class="invalid-feedback">{% for error in form.feedback.errors %}
+                                    <span>{{ error }}</span><br>{% endfor %}</div>
+                            {% else %}
+                                {{ form.feedback(class="form-control", rows="5") }}
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {% if form.status.errors %}
+                                {{ form.status(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">{% for error in form.status.errors %}
+                                    <span>{{ error }}</span><br>{% endfor %}</div>
+                            {% else %}
+                                {{ form.status(class="form-select") }}
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="mt-3">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('view_pending_ideas') }}" class="btn btn-outline-secondary ms-2">Quay lại
+                            Danh sách</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

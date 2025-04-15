@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết Ý tưởng: {{ title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <article class="card shadow-sm">
+            <div class="card-header">
+                <h2>{{ idea.title }}</h2>
+            </div>
+            <div class="card-body">
+                {# --- Metadata --- #}
+                <div class="mb-3 text-muted small">
+                    <span class="me-3"><i
+                            class="bi bi-calendar3"></i> Ngày gửi: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}
+                    </span>
+
+                    <span>
+                        Trạng thái:
+                        {% if idea.status == 'approved' %} <span class="badge bg-success">Đã duyệt</span>
+                        {% elif idea.status == 'rejected' %} <span class="badge bg-danger">Đã từ chối</span>
+                        {% elif idea.status == 'reviewed' %} <span class="badge bg-info">Đã xem xét</span>
+                        {% else %} <span class="badge bg-warning text-dark">Đang chờ duyệt</span> {% endif %}
+                    </span>
+
+                    {# Phần Người nhận (đặt ngay sau Trạng thái) #}
+                    <span> {# Không cần thêm margin ở đây #}
+                         <i class="bi bi-send-fill me-1"></i> {# Icon Gửi #}
+                                <span class="fw-bold">Gửi đến:</span> {# In đậm chữ "Gửi đến" #}
+                        {% if idea.recipients.count() > 0 %}
+                            {% for lecturer in idea.recipients %}
+                                {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Tất cả Giảng viên
+                        {% endif %}
+                     </span>
+
+
+                </div>
+                <hr>
+
+                {# --- Nội dung Mô tả --- #}
+                <div class="idea-description mb-4">
+                    <h5>Mô tả chi tiết:</h5>
+                    {# Hiển thị nội dung RTE đã làm sạch #}
+                    <div class="border p-3 bg-light rounded"
+                         style="white-space: pre-wrap;">{{ idea.description | safe }}</div>
+                </div>
+
+                {# --- File đính kèm --- #}
+                {% if idea.attachments %}
+                    <div class="attachments-section mb-4">
+                        <h5><i class="bi bi-paperclip"></i> Tệp đính kèm:</h5>
+                        <ul class="list-unstyled">
+                            {% for attachment in idea.attachments %}
+                                <li class="mb-1">
+                                    <a href="{{ url_for('download_idea_attachment', filename=attachment.saved_filename) }}"
+                                       target="_blank" class="text-decoration-none">
+                                        {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                        {% if extension == 'pdf' %}
+                                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                        {% elif extension in ['doc', 'docx'] %}
+                                            <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                        {% elif extension in ['xls', 'xlsx'] %}
+                                            <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                        {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                        {{ attachment.original_filename }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {# --- Phản hồi từ Giảng viên --- #}
+                {% if idea.feedback %}
+                    <div class="feedback-section mb-4">
+                        <h5><i class="bi bi-chat-left-text-fill text-success"></i> Phản hồi từ Giảng viên:</h5>
+                        <div class="border p-3 bg-light rounded" style="white-space: pre-wrap;">
+                            {{ idea.feedback | safe if idea.feedback else "Chưa có phản hồi." }}
+                            {# Dùng safe nếu feedback cũng là RTE #}
+                        </div>
+                        {# Có thể thêm tên Giảng viên phản hồi nếu lưu reviewer_id #}
+                    </div>
+                {% else %}
+                    <p class="text-muted"><em>Chưa có phản hồi từ Giảng viên.</em></p>
+                {% endif %}
+                <hr>
+
+                {# --- Nút hành động --- #}
+                <div class="text-end">
+                    <a href="{{ url_for('my_ideas') }}" class="btn btn-outline-secondary me-2"><i
+                            class="bi bi-list-ul"></i> Danh sách Ý tưởng</a>
+                    {# Nút Xóa chỉ hiển thị cho chủ nhân ý tưởng #}
+                    {% if idea.student_id == current_user.id %}
+                        {# Nút này sẽ mở Modal #}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                data-bs-target="#deleteIdeaModal">
+                            <i class="bi bi-trash-fill"></i> Xóa Ý tưởng này
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {# End card-body #}
+        </article>
+    </div>
+
+    {# --- Modal Xác nhận Xóa Ý tưởng --- #}
+    {% if idea.student_id == current_user.id %}
+        <div class="modal fade" id="deleteIdeaModal" tabindex="-1" aria-labelledby="deleteIdeaModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteIdeaModalLabel">Xác nhận Xóa Ý tưởng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc chắn muốn xóa ý tưởng "{{ idea.title }}" không? Hành động này không thể hoàn tác và
+                        sẽ xóa cả các file đính kèm (nếu có).
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        {# Form này sẽ POST đến route xóa ý tưởng #}
+                        <form action="{{ url_for('delete_my_idea', idea_id=idea.id) }}" method="POST"
+                              style="display: inline;">
+                            <button type="submit" class="btn btn-danger">Xóa</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {# --- Kết thúc Modal --- #}
+
+{% endblock %}

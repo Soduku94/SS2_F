@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {# Tiêu đề và thông báo số kết quả #}
+    <h1 class="mb-2">
+        {% if q %}
+            Kết quả tìm kiếm cho: "{{ q }}"
+        {% else %}
+            Tìm kiếm Bài đăng / Đề tài {# Hoặc một tiêu đề khác nếu q rỗng #}
+        {% endif %}
+    </h1>
+    {% if q %}
+        <p class="text-muted mb-4">
+            {% if posts_pagination and posts_pagination.total > 0 %}
+                Tìm thấy {{ posts_pagination.total }} kết quả phù hợp.
+            {% else %}
+                Không tìm thấy kết quả nào phù hợp với từ khóa của bạn.
+            {% endif %}
+        </p>
+    {% endif %}
+
+    <div class="row">
+        {# --- Cột Hiển thị Kết quả (Trái) --- #}
+        <div class="col-md-8">
+            {# Kiểm tra và Lặp qua các bài post tìm được #}
+            {% if posts_pagination and posts_pagination.items %}
+                {% for post in posts_pagination.items %}
+                    {# === SỬ DỤNG LẠI CẤU TRÚC CARD GIỐNG DASHBOARD === #}
+                    <div class="card mb-3 shadow-sm"> {# Thêm shadow nhẹ #}
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {# Link tiêu đề đến trang chi tiết #}
+                                <a href="{{ url_for('view_post', post_id=post.id) }}"
+                                   class="text-decoration-none">{{ post.title }}</a>
+                                {# Badges loại bài, trạng thái... #}
+                                {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Đề tài</span>
+                                {% elif post.post_type == 'article' %}
+                                    <span class="badge bg-secondary ms-1">Bài viết</span> {% endif %}
+                                {% if post.post_type == 'topic' and post.status %}
+                                    {% if post.status == 'working_on' %}
+                                        <span class="badge bg-success ms-1">Đang thực hiện</span>
+                                    {% elif post.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark ms-1">Chờ duyệt/Tìm SV</span>
+                                    {% elif post.status == 'closed' %}
+                                        <span class="badge bg-secondary ms-1">Đã đóng</span> {% endif %}
+                                {% endif %}
+                                {% if post.is_featured %}
+                                    <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span> {% endif %}
+                            </h5>
+                            {# Thông tin tác giả, ngày đăng #}
+                            <p class="card-text"><small class="text-muted">Đăng bởi {{ post.author.full_name }}
+                                vào {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                            {# Nội dung trích dẫn #}
+                            <p class="card-text">{{ post.content[:200] }}...</p>
+                            {# Link file đính kèm (nếu có) - hiển thị tóm tắt #}
+                            {% if post.attachments %}
+                                <div class="attachment-link-condensed mb-2">
+                                    {% for attachment in post.attachments[:1] %}
+                                        <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}"
+                                           target="_blank" class="text-decoration-none small">
+                                            {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                            {% if extension == 'pdf' %}
+                                                <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                            {% elif extension in ['doc', 'docx'] %}
+                                                <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                            {% elif extension in ['xls', 'xlsx'] %}
+                                                <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                            {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                            {{ attachment.original_filename }}
+                                            {% if post.attachments|length > 1 %} (+{{ post.attachments|length - 1 }}file
+                                                khác) {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {# Nút Xem chi tiết #}
+                            <a href="{{ url_for('view_post', post_id=post.id) }}"
+                               class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                            {# Nút quan tâm #}
+                            {% if post.post_type == 'topic' and post.status != 'closed' and current_user.is_authenticated and current_user.role == 'student' %}
+                                {% if post in current_user.interested_topics %}
+                                    <form action="{{ url_for('remove_interest', post_id=post.id) }}" method="POST"
+                                          style="display: inline;" class="ms-2">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Bỏ quan tâm">
+                                            <i class="bi bi-heartbreak-fill"></i> Bỏ quan tâm
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form action="{{ url_for('register_interest', post_id=post.id) }}" method="POST"
+                                          style="display: inline;" class="ms-2">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Đăng ký quan tâm"><i
+                                                class="bi bi-heart-fill"></i> Quan tâm
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                {# === KẾT THÚC HIỂN THỊ CARD === #}
+            {% elif q %} {# Chỉ hiển thị không tìm thấy nếu có thực hiện tìm kiếm 'q' #}
+                <div class="alert alert-warning" role="alert">
+                    Không tìm thấy bài đăng nào phù hợp với từ khóa "{{ q }}".
+                </div>
+            {% else %}
+                <p>Không có bài đăng nào để hiển thị.</p> {# Trường hợp vào /search mà không có q #}
+            {% endif %}
+
+            {# --- Phân trang cho Kết quả Tìm kiếm --- #}
+            <nav aria-label="Search results navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not posts_pagination.has_prev %}disabled{% endif %}">
+                        {# Đảm bảo có đủ q, sort, author_id, post_type, status #}
+                        <a class="page-link"
+                           href="{{ url_for('search_results', page=posts_pagination.prev_num, q=q, sort=selected_sort, author_id=selected_author_id, post_type=selected_post_type, status=selected_status) if posts_pagination.has_prev else '#' }}">&laquo;</a>
+                    </li>
+                    {% for page_num in posts_pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == posts_pagination.page %}active{% endif %}">
+                                {# Đảm bảo có đủ q, sort, author_id, post_type, status #}
+                                <a class="page-link"
+                                   href="{{ url_for('search_results', page=page_num, q=q, sort=selected_sort, author_id=selected_author_id, post_type=selected_post_type, status=selected_status) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not posts_pagination.has_next %}disabled{% endif %}">
+                        {# Đảm bảo có đủ q, sort, author_id, post_type, status #}
+                        <a class="page-link"
+                           href="{{ url_for('search_results', page=posts_pagination.next_num, q=q, sort=selected_sort, author_id=selected_author_id, post_type=selected_post_type, status=selected_status) if posts_pagination.has_next else '#' }}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+        {# --- Kết thúc Cột Kết quả --- #}
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-funnel-fill"></i> Lọc & Sắp xếp
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('dashboard') }}">
+                        <div class="mb-3">
+                            <label for="sort" class="form-label">Sắp xếp theo:</label>
+                            <select class="form-select form-select-sm" id="sort" name="sort">
+                                <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Ngày
+                                    đăng (Mới nhất)
+                                </option>
+                                <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Ngày
+                                    đăng (Cũ nhất)
+                                </option>
+                                <option value="title_asc" {% if selected_sort == 'title_asc' %}selected{% endif %}>Tiêu
+                                    đề (A-Z)
+                                </option>
+                                <option value="title_desc" {% if selected_sort == 'title_desc' %}selected{% endif %}>
+                                    Tiêu đề (Z-A)
+                                </option>
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <label for="filterAuthor" class="form-label">Tác giả (Giảng viên):</label>
+                            <select class="form-select form-select-sm" id="filterAuthor" name="author_id">
+                                <option value="">Tất cả Giảng viên</option>
+                                {% for lecturer in lecturers %}
+                                    <option value="{{ lecturer.id }}"
+                                            {% if selected_author_id == lecturer.id|string %}selected{% endif %}>{{ lecturer.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterType" class="form-label">Loại bài đăng:</label>
+                            <select class="form-select form-select-sm" id="filterType" name="post_type">
+                                <option value="">Tất cả</option>
+                                <option value="topic" {% if selected_post_type == 'topic' %}selected{% endif %}>Đề tài
+                                </option>
+                                <option value="article" {% if selected_post_type == 'article' %}selected{% endif %}>Bài
+                                    viết/Thông báo
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterStatus" class="form-label">Trạng thái Đề tài:</label>
+                            <select class="form-select form-select-sm" id="filterStatus" name="status">
+                                <option value="">Tất cả</option>
+                                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Chờ
+                                    duyệt/Tìm SV
+                                </option>
+                                <option value="working_on" {% if selected_status == 'working_on' %}selected{% endif %}>
+                                    Đang thực hiện
+                                </option>
+                                <option value="closed" {% if selected_status == 'closed' %}selected{% endif %}>Đã đóng
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Chỉ áp dụng khi lọc theo Loại là 'Đề tài'.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Áp dụng</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Bỏ
+                            lọc</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {# --- Kết thúc Bộ lọc --- #}
+    </div>
+    {# End row #}
+</div> {# End container #}
+{% endblock %}

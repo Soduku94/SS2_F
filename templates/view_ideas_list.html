@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">{{ list_title }}</h1>
+        {# Có thể thêm link/tab để chuyển qua lại giữa Pending và Responded ở đây sau #}
+        <div class="nav nav-tabs mb-3">
+            <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}"
+               href="{{ url_for('view_pending_ideas') }}">Chờ duyệt</a>
+            <a class="nav-link {% if request.endpoint == 'view_responded_ideas' %}active{% endif %}"
+               href="{{ url_for('view_responded_ideas') }}">Đã phản hồi</a>
+            {# Có thể thêm các bộ lọc khác ở đây #}
+        </div>
+
+        {% if ideas_pagination and ideas_pagination.items %}
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    {# === PHẦN HEADER CỦA BẢNG === #}
+                    <thead class="table-dark">
+                    <tr>
+                        <th scope="col" style="width: 5%;">STT</th>
+                        <th scope="col" style="width: 20%;">Tiêu đề Ý tưởng</th>
+                        <th scope="col" style="width: 20%;">Người gửi</th>
+                        {# Thêm cột Trạng thái, điều chỉnh width #}
+                        <th scope="col" style="width: 20%;">Trạng thái</th>
+                        <th scope="col" style="width: 20%;">Thời gian gửi</th>
+                        <th scope="col" style="width: 20%;">Hành động</th>
+                    </tr>
+                    </thead>
+                    {# === KẾT THÚC HEADER === #}
+
+                    {# === PHẦN BODY CỦA BẢNG === #}
+                    <tbody>
+                    {% for idea in ideas_pagination.items %}
+                        <tr>
+                            {# STT #}
+                            <td>{{ ideas_pagination.per_page * (ideas_pagination.page - 1) + loop.index }}</td>
+                            {# Tiêu đề (Link) #}
+                            <td>
+                                <a href="{{ url_for('review_idea', idea_id=idea.id) }}"
+                                   class="fw-bold text-decoration-none"
+                                   title="{{ idea.title }}">{{ idea.title | truncate(60, True, '...') }}</a>
+                            </td>
+                            {# Người gửi #}
+                            <td>{{ idea.student.full_name }}</td>
+                            {# Trạng thái (DÙNG LẠI BADGE) #}
+                            <td>
+                                {% if idea.status == 'approved' %} <span class="badge bg-success">Đã duyệt</span>
+                                {% elif idea.status == 'rejected' %} <span class="badge bg-danger">Đã từ chối</span>
+                                {% elif idea.status == 'reviewed' %} <span class="badge bg-info">Đã xem xét</span>
+                                {% else %} <span class="badge bg-warning text-dark">Đang chờ duyệt</span> {% endif %}
+                            </td>
+                            {# Thời gian gửi #}
+                            <td>{{ idea.submission_date.strftime('%d/%m/%Y') }}<br><small
+                                    class="text-muted">{{ idea.submission_date.strftime('%H:%M') }}</small></td>
+                            {# Hành động #}
+                            <td>
+                                {# Nút Xem/Review (DÙNG TEXT) #}
+                                <a href="{{ url_for('review_idea', idea_id=idea.id) }}"
+                                   class="btn btn-sm btn-outline-primary me-1" title="Xem/Review">
+                                    Xem/Review {# Thay icon bằng text #}
+                                </a>
+                                {# Nút Xóa (Giữ nguyên) #}
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#deleteIdeaModal{{ idea.id }}" title="Xóa Ý tưởng">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        {# Modal xác nhận xóa cho từng idea (giữ nguyên) #}
+                        <div class="modal fade" id="deleteIdeaModal{{ idea.id }}" ...>
+                            ...
+                        </div>
+
+                    {% endfor %} {# Kết thúc vòng lặp for idea #}
+                    </tbody>
+                    {# === KẾT THÚC BODY === #}
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Hiện tại không có ý tưởng nào phù hợp với bộ lọc này.
+            </div>
+        {% endif %}
+
+        {# --- Phân Trang (Đảm bảo url_for đúng endpoint hiện tại) --- #}
+        {% if ideas_pagination and ideas_pagination.pages > 1 %}
+            {# Sử dụng request.endpoint để link phân trang tự động đúng với route hiện tại #}
+            <nav aria-label="Ideas navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not ideas_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for(request.endpoint, page=ideas_pagination.prev_num, **request.view_args) if ideas_pagination.has_prev else '#' }}">&laquo;</a>
+                    </li>
+                    {% for page_num in ideas_pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == ideas_pagination.page %}active{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for(request.endpoint, page=page_num, **request.view_args) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not ideas_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for(request.endpoint, page=ideas_pagination.next_num, **request.view_args) if ideas_pagination.has_next else '#' }}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+        {# --- Kết thúc Phân Trang --- #}
+
+    </div>
+{% endblock %}

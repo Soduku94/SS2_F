@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6"> {# Có thể dùng col-md-8 nếu muốn rộng hơn #}
+        <div class="card shadow-sm">
+            <div class="card-header"><h2>{{ title }}</h2></div>
+            <div class="card-body">
+                {# Action trỏ về route 'register' #}
+                <form method="POST" action="{{ url_for('register') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    <fieldset>
+                        {# 1. Họ và tên #}
+                        <div class="mb-3">
+                            {{ form.full_name.label(class="form-label") }}
+                            {% if form.full_name.errors %} {{ form.full_name(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.full_name.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.full_name(class="form-control") }} {% endif %}
+                        </div>
+                        {# 2. MSSV #}
+                         <div class="mb-3">
+                            {{ form.student_id.label(class="form-label") }}
+                            {% if form.student_id.errors %} {{ form.student_id(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.student_id.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.student_id(class="form-control") }} {% endif %}
+                        </div>
+                        {# 3. Email Đăng nhập #}
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                             {% if form.email.errors %} {{ form.email(class="form-control is-invalid", placeholder="abc@fit.edu.vn") }} <div class="invalid-feedback">{% for e in form.email.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.email(class="form-control", placeholder="abc@fit.edu.vn") }} {% endif %}
+                        </div>
+                         {# 4. Lớp học #}
+                         <div class="mb-3">
+                             {{ form.class_name.label(class="form-label") }}
+                             {% if form.class_name.errors %} {{ form.class_name(class="form-control is-invalid", placeholder="Ví dụ: 22CTT1") }} <div class="invalid-feedback">{% for e in form.class_name.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.class_name(class="form-control", placeholder="Ví dụ: 22CTT1") }} {% endif %}
+                         </div>
+                         {# 5. Ngày sinh #}
+                         <div class="mb-3">
+                             {{ form.date_of_birth.label(class="form-label") }}
+                             {% if form.date_of_birth.errors %} {{ form.date_of_birth(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.date_of_birth.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.date_of_birth(class="form-control") }} {% endif %}
+
+                         </div>
+                          {# 6. Giới tính #}
+                         <div class="mb-3">
+                             {{ form.gender.label(class="form-label") }}
+                             {% if form.gender.errors %} {{ form.gender(class="form-select is-invalid") }} <div class="invalid-feedback">{% for e in form.gender.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.gender(class="form-select") }} {% endif %}
+                         </div>
+                         {# 7. Số điện thoại #}
+                         <div class="mb-3">
+                             {{ form.phone_number.label(class="form-label") }}
+                             {% if form.phone_number.errors %} {{ form.phone_number(class="form-control is-invalid", placeholder="Số điện thoại") }} <div class="invalid-feedback">{% for e in form.phone_number.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.phone_number(class="form-control", placeholder="Số điện thoại") }} {% endif %}
+                         </div>
+                         {# 8. Mật khẩu #}
+                         <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {% if form.password.errors %} {{ form.password(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.password.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.password(class="form-control") }} {% endif %}
+                        </div>
+                         {# 9. Xác nhận Mật khẩu #}
+                         <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {% if form.confirm_password.errors %} {{ form.confirm_password(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.confirm_password.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.confirm_password(class="form-control") }} {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="d-grid mt-3">
+                         {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+             <div class="card-footer text-center">
+                Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập tại đây</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

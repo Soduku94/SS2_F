@@ -1,0 +1,145 @@
+{% extends "base.html" %} {# Kế thừa từ base template chính #}
+
+{% block title %}{{ title or "Admin Dashboard" }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">{{ title or "Admin Dashboard" }}</h1>
+        {# Hiển thị tên Admin nếu muốn #}
+        <p>Chào mừng Admin {{ current_user.full_name }}!</p>
+        <hr>
+
+        {# --- Hàng Thống kê Nhanh --- #}
+        <h3 class="mb-3">Tổng quan Hệ thống</h3>
+        <div class="row g-4 mb-4"> {# g-4: gutter/khoảng cách giữa các cột #}
+            {# Card Tổng số User #}
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-white bg-primary shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {# Biến user_count được truyền từ route #}
+                                <h4 class="card-title mb-0">{{ user_count | default('N/A') }}</h4>
+                                <p class="card-text small mb-0">Tổng số Người dùng</p>
+                            </div>
+                            <i class="bi bi-people-fill h1 opacity-50"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin.list_users') }}"
+                       class="card-footer text-white text-decoration-none small">
+                        Xem chi tiết <i class="bi bi-arrow-right-circle"></i>
+                    </a>
+                </div>
+            </div>
+            {# Card Số Giảng viên #}
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-white bg-info shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {# Biến lecturer_count được truyền từ route #}
+                                <h4 class="card-title mb-0">{{ lecturer_count | default('N/A') }}</h4>
+                                <p class="card-text small mb-0">Giảng viên</p>
+                            </div>
+                            <i class="bi bi-person-video3 h1 opacity-50"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin.list_users', role='lecturer') }}"
+                       class="card-footer text-white text-decoration-none small">
+                        {# Thêm param role nếu route list_users hỗ trợ lọc #}
+                        Xem chi tiết <i class="bi bi-arrow-right-circle"></i>
+                    </a>
+                </div>
+            </div>
+            {# Card Số Sinh viên #}
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-white bg-success shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {# Biến student_count được truyền từ route #}
+                                <h4 class="card-title mb-0">{{ student_count | default('N/A') }}</h4>
+                                <p class="card-text small mb-0">Sinh viên</p>
+                            </div>
+                            <i class="bi bi-person-badge h1 opacity-50"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin.list_users', role='student') }}"
+                       class="card-footer text-white text-decoration-none small">
+                        {# Thêm param role nếu route list_users hỗ trợ lọc #}
+                        Xem chi tiết <i class="bi bi-arrow-right-circle"></i>
+                    </a>
+                </div>
+            </div>
+            {# Card Số Ý tưởng chờ duyệt #}
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-dark bg-warning shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {# Biến pending_idea_count được truyền từ route #}
+                                <h4 class="card-title mb-0">{{ pending_idea_count | default('N/A') }}</h4>
+                                <p class="card-text small mb-0">Ý tưởng chờ duyệt</p>
+                            </div>
+                            <i class="bi bi-lightbulb-fill h1 opacity-50"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('view_pending_ideas') }}"
+                       class="card-footer text-dark text-decoration-none small"> {# Giả sử route này tồn tại #}
+                        Xem chi tiết <i class="bi bi-arrow-right-circle"></i>
+                    </a>
+                </div>
+            </div>
+            {# Có thể thêm Card Tổng số Bài đăng/Đề tài: post_count nếu muốn #}
+        </div>
+        {# --- Kết thúc Hàng Thống kê --- #}
+
+        <hr class="my-4">
+
+        {# --- Hàng Chức năng Quản lý --- #}
+        <h3 class="mb-3">Chức năng Quản lý</h3>
+        <div class="row g-4">
+            {# Card Quản lý User #}
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100"> {# Thêm h-100 để các card cao bằng nhau #}
+                    <div class="card-body text-center d-flex flex-column"> {# Dùng flex column #}
+                        <i class="bi bi-people-fill h1 text-primary mb-3"></i>
+                        <h5 class="card-title">Quản lý Người dùng</h5>
+                        <p class="card-text small text-muted flex-grow-1">Xem danh sách, tạo, sửa, xóa tài khoản Giảng
+                            viên và Sinh viên.</p> {# flex-grow-1 #}
+                        <a href="{{ url_for('admin.list_users') }}" class="btn btn-primary mt-auto">Đi đến</a>
+                        {# mt-auto đẩy nút xuống dưới #}
+                    </div>
+                </div>
+            </div>
+            {# Card Quản lý Bài đăng #}
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <i class="bi bi-journal-text h1 text-secondary mb-3"></i>
+                        <h5 class="card-title">Quản lý Bài đăng</h5>
+                        <p class="card-text small text-muted flex-grow-1">Xem, chỉnh sửa hoặc xóa các bài đăng, đề tài
+                            trên hệ thống.</p>
+                        <a href="{{ url_for('admin.list_posts') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-journal-text me-2"></i> Quản lý Bài đăng
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {# Card Quản lý Ý tưởng SV #}
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <i class="bi bi-lightbulb-fill h1 text-warning mb-3"></i>
+                        <h5 class="card-title">Quản lý Ý tưởng SV</h5>
+                        <p class="card-text small text-muted flex-grow-1">Xem danh sách, duyệt hoặc xóa các ý tưởng do
+                            sinh viên gửi.</p>
+                        <a href="{{ url_for('view_pending_ideas') }}" class="btn btn-warning mt-auto">Đi đến</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# --- Kết thúc Hàng Chức năng --- #}
+
+    </div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Gửi Ý tưởng Mới{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header"><h2>Gửi Ý tưởng Nghiên cứu Mới</h2></div>
+            <div class="card-body">
+                 <form method="POST" action="{{ url_for('submit_idea') }}" novalidate enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <fieldset>
+                        {# Trường title #}
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {% if form.title.errors %}
+                                {{ form.title(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                            {% else %}
+                                {{ form.title(class="form-control") }}
+                            {% endif %}
+                        </div>
+
+                        {# Trường description với Trix Editor #}
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            <input type="hidden" name="description" id="idea_description_input" value="{{ form.description.data or '' }}">
+                            <trix-editor input="idea_description_input" class="form-control trix-content" style="min-height: 200px;"></trix-editor>
+                             {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">{% for error in form.description.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                            {% endif %}
+                        </div>
+
+                        {# Trường attachments với Krajee #}
+                        <div class="mb-3">
+                            {{ form.attachments.label(class="form-label") }}
+                            <div class="file-loading">
+                                {% if form.attachments.errors %}
+                                    {{ form.attachments(class="file is-invalid", multiple=True, id="ideaAttachmentInput") }} {# Đặt ID khác nếu cần #}
+                                    <div class="invalid-feedback d-block">{% for error in form.attachments.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                                {% else %}
+                                    {{ form.attachments(class="file", multiple=True, id="ideaAttachmentInput") }}
+                                {% endif %}
+                            </div>
+                            {# Không cần div hiển thị tên file thủ công nếu dùng Krajee #}
+                        </div>
+
+
+                    {# <<< THÊM KHỐI DIV CHO RECIPIENTS >>> #}
+        <div class="mb-3">
+            {{ form.recipients.label(class="form-label") }}
+            {% if form.recipients.errors %}
+                {# Thêm size để hiển thị như list box, hoặc dùng JS plugin #}
+                {{ form.recipients(class="form-select is-invalid", size=5) }}
+                <div class="invalid-feedback d-block"> {# Dùng d-block #}
+                    {% for error in form.recipients.errors %}<span>{{ error }}</span><br>{% endfor %}
+                </div>
+            {% else %}
+                 {# Thêm size để hiển thị như list box, hoặc dùng JS plugin #}
+                 {{ form.recipients(class="form-select", size=5) }}
+            {% endif %}
+             <small class="form-text text-muted">Giữ Ctrl (hoặc Cmd trên Mac) và nhấp để chọn nhiều giảng viên. Mặc định không chọn ai sẽ gửi công khai cho tất cả giảng viên.</small>
+        </div>
+        {# <<< KẾT THÚC THÊM RECIPIENTS >>> #}
+
+                    </fieldset>
+                    <div class="d-grid mt-3">
+                         {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+                 <div class="mt-3 text-center">
+                       <a href="{{ url_for('my_ideas') }}">Quay lại Danh sách Ý tưởng</a> {# Link quay lại #}
+                  </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{# Script khởi tạo Krajee File Input cho attachments (nếu bạn dùng Krajee) #}
+<script>
+$(document).ready(function() {
+    $("#ideaAttachmentInput").fileinput({ // Đảm bảo ID khớp với input file
+        language: "vi",
+        theme: "bs5",
+        showUpload: false,
+        showCaption: true,
+        showPreview: true,
+        allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx', 'png', 'jpg', 'jpeg'],
+        browseOnZoneClick: true,
+        overwriteInitial: false,
+        maxFileSize: 10240, // 10MB
+        maxFileCount: 5,   // Giới hạn 5 file cho ý tưởng chẳng hạn
+    });
+
+    // Đảm bảo Trix Editor cũng được load đúng (thường chỉ cần JS ở base.html)
+});
+</script>
+{% endblock %}

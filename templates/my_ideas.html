@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ title }}</h1>
+            <a href="{{ url_for('submit_idea') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle-fill"></i> Gửi ý tưởng mới
+            </a>
+        </div>
+
+        {% if ideas_pagination and ideas_pagination.items %}
+            <div class="list-group shadow-sm">
+                {% for idea in ideas_pagination.items %}
+                    <div class="list-group-item list-group-item-action flex-column align-items-start mb-2">
+                        <div class="d-flex w-100 justify-content-between">
+                            {# <<< SỬA LẠI TIÊU ĐỀ THÀNH LINK >>> #}
+                            <h5 class="mb-1">
+                                <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="text-decoration-none">
+                                    {{ idea.title }}
+                                </a>
+                            </h5>
+                            <small class="text-muted">{{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1 text-muted small">{{ idea.description | striptags | truncate(250, True, '...') }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                Trạng thái:
+                                {% if idea.status == 'approved' %}
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                {% elif idea.status == 'rejected' %}
+                                    <span class="badge bg-danger">Đã từ chối</span>
+                                {% elif idea.status == 'reviewed' %}
+                                    <span class="badge bg-info">Đã xem xét</span>
+                                {% else %} {# Mặc định là 'pending' #}
+                                    <span class="badge bg-warning text-dark">Đang chờ duyệt</span>
+                                {% endif %}
+                            </div>
+                            {% if idea.attachments %}
+
+                                <div class="attachments-list mt-2"> {# Giữ mt-2 để có khoảng cách #}
+                                    <small class="text-muted d-block mb-1">Tệp đính kèm:</small>
+                                    {# Có thể dùng d-block mb-1 #}
+                                    <ul class="list-inline mb-0">
+                                        {% for attachment in idea.attachments %}
+                                            <li class="list-inline-item">
+                                                <a href="{{ url_for('download_idea_attachment', filename=attachment.saved_filename) }}"
+                                                   target="_blank" class="text-decoration-none small">
+                                                    {# ... Icon logic ... #}
+                                                    {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                                    {% if extension == 'pdf' %}
+                                                        <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                                    {% elif extension in ['doc', 'docx'] %}
+                                                        <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                                    {% elif extension in ['xls', 'xlsx'] %}
+                                                        <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                                    {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                                    {{ attachment.original_filename }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {# Hiển thị feedback nếu có #}
+                        {% if idea.feedback %}
+                            <div class="alert alert-light mt-3 mb-0 p-2 small">
+                                <strong>Phản hồi từ Giảng viên:</strong><br>
+                                <span style="white-space: pre-wrap;">{{ idea.feedback }}</span>
+                                {# Có thể thêm thông tin người phản hồi nếu lưu reviewer_id #}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Bạn chưa gửi ý tưởng nào. <a href="{{ url_for('submit_idea') }}" class="alert-link">Gửi ý tưởng mới
+                ngay!</a>
+            </div>
+        {% endif %}
+
+        {# --- Phân Trang --- #}
+        {# Copy từ dashboard/search_results và sửa lại url_for, biến pagination #}
+        {% if ideas_pagination and ideas_pagination.pages > 1 %}
+            <nav aria-label="My ideas navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not ideas_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('my_ideas', page=ideas_pagination.prev_num) if ideas_pagination.has_prev else '#' }}">&laquo;</a>
+                    </li>
+                    {% for page_num in ideas_pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == ideas_pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('my_ideas', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not ideas_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('my_interests', page=ideas_pagination.next_num) if ideas_pagination.has_next else '#' }}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+        {# --- Kết thúc Phân Trang --- #}
+
+    </div>
+{% endblock %}

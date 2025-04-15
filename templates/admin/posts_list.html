@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ title }}</h1>
+        {# Có thể thêm nút Tạo bài đăng ở đây nếu muốn Admin cũng tạo được #}
+        {# <a href="{{ url_for('create_post') }}" class="btn btn-success">...</a> #}
+    </div>
+
+    {% if posts_pagination and posts_pagination.items %}
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tiêu đề</th>
+                        <th scope="col">Tác giả</th>
+                        <th scope="col">Loại</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col">Ngày đăng</th>
+                        <th scope="col">Nổi bật</th>
+                        <th scope="col">Đính kèm</th>
+                        <th scope="col">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts_pagination.items %}
+                    <tr>
+                        <td>{{ loop.index + posts_pagination.per_page * (posts_pagination.page - 1) }}</td>
+                        <td>
+                             <a href="{{ url_for('view_post', post_id=post.id) }}" class="fw-bold text-decoration-none" title="{{ post.title }}">
+                                 {{ post.title | truncate(50, True, '...') }}
+                             </a>
+                        </td>
+                        <td>{{ post.author.full_name }}</td>
+                        <td>
+                            {% if post.post_type == 'topic' %} <span class="badge bg-primary">Đề tài</span>
+                            {% elif post.post_type == 'article' %} <span class="badge bg-secondary">Bài viết</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                             {% if post.post_type == 'topic' %}
+                                {% if post.status == 'working_on' %} <span class="badge bg-success">Đang làm</span>
+                                {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark">Chờ</span>
+                                {% elif post.status == 'closed' %} <span class="badge bg-secondary">Đóng</span>
+                                {% else %} <span class="badge bg-light text-dark">N/A</span> {% endif %}
+                             {% else %}
+                                <span class="badge bg-light text-dark">N/A</span>
+                             {% endif %}
+                        </td>
+                        <td>{{ post.date_posted.strftime('%d/%m/%y %H:%M') }}</td>
+                        <td class="text-center">
+                             {% if post.is_featured %}<i class="bi bi-check-circle-fill text-success"></i>{% endif %}
+                        </td>
+                         <td class="text-center">
+                             {% if post.attachments %}{{ post.attachments | length }}{% else %}0{% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-info me-1" title="Xem chi tiết">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                             {# Nút Sửa (trỏ đến route sửa của Giảng viên, hoặc tạo route sửa riêng cho Admin) #}
+                             <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary me-1" title="Sửa Bài đăng">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            {# Nút Xóa (sẽ làm ở bước sau) #}
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}" title="Xóa Bài đăng">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {# === MODAL XÁC NHẬN XÓA POST (BÊN TRONG VÒNG LẶP FOR POST) === #}
+                    <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1" aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="deletePostModalLabel{{ post.id }}">Xác nhận Xóa</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            Xóa bài đăng/đề tài "{{ post.title }}"?<br>
+                            <small class="text-danger">Hành động này sẽ xóa cả các file đính kèm và không thể hoàn tác!</small>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            {# Form trỏ đến route xóa của admin #}
+                            <form action="{{ url_for('admin.delete_post_by_admin', post_id=post.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {# === KẾT THÚC MODAL === #}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">Chưa có bài đăng nào trong hệ thống.</div>
+    {% endif %}
+
+    {# --- Phân Trang --- #}
+    {% if posts_pagination and posts_pagination.pages > 1 %}
+    <nav aria-label="Post list navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not posts_pagination.has_prev %}disabled{% endif %}">
+                {# Link đến admin.list_posts #}
+                <a class="page-link" href="{{ url_for('admin.list_posts', page=posts_pagination.prev_num) if posts_pagination.has_prev else '#' }}">&laquo;</a>
+            </li>
+            {% for page_num in posts_pagination.iter_pages() %}
+                {% if page_num %}
+                    <li class="page-item {% if page_num == posts_pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.list_posts', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            <li class="page-item {% if not posts_pagination.has_next %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.list_posts', page=posts_pagination.next_num) if posts_pagination.has_next else '#' }}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+    {# --- Kết thúc Phân Trang --- #}
+</div>
+{% endblock %}

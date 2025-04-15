@@ -1,0 +1,16 @@
+{% extends "base.html" %} {# Kế thừa từ base chính #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ title }}</h1>
+    <p>Chào mừng đến với khu vực quản trị!</p>
+    {# Sau này thêm các link quản lý ở đây #}
+    <ul>
+        <li><a href="#">Quản lý Người dùng</a></li> {# TODO: Link đến trang user list #}
+        <li><a href="#">Quản lý Bài đăng</a></li> {# TODO: Link đến trang post list #}
+        <li><a href="#">Quản lý Ý tưởng SV</a></li> {# TODO: Link đến trang idea list #}
+    </ul>
+</div>
+{% endblock %}

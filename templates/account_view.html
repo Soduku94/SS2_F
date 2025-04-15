@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Thông tin Tài khoản{% endblock %}
+
+{% block content %}
+<div class="row mt-4 gy-4"> {# Thêm gy-4 để có khoảng cách dọc giữa các cột trên mobile #}
+
+    {# --- Cột Thông tin Hiển thị (Trái) --- #}
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                {# === LOGIC XÁC ĐỊNH URL VÀ HIỂN THỊ ẢNH ĐẠI DIỆN (ĐÚNG) === #}
+                {# 1. Lấy tên file từ DB, nếu không có thì dùng default.jpg #}
+                {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
+                {# 2. Mặc định thư mục là user_pics #}
+                {% set image_folder = 'user_pics' %}
+                {# 3. KIỂM TRA: Nếu tên file LÀ default -> Đổi sang thư mục profile_pics #}
+                {% if image_filename.startswith('default') %}
+                    {% set image_folder = 'profile_pics' %} {# Đổi thư mục #}
+                    {# Chọn ảnh default cụ thể theo giới tính #}
+                    {% if current_user.gender == 'female' %}
+                        {% set image_filename = 'default_female.jpg' %}
+                    {% elif current_user.gender == 'male' %}
+                         {% set image_filename = 'default_male.jpg' %}
+                    {% else %}
+                         {% set image_filename = 'default.jpg' %} {# Fallback #}
+                    {% endif %}
+                {% endif %} {# Kết thúc kiểm tra default #}
+                {# 4. Tạo URL cuối cùng #}
+                {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
+                {# === KẾT THÚC LOGIC === #}
+
+                {# 5. Hiển thị ảnh #}
+                <img class="rounded-circle img-thumbnail mb-3" src="{{ avatar_url }}" alt="Ảnh đại diện" width="180" height="180" style="object-fit: cover;">
+
+                <h4 class="mb-1">{{ current_user.full_name }}</h4>
+                {% if current_user.role == 'student' and current_user.class_name %}
+                    <p class="text-muted mb-0">{{ current_user.class_name }}</p>
+                {% elif current_user.role == 'lecturer' %}
+                     <p class="text-muted mb-0">Giảng viên</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# --- Cột Thông tin Chi tiết (Phải) --- #}
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+             <div class="card-header">
+                 <h5 class="mb-0">Thông tin Chi tiết</h5>
+             </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Họ và tên:</dt>
+                    <dd class="col-sm-8">{{ current_user.full_name }}</dd>
+
+                    <dt class="col-sm-4">Chức vụ:</dt>
+                    <dd class="col-sm-8">
+                         {% if current_user.role == 'lecturer' %} <span class="badge bg-primary">Giảng viên</span>
+                         {% elif current_user.role == 'student' %} <span class="badge bg-info">Sinh viên</span>
+                         {% else %} <span class="badge bg-danger">Admin</span>
+                         {% endif %}
+                    </dd>
+
+                    {% if current_user.role == 'student' %}
+                        <dt class="col-sm-4">MSSV:</dt>
+                        <dd class="col-sm-8">{{ current_user.student_id or 'Chưa cập nhật' }}</dd>
+                        <dt class="col-sm-4">Lớp:</dt>
+                        <dd class="col-sm-8">{{ current_user.class_name or 'Chưa cập nhật' }}</dd>
+                        <dt class="col-sm-4">Khóa:</dt>
+                        <dd class="col-sm-8">{{ cohort or 'N/A' }}</dd>
+                    {% endif %}
+
+                    <dt class="col-sm-4">Email Đăng nhập:</dt>
+                    <dd class="col-sm-8">{{ current_user.email }} </dd>
+
+                    <dt class="col-sm-4">Ngày sinh:</dt>
+                    <dd class="col-sm-8">{{ current_user.date_of_birth.strftime('%d/%m/%Y') if current_user.date_of_birth else 'Chưa cập nhật' }}</dd>
+
+                    <dt class="col-sm-4">Giới tính:</dt>
+                    <dd class="col-sm-8">
+                        {% if current_user.gender == 'male' %} Nam
+                        {% elif current_user.gender == 'female' %} Nữ
+                        {% else %} Chưa cập nhật
+                        {% endif %}
+                     </dd>
+
+                     <dt class="col-sm-4">Điện thoại:</dt>
+                     <dd class="col-sm-8">{{ current_user.phone_number or 'Chưa cập nhật' }}</dd>
+
+                     <dt class="col-sm-4">Email liên hệ:</dt>
+                     <dd class="col-sm-8">{{ current_user.contact_email or 'Chưa cập nhật' }}</dd>
+
+                </dl>
+
+                <h6>Giới thiệu bản thân:</h6>
+                {% if current_user.about_me %}
+                     <p class="text-muted small" style="white-space: pre-wrap;">{{ current_user.about_me }}</p>
+                {% else %}
+                     <p class="text-muted small"><i>Chưa cập nhật...</i></p>
+                {% endif %}
+
+                 {# --- Nút hành động --- #}
+                 <hr>
+                 <div class="text-end d-flex justify-content-end align-items-center">
+                     <a href="{{ url_for('change_password') }}" class="btn btn-outline-secondary me-2">
+                         <i class="bi bi-key-fill"></i> Đổi mật khẩu
+                     </a>
+                     <a href="{{ url_for('account_edit') }}" class="btn btn-primary">
+                         <i class="bi bi-pencil-square"></i> Thay đổi thông tin
+                     </a>
+                 </div>
+            </div> {# End card-body #}
+        </div> {# End card #}
+    </div> {# End col-lg-8 #}
+</div> {# End row #}
+{% endblock %}

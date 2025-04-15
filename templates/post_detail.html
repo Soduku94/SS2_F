@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <article class="card shadow-sm mb-4">
+            <div class="card-header">
+                {# Hiển thị tiêu đề bài đăng #}
+                <h2 class="mb-0">{{ post.title }}</h2>
+            </div>
+            <div class="card-body">
+                {# --- Metadata của bài đăng --- #}
+                <div class="d-flex flex-wrap align-items-center mb-3 text-muted small">
+                    <div class="me-3">
+                        <i class="bi bi-person-fill"></i> Đăng bởi:
+                        <a href="#" class="text-decoration-none">{{ post.author.full_name }}</a>
+                        {# TODO: Link đến profile tác giả? #}
+                    </div>
+                    <div class="me-3">
+                        <i class="bi bi-calendar3"></i> Ngày đăng: {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                    <div class="me-3">
+                        {% if post.post_type == 'topic' %}
+                            <span class="badge bg-primary"><i class="bi bi-lightbulb-fill"></i> Đề tài</span>
+                        {% elif post.post_type == 'article' %}
+                            <span class="badge bg-secondary"><i class="bi bi-file-text-fill"></i> Bài viết</span>
+                        {% endif %}
+                    </div>
+                    {% if post.post_type == 'topic' and post.status %}
+                        <div class="me-3">
+                            Trạng thái:
+                            {% if post.status == 'working_on' %}
+                                <span class="badge bg-success">Đang thực hiện</span>
+                            {% elif post.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Chờ duyệt/Tìm SV</span>
+                            {% elif post.status == 'closed' %}
+                                <span class="badge bg-secondary">Đã đóng</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if post.is_featured %}
+                        <div class="me-3">
+                            <span class="badge bg-warning text-dark"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span>
+                        </div>
+                    {% endif %}
+                    {# Bỏ phần hiển thị số lượt quan tâm ở đây vì đã chuyển xuống nút bấm #}
+                </div>
+                {# --- Kết thúc Metadata --- #}
+
+                <hr>
+
+                {# --- Nội dung bài đăng --- #}
+                <div class="post-content mb-4">
+                    <h5>Nội dung chi tiết:</h5>
+                    {# Hiển thị nội dung RTE đã làm sạch #}
+                    <div class="border p-3 bg-light rounded"
+                         style="white-space: pre-wrap;">{{ post.content | safe }}</div>
+                </div>
+
+                {# --- File đính kèm (nếu có) --- #}
+                {% if post.attachments %}
+                    <hr>
+                    <div class="attachments-section mb-4">
+                        <h5><i class="bi bi-paperclip"></i> Tệp đính kèm:</h5>
+                        <ul class="list-unstyled">
+                            {% for attachment in post.attachments %}
+                                <li class="mb-1">
+                                    <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}"
+                                       target="_blank" class="text-decoration-none">
+                                        {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                        {% if extension == 'pdf' %}
+                                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                        {% elif extension in ['doc', 'docx'] %}
+                                            <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                        {% elif extension in ['xls', 'xlsx'] %}
+                                            <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                        {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                        {{ attachment.original_filename }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {# --- Kết thúc File đính kèm --- #}
+
+                <hr>
+
+                {# --- Các nút hành động --- #}
+                {# --- KHỐI NÚT HÀNH ĐỘNG (ĐÃ SẮP XẾP LẠI) --- #}
+                <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    {# --- NHÓM NÚT BÊN TRÁI --- #}
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        {# Nút Quay lại Dashboard #}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left-circle"></i> Quay lại Dashboard
+                        </a>
+
+                        {# Dropdown Lượt quan tâm (chỉ cho tác giả, là topic, có người quan tâm) #}
+                        {% if post.author == current_user and post.post_type == 'topic' and post.interested_students.count() > 0 %}
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-info text-dark position-relative">
+                                    <i class="bi bi-heart-fill me-1"></i>
+                                    {{ post.interested_students.count() }}
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-info dropdown-toggle dropdown-toggle-split text-dark"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Xem danh sách</span>
+                                </button>
+                                <ul class="dropdown-menu"> {# Bỏ dropdown-menu-end để nó không bị lệch quá #}
+                                    <li><h6 class="dropdown-header">Sinh viên quan tâm</h6></li>
+                                    {% if interested_students %} {# Dùng biến đã query từ route view_post #}
+                                        {% for student in interested_students %}
+                                            <li><span
+                                                    class="dropdown-item-text small">{{ student.full_name }} ({{ student.student_id or student.email }})</span>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li><span
+                                                class="dropdown-item-text small text-muted">Lỗi khi tải danh sách.</span>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        {# Nút Quan tâm/Bỏ quan tâm (chỉ cho Sinh viên) #}
+                        {% if post.post_type == 'topic' and post.status != 'closed' and current_user.is_authenticated and current_user.role == 'student' %}
+                            {% if post in current_user.interested_topics %}
+                                <form action="{{ url_for('remove_interest', post_id=post.id) }}" method="POST"
+                                      style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Bỏ quan tâm"><i
+                                            class="bi bi-heartbreak-fill"></i> Bỏ quan tâm
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('register_interest', post_id=post.id) }}" method="POST"
+                                      style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Đăng ký quan tâm"><i
+                                            class="bi bi-heart-fill"></i> Quan tâm
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+
+                    </div>
+                    {# --- KẾT THÚC NHÓM NÚT BÊN TRÁI --- #}
+
+
+                    {# --- NHÓM NÚT BÊN PHẢI (SỬA/XÓA - chỉ cho tác giả) --- #}
+                    {% if post.author == current_user %}
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-secondary btn-sm"><i
+                                    class="bi bi-pencil-fill"></i> Sửa</a>
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#deletePostModal{{ post.id }}">
+                                <i class="bi bi-trash-fill"></i> Xóa
+                            </button>
+                        </div>
+                    {% endif %}
+                    {# --- KẾT THÚC NHÓM NÚT BÊN PHẢI --- #}
+
+                </div>
+                {# --- Kết thúc hàng nút hành động --- #}
+                {# --- Kết thúc hàng nút hành động --- #}
+            </div>
+            {# End card-body #}
+        </article>
+        {# End article #}
+    </div> {# End container #}
+
+
+    {# --- Modal Xác nhận Xóa Post --- #}
+    {% if post.author == current_user %}
+        <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1"
+             aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deletePostModalLabel{{ post.id }}">Xác nhận Xóa Bài Đăng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc chắn muốn xóa bài đăng "{{ post.title }}" không? Hành động này không thể hoàn tác.
+                        File đính kèm (nếu có) cũng sẽ bị xóa.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                        <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST"
+                              style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {# --- Kết thúc Modal --- #}
+
+{% endblock %}

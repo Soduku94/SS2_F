@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header"><h2>{{ title }}</h2></div>
+            <div class="card-body">
+                 {# === THÊM enctype VÀO FORM === #}
+                 <form method="POST" action="" id="updateAccountForm" novalidate enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <fieldset>
+
+                        <div class="mb-3">
+                             {{ form.class_name.label(class="form-label") }}
+                             {% if form.class_name.errors %}
+                                {{ form.class_name(class="form-control is-invalid", placeholder="Ví dụ: 22CTT1") }}
+                                <div class="invalid-feedback">{% for error in form.class_name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                             {% else %}
+                                {{ form.class_name(class="form-control", placeholder="Ví dụ: 22CTT1") }}
+                             {% endif %}
+                         </div>
+
+                        {# Render các trường có thể sửa: DOB, Gender, Phone, Contact Email, About Me, Class Name #}
+                         <div class="mb-3">
+                             {{ form.date_of_birth.label(class="form-label") }}
+                             {% if form.date_of_birth.errors %}
+                                {{ form.date_of_birth(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">{% for error in form.date_of_birth.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                             {% else %}
+                                {{ form.date_of_birth(class="form-control") }}
+                             {% endif %}
+                         </div>
+                         <div class="mb-3">
+                             {{ form.gender.label(class="form-label") }}
+                             {% if form.gender.errors %}
+                                {{ form.gender(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">{% for error in form.gender.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                             {% else %}
+                                {{ form.gender(class="form-select") }}
+                             {% endif %}
+                         </div>
+                          <div class="mb-3">
+                             {{ form.phone_number.label(class="form-label") }}
+                             {% if form.phone_number.errors %}
+                                {{ form.phone_number(class="form-control is-invalid", placeholder="Số điện thoại") }}
+                                <div class="invalid-feedback">{% for error in form.phone_number.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                             {% else %}
+                                {{ form.phone_number(class="form-control", placeholder="Số điện thoại") }}
+                             {% endif %}
+                         </div>
+                          <div class="mb-3">
+                             {{ form.contact_email.label(class="form-label") }}
+                             {% if form.contact_email.errors %}
+                                {{ form.contact_email(class="form-control is-invalid", placeholder="Email liên hệ khác (tùy chọn)") }}
+                                <div class="invalid-feedback">{% for error in form.contact_email.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                             {% else %}
+                                {{ form.contact_email(class="form-control", placeholder="Email liên hệ khác (tùy chọn)") }}
+                             {% endif %}
+                         </div>
+                          <div class="mb-3">
+                             {{ form.about_me.label(class="form-label") }}
+                             {% if form.about_me.errors %}
+                                {{ form.about_me(class="form-control is-invalid", rows="4") }}
+                                <div class="invalid-feedback">{% for error in form.about_me.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                             {% else %}
+                                {{ form.about_me(class="form-control", rows="4") }}
+                             {% endif %}
+                         </div>
+
+
+
+                        {# === KHỐI DIV CHO TRƯỜNG PICTURE === #}
+                        <hr>
+                        <div class="mb-3">
+                            {{ form.picture.label(class="form-label") }}
+                            {# Input chọn file ảnh #}
+                            {{ form.picture(class="form-control") }}
+                            {# Hiển thị lỗi validation nếu có #}
+                            {% if form.picture.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.picture.errors %}<span>{{ error }}</span><br>{% endfor %}
+                                </div>
+                            {% endif %}
+                             <small class="form-text text-muted">Chọn file ảnh mới (jpg, png, jpeg, gif) để thay đổi ảnh đại diện.</small>
+                        </div>
+                        {# === KẾT THÚC KHỐI PICTURE === #}
+
+                    </fieldset>
+                    <div class="d-grid mt-3">
+                         {# Nút mở Modal xác nhận #}
+                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmUpdateModal">
+                             Lưu thay đổi
+                         </button>
+                    </div>
+                </form>
+                 <div class="mt-3 text-center">
+                       <a href="{{ url_for('account') }}">Hủy bỏ thay đổi</a>
+                  </div>
+            </div> {# End card-body #}
+        </div> {# End card #}
+    </div> {# End col #}
+</div> {# End row #}
+
+{# --- Modal Xác nhận Cập nhật --- #}
+<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="confirmUpdateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmUpdateModalLabel">Xác nhận Cập nhật</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn lưu các thay đổi thông tin cá nhân này không?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" id="submitUpdateBtn">Đồng ý</button> {# JS sẽ submit form #}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{# Script xử lý modal submit #}
+<script>
+    const confirmButton = document.getElementById('submitUpdateBtn');
+    const updateForm = document.getElementById('updateAccountForm');
+    if (confirmButton && updateForm) {
+        confirmButton.addEventListener('click', function () { updateForm.submit(); });
+    } else { /* console error */ }
+</script>
+{% endblock %}
