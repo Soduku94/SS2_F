@@ -32,10 +32,6 @@
                     <div class="card mb-3 shadow-sm"> {# Thêm shadow nhẹ #}
                         <div class="card-body">
                             <h5 class="card-title">
-                                {# Link tiêu đề đến trang chi tiết #}
-                                <a href="{{ url_for('view_post', post_id=post.id) }}"
-                                   class="text-decoration-none">{{ post.title }}</a>
-                                {# Badges loại bài, trạng thái... #}
                                 {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Đề tài</span>
                                 {% elif post.post_type == 'article' %}
                                     <span class="badge bg-secondary ms-1">Bài viết</span> {% endif %}
@@ -49,6 +45,11 @@
                                 {% endif %}
                                 {% if post.is_featured %}
                                     <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span> {% endif %}
+                                {# Link tiêu đề đến trang chi tiết #}
+                                <a href="{{ url_for('view_post', post_id=post.id) }}"
+                                   class="text-decoration-none">{{ post.title }}</a>
+                                {# Badges loại bài, trạng thái... #}
+
                             </h5>
                             {# Thông tin tác giả, ngày đăng #}
                             <p class="card-text"><small class="text-muted">Đăng bởi {{ post.author.full_name }}
