@@ -105,7 +105,7 @@ ALLOWED_ATTRS = {
 # --- User Loader ---
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # --- Error Handlers ---
@@ -139,10 +139,10 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
-            flash(f'Đăng nhập thành công cho {user.full_name}!', 'success')
+            flash(f'Đăng nhập thành công cho {user.full_name}!', 'auth')
             return redirect(next_page or url_for('dashboard'))
         else:
-            flash('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.', 'danger')
+            flash('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.', 'auth')
             print("DEBUG: Flashed 'Login Failed' message.")
     return render_template('login.html', title='Đăng nhập', form=form)
 
@@ -186,7 +186,7 @@ def register():
 @login_required
 def logout():
     logout_user()
-    flash('Bạn đã đăng xuất.', 'info')
+    flash('Bạn đã đăng xuất.', 'auth')
     return redirect(url_for('login'))
 
 
@@ -464,7 +464,7 @@ def delete_post(post_id):
     except Exception as e:
         db.session.rollback()
         flash(f'Lỗi khi xóa bài đăng: {e}', 'danger')
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('my_posts'))
 
 
 # --- ACCOUNT ROUTES ---
@@ -805,6 +805,48 @@ def submit_idea():
             if attachments_to_add:
                 db.session.add_all(attachments_to_add)
             db.session.commit()
+            try:
+                # Lấy danh sách giảng viên đã được liên kết với ý tưởng
+                # Giả sử 'idea.recipients' vẫn chứa đúng danh sách sau commit
+                lecturers_to_notify = idea.recipients
+
+                if lecturers_to_notify:  # Chỉ tạo thông báo nếu có người nhận
+                    notifications_to_add = []
+                    for lecturer in lecturers_to_notify:
+                        # Tạo nội dung thông báo (bạn có thể tùy chỉnh)
+                        notification_content = f"Sinh viên {current_user.full_name} đã gửi một ý tưởng mới: '{idea.title}'"
+
+                        # Tạo đối tượng Notification
+                        # !!! Quan trọng: Đảm bảo các tên trường khớp với model Notification của bạn !!!
+                        new_notification = Notification(
+                            recipient_id=lecturer.id,  # ID người nhận (giảng viên)
+                            sender_id=current_user.id,  # ID người gửi (sinh viên)
+                            content=notification_content,  # Nội dung thông báo
+                            notification_type='new_idea',  # Loại thông báo (ví dụ)
+                            related_idea_id=idea.id,  # ID của ý tưởng liên quan
+                            is_read=False  # Mặc định là chưa đọc
+                            # timestamp: Thường DB hoặc Model sẽ tự xử lý
+                        )
+                        notifications_to_add.append(new_notification)
+
+                    # Thêm tất cả thông báo mới vào session và commit
+                    if notifications_to_add:
+                        db.session.add_all(notifications_to_add)
+                        db.session.commit()  # Commit các bản ghi thông báo
+
+            except Exception as notif_e:
+                # Xử lý lỗi nếu không tạo được thông báo
+                # Bạn có thể chọn rollback cả giao dịch chính hoặc chỉ log lỗi
+                # và báo cho người dùng biết (ví dụ: bằng flash message)
+                print(f"LỖI NGHIÊM TRỌNG khi tạo thông báo cho ý tưởng ID {idea.id}: {notif_e}")
+                # Có thể cân nhắc rollback ở đây nếu việc tạo thông báo là bắt buộc
+                # db.session.rollback()
+                flash('Gửi ý tưởng thành công, nhưng có lỗi xảy ra khi tạo thông báo cho giảng viên.', 'warning')
+
+
+
+
+
             flash(f'Ý tưởng của bạn đã được gửi thành công! ({files_saved_count} tệp đính kèm).', 'success')
             redirect_target = 'my_ideas' if 'my_ideas' in app.view_functions else 'dashboard'
             return redirect(url_for(redirect_target))
