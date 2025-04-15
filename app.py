@@ -143,6 +143,7 @@ def login():
             return redirect(next_page or url_for('dashboard'))
         else:
             flash('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.', 'danger')
+            print("DEBUG: Flashed 'Login Failed' message.")
     return render_template('login.html', title='Đăng nhập', form=form)
 
 
@@ -641,10 +642,7 @@ def change_password():
     return render_template('change_password.html', title='Đổi Mật khẩu', form=form)
 
 
-# --- KẾT THÚC ROUTE ĐỔI MẬT KHẨU ---
 
-
-# --- THÊM API ENDPOINT CHO SEARCH SUGGESTIONS ---
 @app.route('/api/search-suggestions')
 @login_required  # Vẫn yêu cầu đăng nhập để thấy gợi ý? (Tùy bạn)
 def search_suggestions():
@@ -1033,12 +1031,8 @@ def delete_idea_by_lecturer(idea_id):
     return redirect(url_for('view_pending_ideas'))
 
 
-# --- KẾT THÚC ROUTE GIẢNG VIÊN XÓA Ý TƯỞNG ---
 
-
-# --- THÊM ROUTE CHO GIẢNG VIÊN XEM Ý TƯỞNG ĐÃ RESPOND ---
-# --- HÀM XEM Ý TƯỞNG ĐÃ RESPOND (ĐÃ SỬA) ---
-@app.route('/responded-ideas')  # Hoặc @admin_bp.route('/responded-ideas')
+@app.route('/responded-ideas')
 @login_required
 def view_responded_ideas():
     # Kiểm tra quyền
@@ -1070,10 +1064,6 @@ def view_responded_ideas():
                            active_tab='responded')  # Truyền tab nếu template dùng tabs
 
 
-# --- KẾT THÚC HÀM RESPONDED ---
-
-
-# --- CONTEXT PROCESSOR ĐỂ TRUYỀN SỐ THÔNG BÁO CHƯA ĐỌC ---
 @app.context_processor
 def inject_notifications():
     unread_count = 0
@@ -1086,10 +1076,7 @@ def inject_notifications():
     return dict(unread_count=unread_count)
 
 
-# --- KẾT THÚC CONTEXT PROCESSOR ---
 
-
-# --- THÊM ROUTE CHO TRANG XEM THÔNG BÁO ---
 @app.route('/notifications')
 @login_required
 def notifications():
@@ -1124,10 +1111,7 @@ def notifications():
                            notifications_pagination=pagination)
 
 
-# --- KẾT THÚC ROUTE NOTIFICATIONS ---
 
-
-# --- THÊM ROUTE XÓA THÔNG BÁO CÁ NHÂN ---
 @app.route('/notification/<int:notif_id>/delete', methods=['POST'])
 @login_required
 def delete_notification(notif_id):
@@ -1149,10 +1133,7 @@ def delete_notification(notif_id):
     return redirect(url_for('notifications'))
 
 
-# --- KẾT THÚC ROUTE XÓA THÔNG BÁO CÁ NHÂN ---
 
-
-# --- THÊM ROUTE XÓA TẤT CẢ THÔNG BÁO ---
 @app.route('/notifications/delete-all', methods=['POST'])
 @login_required
 def delete_all_notifications():
@@ -1171,13 +1152,7 @@ def delete_all_notifications():
     return redirect(url_for('notifications'))
 
 
-# --- KẾT THÚC ROUTE XÓA TẤT CẢ ---
 
-
-
-
-
-# --- THÊM ROUTE CHO TRANG "BÀI ĐÃ ĐĂNG" CỦA GIẢNG VIÊN ---
 @app.route('/my-posts')
 @login_required
 def my_posts():

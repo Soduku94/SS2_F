@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vie">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
-
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/css/fileinput.min.css">
@@ -14,7 +12,7 @@
     <title>{% block title %}FIT Research Connect{% endblock %}</title>
     <link rel="stylesheet" href="static/css/style.css">
 </head>
-<body  class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
@@ -82,37 +80,39 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownUserLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                           id="navbarDropdownUserLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-          {# --- Logic xác định URL ảnh đại diện (ĐÚNG) --- #}
-          {# 1. Lấy tên file từ DB, nếu không có thì dùng default.jpg #}
-          {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
-          {# 2. Mặc định thư mục là user_pics #}
-          {% set image_folder = 'user_pics' %}
+                            {# --- Logic xác định URL ảnh đại diện (ĐÚNG) --- #}
+                            {# 1. Lấy tên file từ DB, nếu không có thì dùng default.jpg #}
+                            {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
+                            {# 2. Mặc định thư mục là user_pics #}
+                            {% set image_folder = 'user_pics' %}
 
-          {# 3. KIỂM TRA: Nếu tên file LÀ default -> Đổi sang thư mục profile_pics #}
-          {% if image_filename.startswith('default') %}
-              {% set image_folder = 'profile_pics' %} {# Đổi thư mục #}
-              {# Chọn ảnh default cụ thể theo giới tính #}
-              {% if current_user.gender == 'female' %}
-                  {% set image_filename = 'default_female.jpg' %}
-              {% elif current_user.gender == 'male' %}
-                  {% set image_filename = 'default_male.jpg' %}
-              {% else %}
-                   {% set image_filename = 'default.jpg' %} {# Fallback #}
-              {% endif %}
-          {% endif %} {# Kết thúc kiểm tra default #}
+                            {# 3. KIỂM TRA: Nếu tên file LÀ default -> Đổi sang thư mục profile_pics #}
+                            {% if image_filename.startswith('default') %}
+                                {% set image_folder = 'profile_pics' %} {# Đổi thư mục #}
+                                {# Chọn ảnh default cụ thể theo giới tính #}
+                                {% if current_user.gender == 'female' %}
+                                    {% set image_filename = 'default_female.jpg' %}
+                                {% elif current_user.gender == 'male' %}
+                                    {% set image_filename = 'default_male.jpg' %}
+                                {% else %}
+                                    {% set image_filename = 'default.jpg' %} {# Fallback #}
+                                {% endif %}
+                            {% endif %} {# Kết thúc kiểm tra default #}
 
-          {# 4. Tạo URL cuối cùng #}
-          {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
-          {# --- Kết thúc Logic --- #}
+                            {# 4. Tạo URL cuối cùng #}
+                            {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
+                            {# --- Kết thúc Logic --- #}
 
-          {# 5. Hiển thị ảnh - dùng cho Navbar #}
-          <img src="{{ avatar_url }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                            {# 5. Hiển thị ảnh - dùng cho Navbar #}
+                            <img src="{{ avatar_url }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32"
+                                 style="object-fit: cover;">
 
-          {# Hiển thị tên #}
-          {{ current_user.full_name }}
-      </a>
+                            {# Hiển thị tên #}
+                            {{ current_user.full_name }}
+                        </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUserLink">
                             <li><a class="dropdown-item" href="{{ url_for('account') }}">Hồ sơ</a></li>
                             <li><a class="dropdown-item" href="#">Cài đặt</a></li>
@@ -157,10 +157,7 @@
 </nav>
 
 <main class="container mt-4">
-    {# Flash messages giữ nguyên #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {# ... #}
-    {% endwith %}
+
     {# Content Block giữ nguyên #}
     {% block content %}{% endblock %}
 </main>
@@ -168,117 +165,85 @@
 {# Scripts giữ nguyên #}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/plugins/piexif.min.js"
         type="text/javascript"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/plugins/sortable.min.js"
         type="text/javascript"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/fileinput.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/locales/vi.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
-
 <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
-{# templates/base.html - bên trong {% block scripts %} #}
-<script>
-    const searchInput = document.getElementById('navbarSearchInput');
-    const resultsDropdown = document.getElementById('searchResultsDropdown');
-    let searchTimeout; // Biến để quản lý debounce
-
-    if (searchInput && resultsDropdown) {
-        searchInput.addEventListener('input', function (event) {
-            const query = event.target.value.trim();
-
-            // Hủy bỏ timeout cũ nếu người dùng gõ tiếp
-            clearTimeout(searchTimeout);
-
-            if (query.length >= 1) { // Chỉ tìm khi đủ dài
-                // Đặt timeout mới - chỉ gửi yêu cầu sau khi người dùng ngừng gõ 300ms
-                searchTimeout = setTimeout(() => {
-                    // Gọi API để lấy gợi ý
-                    fetch(`/api/search-suggestions?q=${encodeURIComponent(query)}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            resultsDropdown.innerHTML = ''; // Xóa kết quả cũ
-                            if (data.length > 0) {
-                                data.forEach(item => {
-                                    const link = document.createElement('a');
-                                    link.classList.add('dropdown-item');
-                                    link.href = item.url; // URL từ API
-                                    link.textContent = `${item.title} - ${item.author}`; // Format Title - Author
-                                    resultsDropdown.appendChild(link);
-                                });
-                                resultsDropdown.style.display = 'block'; // Hiển thị dropdown
-                            } else {
-                                // Hiển thị thông báo không tìm thấy hoặc ẩn dropdown
-                                const noResult = document.createElement('span');
-                                noResult.classList.add('dropdown-item', 'text-muted');
-                                noResult.textContent = 'Không tìm thấy kết quả nào';
-                                resultsDropdown.appendChild(noResult);
-                                resultsDropdown.style.display = 'block';
-                                // Hoặc resultsDropdown.style.display = 'none';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching search suggestions:', error);
-                            resultsDropdown.innerHTML = '<span class="dropdown-item text-danger">Lỗi khi tìm kiếm</span>';
-                            resultsDropdown.style.display = 'block';
-                        });
-                }, 300); // Thời gian chờ (ms) trước khi gửi yêu cầu
-            } else {
-                resultsDropdown.innerHTML = ''; // Xóa kết quả nếu query quá ngắn
-                resultsDropdown.style.display = 'none'; // Ẩn dropdown
-            }
-        });
-
-        // Ẩn dropdown khi click ra ngoài hoặc chọn một mục
-        document.addEventListener('click', function (event) {
-            if (!searchInput.contains(event.target) && !resultsDropdown.contains(event.target)) {
-                resultsDropdown.style.display = 'none';
-            }
-        });
-
-        // (Tùy chọn) Ẩn dropdown khi input trống hoặc mất focus
-        searchInput.addEventListener('blur', function () {
-            // Thêm độ trễ nhỏ để cho phép click vào link trong dropdown trước khi nó ẩn đi
-            setTimeout(() => {
-                if (!resultsDropdown.contains(document.activeElement)) {
-                    resultsDropdown.style.display = 'none';
-                }
-            }, 150);
-        });
-        searchInput.addEventListener('focus', function () {
-            // Hiển thị lại nếu có kết quả khi focus (tùy chọn)
-            if (resultsDropdown.children.length > 0 && searchInput.value.length >= 2) {
-                resultsDropdown.style.display = 'block';
-            }
-        });
 
 
-    } else {
-        if (!searchInput) console.error("Không tìm thấy #navbarSearchInput");
-        if (!resultsDropdown) console.error("Không tìm thấy #searchResultsDropdown");
-    }
-</script>
 {% block scripts %}{% endblock %}
+ {# === THÊM ĐOẠN CODE HIỂN THỊ FLASH MESSAGES === #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+                // Đợi DOM load xong mới chạy script
+                document.addEventListener('DOMContentLoaded', function() {
+                    const toastContainer = document.querySelector('.toast-container');
+                    if (toastContainer) {
+                        {% for category, message in messages %}
+                            const toastId = 'flash-toast-{{ loop.index }}';
+                            // Xác định class màu nền dựa trên category (success, danger, warning, info)
+                            const bgClass = 'text-bg-' + ('{{ category }}' || 'secondary'); // Mặc định là secondary nếu không có category
+
+                            const toastHTML = `
+                            <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                              <div class="d-flex">
+                                <div class="toast-body">
+                                  {{ message | safe }} {# Dùng safe nếu message có thể chứa HTML #}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                              </div>
+                            </div>`;
+
+                            // Thêm toast vào container
+                            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                            const toastElement = document.getElementById(toastId);
+
+                            // Khởi tạo và hiển thị toast
+                            if (toastElement) {
+                                const toast = new bootstrap.Toast(toastElement, {
+                                    delay: 5000 // Tự động ẩn sau 5 giây (tùy chỉnh)
+                                });
+                                toast.show();
+                                // Optional: Xóa toast khỏi DOM sau khi nó đã ẩn hoàn toàn
+                                toastElement.addEventListener('hidden.bs.toast', function () {
+                                    toastElement.remove();
+                                });
+                            }
+                        {% endfor %}
+                    } else {
+                        console.warn('Toast container not found for flash messages.');
+                    }
+                });
+            </script>
+        {% endif %}
+    {% endwith %}
+    {# === KẾT THÚC CODE HIỂN THỊ FLASH MESSAGES === #}
 
 
-
-<footer class="bg-dark text-light text-center py-3 mt-auto"> {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
+<footer class="bg-dark text-light text-center py-3 mt-auto">
+    {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
     <div class="container">
         {# Thay 2025 bằng năm hiện tại nếu muốn hoặc giữ nguyên #}
         <p class="mb-0 small">&copy; 2025 Khoa Công nghệ Thông tin - Đại học Hà Nội</p>
-         {# Thêm các link khác nếu muốn #}
-         {# <p class="mb-0 small"><a href="#" class="text-light">Liên hệ</a> | <a href="#" class="text-light">Giới thiệu</a></p> #}
+        {# Thêm các link khác nếu muốn #}
+        {# <p class="mb-0 small"><a href="#" class="text-light">Liên hệ</a> | <a href="#" class="text-light">Giới thiệu</a></p> #}
     </div>
 </footer>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+
+</div>
 </body>
+
 </html>
