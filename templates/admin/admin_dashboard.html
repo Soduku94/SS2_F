@@ -3,10 +3,10 @@
 {% block title %}{{ title or "Admin Dashboard" }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
+
         <h1 class="mb-4">{{ title or "Admin Dashboard" }}</h1>
         {# Hiển thị tên Admin nếu muốn #}
-        <p>Chào mừng Admin {{ current_user.full_name }}!</p>
+        <p class="fs-1 fw-bold" >Chào mừng {{ current_user.full_name }}!</p>
         <hr>
 
         {# --- Hàng Thống kê Nhanh --- #}
@@ -141,5 +141,4 @@
         </div>
         {# --- Kết thúc Hàng Chức năng --- #}
 
-    </div>
 {% endblock %}
