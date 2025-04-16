@@ -226,6 +226,93 @@
     {% endif %}
 {% endwith %}
 
+
+<script>
+    const searchInput = document.getElementById('navbarSearchInput');
+    const resultsDropdown = document.getElementById('searchResultsDropdown');
+    let searchTimeout; // Biến để quản lý debounce
+
+    if (searchInput && resultsDropdown) {
+        searchInput.addEventListener('input', function (event) {
+            const query = event.target.value.trim();
+
+            // Hủy bỏ timeout cũ nếu người dùng gõ tiếp
+            clearTimeout(searchTimeout);
+
+            if (query.length >= 1) { // Chỉ tìm khi đủ dài
+                // Đặt timeout mới - chỉ gửi yêu cầu sau khi người dùng ngừng gõ 300ms
+                searchTimeout = setTimeout(() => {
+                    // Gọi API để lấy gợi ý
+                    fetch(`/api/search-suggestions?q=${encodeURIComponent(query)}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            resultsDropdown.innerHTML = ''; // Xóa kết quả cũ
+                            if (data.length > 0) {
+                                data.forEach(item => {
+                                    const link = document.createElement('a');
+                                    link.classList.add('dropdown-item');
+                                    link.href = item.url; // URL từ API
+                                    link.textContent = `${item.title} - ${item.author}`; // Format Title - Author
+                                    resultsDropdown.appendChild(link);
+                                });
+                                resultsDropdown.style.display = 'block'; // Hiển thị dropdown
+                            } else {
+                                // Hiển thị thông báo không tìm thấy hoặc ẩn dropdown
+                                const noResult = document.createElement('span');
+                                noResult.classList.add('dropdown-item', 'text-muted');
+                                noResult.textContent = 'Không tìm thấy kết quả nào';
+                                resultsDropdown.appendChild(noResult);
+                                resultsDropdown.style.display = 'block';
+                                // Hoặc resultsDropdown.style.display = 'none';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching search suggestions:', error);
+                            resultsDropdown.innerHTML = '<span class="dropdown-item text-danger">Lỗi khi tìm kiếm</span>';
+                            resultsDropdown.style.display = 'block';
+                        });
+                }, 300); // Thời gian chờ (ms) trước khi gửi yêu cầu
+            } else {
+                resultsDropdown.innerHTML = ''; // Xóa kết quả nếu query quá ngắn
+                resultsDropdown.style.display = 'none'; // Ẩn dropdown
+            }
+        });
+
+        // Ẩn dropdown khi click ra ngoài hoặc chọn một mục
+        document.addEventListener('click', function (event) {
+            if (!searchInput.contains(event.target) && !resultsDropdown.contains(event.target)) {
+                resultsDropdown.style.display = 'none';
+            }
+        });
+
+        // (Tùy chọn) Ẩn dropdown khi input trống hoặc mất focus
+        searchInput.addEventListener('blur', function () {
+            // Thêm độ trễ nhỏ để cho phép click vào link trong dropdown trước khi nó ẩn đi
+            setTimeout(() => {
+                if (!resultsDropdown.contains(document.activeElement)) {
+                    resultsDropdown.style.display = 'none';
+                }
+            }, 150);
+        });
+        searchInput.addEventListener('focus', function () {
+            // Hiển thị lại nếu có kết quả khi focus (tùy chọn)
+            if (resultsDropdown.children.length > 0 && searchInput.value.length >= 2) {
+                resultsDropdown.style.display = 'block';
+            }
+        });
+
+
+    } else {
+        if (!searchInput) console.error("Không tìm thấy #navbarSearchInput");
+        if (!resultsDropdown) console.error("Không tìm thấy #searchResultsDropdown");
+    }
+</script>
+
 <footer class="bg-dark text-light text-center py-3 mt-auto">
     {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
     <div class="container">
