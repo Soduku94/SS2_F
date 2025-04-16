@@ -15,7 +15,7 @@ cd SS2_F
 
 python -m venv venv
 source venv/Scripts/activate
-
+[nếu clone về mà đã có môi trường ảo .venv thì không cần chạy câu này ] 
 
 4.ok giờ vào phần terminal của Pycharm 
 
