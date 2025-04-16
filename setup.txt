@@ -1,0 +1,87 @@
+khi clone dự án về , vào 1 thư mục nào đấy , đường dẫn để làm việc 
+
+mọi người mở bằng vs hay ide nào cũng được , khuyên dùng PyCharm vì tôi đang dùng pycharm làm việc cho thống nhất 
+
+1.clone dự án dùng git bash cmd hay cái gì đó :
+
+git clone https://github.com/Soduku94/SS2_F.git
+
+2. Di chuyển vào Thư mục Dự án
+
+cd SS2_F 
+
+3.Tạo và Kích hoạt Môi trường ảo (venv)Tạo và Kích hoạt Môi trường ảo (venv): (Rất quan trọng để không làm ảnh hưởng các thư viện Python khác trên máy(khác so với máy tôi )
+
+
+python -m venv venv
+source venv/Scripts/activate
+[nếu clone về mà đã có môi trường ảo .venv thì không cần chạy câu này ] 
+
+4.ok giờ vào phần terminal của Pycharm 
+
+pip install -r requirements.txt
+
+
+cái này để cài đặt những phiên bản chúng ta cần dùng 
+
+5. tạo db (tạo db riêng trên mỗi máy , git hub không cho up file db)
+
+flask db upgrade
+
+-> tự đọng tạo ra 1 db mới toanh chưa có dữ liệu gì 
+
+6. vẫn ở terminal của Pycharm:
+
+flask shell
+
+(paste phần này zô, cái này để tạo tài khoản admin , mới có thể tạo tài khoản giảng viên . Yêu cầu là nên có 1 Admin 2 giảng viên và 2 sinh viên)
+
+# Bên trong flask shell
+from extensions import db, bcrypt
+from models import User
+
+admin_email = 'admin@fit.edu.vn' # Hoặc email khác họ muốn
+admin_password = 'adminpassword' # Nhắc họ đặt mật khẩu mạnh hơn!
+admin_full_name = 'Admin Team Member'
+
+# Kiểm tra lại cho chắc
+existing_admin = User.query.filter_by(email=admin_email).first()
+if not existing_admin:
+    admin_user = User(full_name=admin_full_name, email=admin_email, role='admin')
+    admin_user.set_password(admin_password)
+    db.session.add(admin_user)
+    try:
+        db.session.commit()
+        print(f"Đã tạo thành công tài khoản Admin: {admin_email}")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Lỗi khi tạo admin: {e}")
+else:
+    print(f"Tài khoản Admin với email {admin_email} đã tồn tại.")
+
+# exit() # Gõ lệnh này để thoát shell 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
