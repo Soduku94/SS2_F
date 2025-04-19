@@ -1,11 +1,21 @@
 # app.py
 
 # import các thứ
+
+
+from dotenv import load_dotenv
 import json
 import os
+
+load_dotenv()
 import secrets
 import uuid
 import bleach
+from models import AcademicWork, AcademicWorkLike, db
+from flask import jsonify
+from flask_login import current_user
+from sqlalchemy import func
+from flask_wtf.csrf import CSRFProtect
 
 from PIL import Image
 from functools import wraps
@@ -34,7 +44,14 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 # --- Khởi tạo App và Extensions ---
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_very_secret_key_change_this'  # <<< NHỚ THAY KEY! >>>
+
+
+SECRET_KEY_FALLBACK = 'thay-doi-key-nay-ngay-lap-tuc-cho-dev-012345!'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', SECRET_KEY_FALLBACK)
+
+
+csrf = CSRFProtect()
+csrf.init_app(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -1665,8 +1682,85 @@ def showcase_detail(item_id):
     # Lấy item theo ID và phải được publish, nếu không tìm thấy sẽ trả về lỗi 404
     item = AcademicWork.query.filter_by(id=item_id, is_published=True).first_or_404()
 
+    like_count = 0  # Khởi tạo số lượt like
+    user_has_liked = False  # Khởi tạo trạng thái like của người dùng hiện tại
+
+    try:
+        # Đếm tổng số lượt like dùng func.count
+        like_count = db.session.query(func.count(AcademicWorkLike.id)) \
+                         .filter(AcademicWorkLike.academic_work_id == item.id) \
+                         .scalar() or 0  # Dùng scalar() và 'or 0' nếu kết quả là None
+
+        # Kiểm tra xem người dùng hiện tại (nếu đã đăng nhập) đã like item này chưa
+        if current_user.is_authenticated:
+            user_like = AcademicWorkLike.query.filter_by(
+                user_id=current_user.id,
+                academic_work_id=item.id
+            ).first()  # Tìm bản ghi like của user này cho item này
+            if user_like:
+                user_has_liked = True  # Nếu tìm thấy -> đặt là True
+
+    except Exception as e:
+        # Ghi log lỗi nếu có vấn đề khi query like, nhưng không làm dừng trang
+        print(f"Lỗi khi lấy thông tin like cho showcase item {item_id}: {e}")
+        # Giữ giá trị mặc định (0 likes, user chưa like)
+
     # Render template chi tiết
     return render_template('showcase_detail.html',
-                           title=item.title, # Lấy title của item làm title trang
-                           item=item)
+                           title=item.title,
+                           item=item,
+                           like_count=like_count,
+                           user_has_liked=user_has_liked)
+
+
+
+
+
+
+# === START: THÊM ROUTE XỬ LÝ LIKE/UNLIKE CHO SHOWCASE ===
+@app.route('/showcase/<int:item_id>/toggle_like', methods=['POST']) # Chỉ chấp nhận POST
+@login_required # Yêu cầu người dùng phải đăng nhập
+def toggle_showcase_like(item_id):
+    # Tìm công trình showcase theo ID, báo lỗi 404 nếu không thấy
+    item = AcademicWork.query.get_or_404(item_id)
+    # Có thể thêm kiểm tra item.is_published ở đây nếu chỉ cho phép like bài đã publish
+
+    # Tìm xem người dùng hiện tại đã like công trình này chưa
+    like = AcademicWorkLike.query.filter_by(
+        user_id=current_user.id,
+        academic_work_id=item.id
+    ).first()
+
+    user_liked_now = False # Biến để lưu trạng thái cuối cùng (đã like hay chưa)
+    try:
+        if like:
+            # Nếu đã tồn tại -> người dùng đang unlike -> Xóa bản ghi like
+            db.session.delete(like)
+            user_liked_now = False
+            # print(f"User {current_user.id} unliked item {item_id}") # Debug log
+        else:
+            # Nếu chưa tồn tại -> người dùng đang like -> Tạo bản ghi like mới
+            new_like = AcademicWorkLike(user_id=current_user.id, academic_work_id=item.id)
+            db.session.add(new_like)
+            user_liked_now = True
+            # print(f"User {current_user.id} liked item {item_id}") # Debug log
+
+        # Lưu thay đổi vào database
+        db.session.commit()
+
+        # Đếm lại tổng số lượt like cho công trình này sau khi commit
+        like_count = AcademicWorkLike.query.filter_by(academic_work_id=item.id).count()
+
+        # Trả về kết quả dạng JSON cho JavaScript xử lý ở frontend
+        return jsonify({
+            'status': 'success',
+            'liked': user_liked_now, # Trạng thái mới (True nếu vừa like, False nếu vừa unlike)
+            'like_count': like_count # Số lượt like mới
+        })
+
+    except Exception as e:
+        db.session.rollback() # Hoàn tác nếu có lỗi
+        print(f"Error in toggle_showcase_like for item {item_id}, user {current_user.id}: {e}") # Log lỗi
+        # Trả về thông báo lỗi dạng JSON
+        return jsonify({'status': 'error', 'message': 'Đã xảy ra lỗi, vui lòng thử lại.'}), 500
 

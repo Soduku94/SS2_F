@@ -3,93 +3,273 @@
 {% block title %}{{ item.title }} - Công trình Tiêu biểu{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        {# Sử dụng cột rộng hơn để hiển thị nội dung chi tiết #}
-        <div class="col-lg-9">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9"> {# Cột nội dung chính #}
 
-            <article class="showcase-article mb-5">
-                 {# (Tùy chọn) Bạn có thể thêm breadcrumb ở đây nếu muốn #}
-                 {# Ví dụ: Trang chủ > Công trình Tiêu biểu > Tiêu đề công trình #}
-                 {# {% if breadcrumbs %} ... render breadcrumbs ... {% endif %} #}
+                <article class="showcase-article mb-5">
+                    {# Breadcrumb nếu có #}
 
-                {# --- Tiêu đề Công trình --- #}
-                <h1 class="display-5 mb-2">{{ item.title }}</h1>
+                    {# --- Tiêu đề --- #}
+                    <h1 class="display-5 mb-2">{{ item.title }}</h1>
 
-                {# --- Thông tin Metadata --- #}
-                <div class="text-muted mb-3 border-bottom pb-2">
-                    <p class="mb-1">
-                        <strong>Tác giả/Nhóm:</strong> {{ item.authors_text }}
-                    </p>
-                    <p class="mb-0">
-                        <strong>Năm:</strong> {{ item.year or 'N/A' }} |
-                        <strong>Loại:</strong>
-                        {% if item.item_type == 'thesis' %}Luận văn / Đồ án Tốt nghiệp
-                        {% elif item.item_type == 'proceeding' %}Bài báo / Kỷ yếu NCKH
-                        {% elif item.item_type == 'project' %}Dự án Nghiên cứu Khác
-                        {% else %}{{ item.item_type | title }} {# Viết hoa chữ cái đầu #}
-                        {% endif %} |
-                        <strong>Ngày đăng:</strong> {{ item.date_added.strftime('%d/%m/%Y') }}
-                    </p>
-                </div>
+                    {# --- Metadata --- #}
+                    <div class="text-muted mb-3 border-bottom pb-2">
+                        <p class="mb-1"><strong>Tác giả/Nhóm:</strong> {{ item.authors_text }}</p>
+                        <p class="mb-0"><strong>Năm:</strong> {{ item.year or 'N/A' }} | <strong>Loại:</strong>
+                            {% if item.item_type == 'thesis' %}Luận văn/Đồ án{% elif item.item_type == 'proceeding' %}
+                                Bài báo/Kỷ yếu{% elif item.item_type == 'project' %}Dự án khác{% else %}
+                                {{ item.item_type | title }}{% endif %} | <strong>Ngày
+                                đăng:</strong> {{ item.date_added.strftime('%d/%m/%Y') }}</p>
+                    </div>
 
-                 {# --- Ảnh minh họa (nếu có) --- #}
-                 {% if item.image_file %}
-                    {# Giả định ảnh lưu trong static/academic_work_images/ #}
-                    <img src="{{ url_for('static', filename='academic_work_images/' + item.image_file) }}"
-                         class="img-fluid rounded mb-4 shadow-sm"
-                         alt="Ảnh minh họa cho {{ item.title }}">
-                 {% endif %}
+                    {# --- Ảnh minh họa --- #}
+                    {% if item.image_file %}
+                        <img src="{{ url_for('static', filename=config.get('ACADEMIC_WORK_IMAGE_FOLDER', 'static/academic_work_images').split('static/')[-1] + '/' + item.image_file) }}"
+                             class="img-fluid rounded mb-4 shadow-sm" alt="Ảnh minh họa cho {{ item.title }}">
+                    {% endif %}
 
-                 {# --- Tóm tắt (nếu có) --- #}
-                 {% if item.abstract %}
-                    <blockquote class="blockquote fs-5 mb-4">
-                        <p>{{ item.abstract }}</p>
-                    </blockquote>
+                    {# --- Tóm tắt --- #}
+                    {% if item.abstract %}
+                        <blockquote class="blockquote fs-5 mb-4 fst-italic">
+                            <p>{{ item.abstract }}</p>
+                        </blockquote>
+                        <hr class="my-4">
+                    {% endif %}
+
+                    {# --- Nội dung chi tiết --- #}
+                    <div class="showcase-content">
+                        {{ item.full_content | safe if item.full_content else '<p><em>(Không có nội dung chi tiết)</em></p>' }}
+                    </div>
+
+                    {# --- Link ngoài --- #}
+                    {% if item.external_link %}
+                        <hr class="my-4">
+                        <p>
+                            <a href="{{ item.external_link }}" target="_blank" rel="noopener noreferrer"
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-box-arrow-up-right"></i> Xem tài liệu / Link gốc
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    {# --- START: Khu vực Like và Share (Đã cập nhật) --- #}
                     <hr class="my-4">
-                 {% endif %}
+                    <div class="d-flex align-items-center mt-4"> {# Bỏ justify-content-between để nút gần nhau #}
 
-                 {# --- Nội dung chi tiết --- #}
-                 <div class="showcase-content">
-                    {# Dùng filter |safe nếu nội dung có thể chứa HTML (ví dụ từ Trix editor) #}
-                    {{ item.full_content | safe if item.full_content else '<p><em>(Không có nội dung chi tiết)</em></p>' }}
-                 </div>
+                        {# --- Nút Like --- #}
+                        <div class="me-2"> {# Thêm margin phải để cách nút Share #}
+                            <button
+                                    id="like-button" {# ID cho JavaScript #}
+                                    type="button"
+                                    {# Class thay đổi dựa trên user_has_liked và trạng thái đăng nhập #}
+                                    class="btn btn-sm {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif user_has_liked %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                    {# Data attribute để JS lấy thông tin #}
+                                    data-item-id="{{ item.id }}"
+                                    data-url="{{ url_for('toggle_showcase_like', item_id=item.id) }}"
+                                    {# Title thay đổi tùy trạng thái #}
+                                    title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif user_has_liked %}Bỏ thích{% else %}Thích{% endif %}"
+                                    {# Vô hiệu hóa nếu chưa đăng nhập #}
+                                    {% if not current_user.is_authenticated %}disabled{% endif %}>
 
-                 {# --- Link liên kết ngoài (nếu có) --- #}
-                 {% if item.external_link %}
-                    <hr class="my-4">
-                    <p>
-                        <a href="{{ item.external_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
-                            <i class="bi bi-box-arrow-up-right"></i> Xem tài liệu / Link gốc
-                        </a>
-                    </p>
-                 {% endif %}
+                                {# Icon thay đổi dựa trên user_has_liked #}
+                                <i id="like-icon"
+                                   class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                {# Hiển thị số lượt like ban đầu #}
+                                Thích <span id="like-count">({{ like_count }})</span>
+                            </button>
+                        </div>
+                        {# --- Kết thúc nút Like --- #}
 
-                 {# --- Khu vực cho Like/Share (Giai đoạn 2) --- #}
-                 {# Tạm thời ẩn hoặc hiển thị dạng disabled #}
-                 <hr class="my-4">
-                 <div class="d-flex  align-items-center mt-4">
-                     <div>
-                         {# Nút Like Placeholder #}
-                         <button class="btn btn-outline-danger btn-sm disabled" type="button" title="Thích (Chức năng sẽ được thêm)">
-                             <i class="bi bi-heart"></i> Thích <span class="like-count">(0)</span>
-                         </button>
-                     </div>
-                     <div>
-                         {# Nút Share Placeholder #}
-                          <button class="btn btn-outline-secondary btn-sm disabled" type="button" title="Chia sẻ (Chức năng sẽ được thêm)">
-                             <i class="bi bi-share-fill"></i> Chia sẻ
-                         </button>
-                     </div>
-                 </div>
-                 {# --- Kết thúc Placeholder --- #}
+                        {# --- Nút Share --- #}
+                        <div>
+                            {# Nút chính để kích hoạt Web Share API #}
+                            <button id="share-button" type="button" class="btn btn-sm btn-outline-secondary"
+                                    title="Chia sẻ">
+                                <i class="bi bi-share-fill"></i> Chia sẻ
+                            </button>
+                            {# Các link fallback (ẩn ban đầu) nếu Web Share API không được hỗ trợ #}
+                            <div id="fallback-share-links" class="mt-2 d-none"> {# d-none để ẩn ban đầu #}
+                                <small>Chia sẻ qua:</small><br>
+                                {# Link Facebook #}
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank"
+                                   rel="noopener noreferrer" class="btn btn-sm btn-outline-primary bi-facebook"
+                                   title="Facebook"></a>
+                                {# Link Twitter (X) #}
+                                <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ item.title|urlencode }}"
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="btn btn-sm btn-outline-info bi-twitter-x" title="Twitter/X"></a>
+                                {# Link Email #}
+                                <a href="mailto:?subject={{ item.title|urlencode }}&body={{ item.abstract or item.title |truncate(100)|urlencode }}%0A%0A{{ request.url }}"
+                                   class="btn btn-sm btn-outline-warning bi-envelope-fill" title="Email"></a>
+                                {# Thêm link LinkedIn, Zalo,... nếu muốn #}
+                            </div>
+                        </div>
+                        {# --- Kết thúc nút Share --- #}
 
-            </article>
+                    </div>
+                    {# --- Kết thúc khu vực Like/Share --- #}
 
-            {# Nút quay lại danh sách #}
-            <a href="{{ url_for('showcase') }}" class="btn btn-secondary mt-4"><i class="bi bi-arrow-left"></i> Quay lại danh sách</a>
+                </article>
 
-        </div> {# End col-lg-9 #}
-    </div> {# End row #}
-</div> {# End container #}
+                {# Nút quay lại #}
+                <a href="{{ url_for('showcase') }}" class="btn btn-secondary mt-4"><i class="bi bi-arrow-left"></i> Quay
+                    lại danh sách</a>
+
+            </div>
+            {# End col-lg-9 #}
+        </div>
+        {# End row #}
+    </div> {# End container #}
 {% endblock content %}
+
+
+{# --- Block Scripts (Thêm vào cuối file) --- #}
+{% block scripts %}
+    {# {{ super() }} #} {# Gọi super() nếu base.html có block scripts và bạn muốn giữ lại script từ base #}
+
+    {# === START: JavaScript cho Nút Like === #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const likeButton = document.getElementById('like-button');
+            const likeIcon = document.getElementById('like-icon');
+            const likeCountSpan = document.getElementById('like-count');
+
+            // Chỉ thêm listener nếu nút tồn tại
+            if (likeButton) {
+                likeButton.addEventListener('click', function () {
+                    // Không làm gì nếu nút bị disabled (chưa đăng nhập)
+                    if (this.disabled) {
+                        // Có thể hiện thông báo yêu cầu đăng nhập ở đây
+                        // alert('Vui lòng đăng nhập để thực hiện thao tác này.');
+                        return;
+                    }
+
+                    const itemId = this.dataset.itemId;
+                    const url = this.dataset.url;
+
+                    // --- Xử lý CSRF Token (QUAN TRỌNG NẾU BẠN DÙNG CSRF) ---
+                    // Cách 1: Lấy từ meta tag (cần thêm vào base.html)
+                    // <meta name="csrf-token" content="{{ csrf_token() }}">
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                    // Cách 2: Lấy từ form ẩn (nếu trang có form nào đó)
+                    // const csrfInput = document.querySelector('input[name="csrf_token"]');
+                    // const csrfToken = csrfInput ? csrfInput.value : null;
+
+                    // Kiểm tra nếu CSRF được bật nhưng không tìm thấy token
+                    const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+                    if (isCsrfEnabled && !csrfToken) {
+                        console.error('CSRF Token not found! Make sure it is available in a meta tag or form input.');
+                        alert('Lỗi bảo mật, không thể thực hiện. Vui lòng tải lại trang (F5).');
+                        return; // Dừng lại nếu cần token mà không có
+                    }
+                    //-----------------------------------------------------------
+
+                    // Gửi yêu cầu POST bằng Fetch API
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // Thêm header CSRF nếu cần
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({}) // Body có thể rỗng cho hành động toggle
+                    })
+                        .then(response => {
+                            // Kiểm tra nếu response không thành công (vd: lỗi server 500)
+                            if (!response.ok) {
+                                // Thử đọc lỗi từ JSON nếu có
+                                return response.json().then(errData => {
+                                    throw new Error(errData.message || `Lỗi HTTP: ${response.status}`);
+                                }).catch(() => {
+                                    // Nếu không đọc được JSON lỗi, throw lỗi chung
+                                    throw new Error(`Lỗi HTTP: ${response.status}`);
+                                });
+                            }
+                            // Nếu response thành công (2xx) thì parse JSON
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Xử lý kết quả thành công từ backend
+                            if (data.status === 'success') {
+                                // Cập nhật số lượt like
+                                likeCountSpan.textContent = `(${data.like_count})`;
+
+                                // Cập nhật giao diện nút (icon và class)
+                                if (data.liked) { // Nếu kết quả là ĐÃ LIKE
+                                    likeButton.classList.remove('btn-outline-danger');
+                                    likeButton.classList.add('btn-danger');
+                                    likeIcon.classList.remove('bi-heart');
+                                    likeIcon.classList.add('bi-heart-fill');
+                                    likeButton.title = 'Bỏ thích';
+                                } else { // Nếu kết quả là ĐÃ UNLIKE
+                                    likeButton.classList.remove('btn-danger');
+                                    likeButton.classList.add('btn-outline-danger');
+                                    likeIcon.classList.remove('bi-heart-fill');
+                                    likeIcon.classList.add('bi-heart');
+                                    likeButton.title = 'Thích';
+                                }
+                            } else {
+                                // Xử lý trường hợp backend trả về status='error'
+                                console.error('Error from backend:', data.message);
+                                alert(data.message || 'Đã có lỗi xảy ra khi xử lý.');
+                            }
+                        })
+                        .catch(error => {
+                            // Xử lý lỗi mạng hoặc lỗi parse JSON
+                            console.error('Fetch error:', error);
+                            alert('Lỗi kết nối hoặc xử lý dữ liệu, vui lòng thử lại.');
+                        });
+                });
+            } // end if(likeButton)
+        });
+    </script>
+    {# === END: JavaScript cho Nút Like === #}
+
+
+    {# === START: JavaScript cho Nút Share === #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const shareButton = document.getElementById('share-button');
+            const fallbackLinks = document.getElementById('fallback-share-links');
+
+            if (shareButton) {
+                shareButton.addEventListener('click', async () => {
+                    // Dữ liệu cần chia sẻ
+                    const shareData = {
+                        // Dùng escapejs để xử lý ký tự đặc biệt trong JS string
+                        title: {{ item.title | tojson | safe }},
+                        text: {{ (item.abstract or item.title) | truncate(100) | tojson | safe }},
+                        // Dùng url_for với _external=True để có URL đầy đủ
+                        url: {{ url_for("showcase_detail", item_id=item.id, _external=True) | tojson | safe }}
+                    };
+
+                    // Kiểm tra trình duyệt có hỗ trợ Web Share API không
+                    if (navigator.share) {
+                        try {
+                            // Gọi API chia sẻ của trình duyệt
+                            await navigator.share(shareData);
+                            console.log('Nội dung được chia sẻ thành công!');
+                        } catch (err) {
+                            // Báo lỗi nếu người dùng hủy hoặc có lỗi xảy ra
+                            console.error('Lỗi khi chia sẻ:', err);
+                            // Có thể hiển thị link fallback nếu người dùng hủy? (Tùy chọn)
+                            // if (fallbackLinks) fallbackLinks.classList.remove('d-none');
+                        }
+                    } else {
+                        // Nếu trình duyệt không hỗ trợ -> Hiển thị các link fallback
+                        console.log('Web Share API không được hỗ trợ, hiển thị fallback links.');
+                        if (fallbackLinks) {
+                            fallbackLinks.classList.remove('d-none'); // Hiện các link dự phòng
+                        }
+                        // Có thể ẩn nút Share chính đi nếu muốn
+                        // shareButton.style.display = 'none';
+                    }
+                });
+            } // end if(shareButton)
+        });
+    </script>
+    {# === END: JavaScript cho Nút Share === #}
+
+{% endblock scripts %}
