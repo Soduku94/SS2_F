@@ -1,12 +1,11 @@
 # app.py
 
 # import các thứ
+import json
 import os
 import secrets
 import uuid
 import bleach
-
-
 
 from PIL import Image
 from functools import wraps
@@ -14,16 +13,17 @@ from datetime import datetime, timezone, date  # Thêm date nếu models dùng
 from flask import (Flask, render_template, url_for, flash, redirect, request,
                    send_from_directory, abort, jsonify, current_app)
 from sqlalchemy import asc, desc, or_, MetaData
+from sqlalchemy.testing.plugin.plugin_base import post
 from werkzeug.utils import secure_filename
 
-from models import StudentIdea, Notification
+from models import StudentIdea, Notification, TopicApplication
 
 # Import Extensions (Một lần)
 from extensions import db, migrate, bcrypt, login_manager
 
 # Import Models (Một lần)
 from models import (User, Post, Attachment, StudentIdea, IdeaAttachment, Notification,
-                    student_topic_interest, idea_recipient_lecturers)  # Đảm bảo đủ
+                    student_topic_interest, Tag, idea_recipient_lecturers)  # Đảm bảo đủ
 
 # Import Forms (Một lần)
 from forms import (LoginForm, RegistrationForm, PostForm, UpdateAccountForm,
@@ -66,9 +66,7 @@ os.makedirs(USER_PICS_FOLDER, exist_ok=True)
 # Lưu vào config nếu muốn (tùy chọn, nhưng tiện lợi)
 app.config['DEFAULT_PICS_FOLDER'] = DEFAULT_PICS_FOLDER
 app.config['USER_PICS_FOLDER'] = USER_PICS_FOLDER
-# --- KẾT THÚC CẬP NHẬT ĐƯỜNG DẪN ---
 
-# Cấu hình Upload chung (giữ nguyên)
 UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -153,7 +151,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
 
-    form = RegistrationForm() # Dùng form đã cập nhật
+    form = RegistrationForm()  # Dùng form đã cập nhật
     if form.validate_on_submit():
         # Hash mật khẩu
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -161,13 +159,13 @@ def register():
         user = User(
             full_name=form.full_name.data,
             student_id=form.student_id.data,
-            email=form.email.data,              # Email đăng nhập
-            class_name=form.class_name.data,      # Lớp học
-            date_of_birth=form.date_of_birth.data, # Ngày sinh
-            gender=form.gender.data,            # Giới tính
+            email=form.email.data,  # Email đăng nhập
+            class_name=form.class_name.data,  # Lớp học
+            date_of_birth=form.date_of_birth.data,  # Ngày sinh
+            gender=form.gender.data,  # Giới tính
             phone_number=form.phone_number.data,  # Số điện thoại
             password_hash=hashed_password,
-            role='student' # <<< Luôn đặt role là 'student' cho form này
+            role='student'  # <<< Luôn đặt role là 'student' cho form này
             # Các trường khác như contact_email, about_me sẽ là NULL ban đầu
         )
         try:
@@ -181,6 +179,7 @@ def register():
 
     # Render template đăng ký (sẽ cập nhật ở bước sau)
     return render_template('register.html', title='Đăng ký Sinh viên', form=form)
+
 
 @app.route('/logout')
 @login_required
@@ -245,10 +244,11 @@ def dashboard():
                            selected_status=selected_status, search_query=search_query)
 
 
-# --- KẾT THÚC ROUTE DASHBOARD ---
+# Trong app.py
 
+# Đảm bảo đã import Tag ở đầu file app.py
+# from models import Tag # <<<< KIỂM TRA IMPORT NÀY
 
-# --- ROUTE CREATE POST (ĐÃ SỬA HOÀN CHỈNH) ---
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def create_post():
@@ -257,62 +257,142 @@ def create_post():
         return redirect(url_for('dashboard'))
 
     form = PostForm()
+
+    # --- Lấy danh sách tên các tag đã có (cho Tagify whitelist) ---
+    try:
+        all_tags = Tag.query.order_by(Tag.name).all()
+        all_tag_names = [tag.name for tag in all_tags]
+    except Exception as e:
+        print(f"Lỗi khi lấy danh sách tags cho form: {e}")
+        all_tag_names = []
+    # --------------------------------------------------------------
+
     if form.validate_on_submit():
+        # Làm sạch nội dung
         safe_content = bleach.clean(form.content.data, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+
+        # Tạo đối tượng Post
         post = Post(title=form.title.data, content=safe_content, post_type=form.post_type.data,
                     is_featured=form.is_featured.data, status=form.status.data, author=current_user)
+
+        # Khởi tạo các biến
+        attachments_to_add = []
+        saved_physical_files = []
+        files_saved_count = 0
         post_id_to_assign = None
+
         try:
+            # Thêm post vào session
             db.session.add(post)
+            # Flush để lấy ID và các thay đổi có hiệu lực trước các bước sau
             db.session.flush()
             post_id_to_assign = post.id
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Lỗi khi tạo bài đăng: {e}', 'danger')
-            return render_template('create_post.html', title='Tạo Bài đăng mới', form=form,
-                                   legend='Tạo Bài đăng / Đề tài')
 
-        if post_id_to_assign:
-            files_saved_count = 0
-            attachments_to_add = []
-            saved_physical_files = []
-            if form.attachments.data and form.attachments.data[0].filename != '':
-                for file in form.attachments.data:
-                    original_filename = secure_filename(file.filename)
-                    if original_filename != '':
-                        name, ext = os.path.splitext(original_filename)
-                        unique_filename = f"{uuid.uuid4().hex}{ext}"
-                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-                        try:
-                            file.save(file_path)
-                            attachment = Attachment(original_filename=original_filename,
-                                                    saved_filename=unique_filename, post_id=post_id_to_assign)
-                            attachments_to_add.append(attachment)
-                            saved_physical_files.append(file_path)
-                            files_saved_count += 1
-                        except Exception as e:
-                            flash(f'Lỗi khi lưu file {original_filename}.', 'warning')
-            try:
+            # >>>>>>>>>>>>>>>>>> START: KHỐI XỬ LÝ TAGS ĐÃ SỬA (XỬ LÝ JSON) >>>>>>>>>>>>>>>>>>
+            tags_input_value = form.tags.data  # Giá trị từ input (có thể là JSON string)
+            post_tags_objects = []  # List để giữ các đối tượng Tag cuối cùng
+            tag_names = []  # List để giữ tên tag đã parse
+
+            if tags_input_value:  # Chỉ xử lý nếu có dữ liệu
+                try:
+                    # THỬ parse dữ liệu đầu vào như là một chuỗi JSON
+                    tag_data_list = json.loads(tags_input_value)
+                    # Trích xuất tên tag từ key 'value' trong mỗi dictionary
+                    # Thêm kiểm tra để đảm bảo item là dict và có key 'value' và value không rỗng
+                    tag_names = [
+                        item['value'].strip().lower()
+                        for item in tag_data_list
+                        if isinstance(item, dict) and item.get('value') and str(item.get('value')).strip()
+                    ]
+                    print(f"DEBUG (create_post): Parsed tags from JSON: {tag_names}")  # Debug
+
+                except (json.JSONDecodeError, TypeError, ValueError):
+                    # NẾU KHÔNG PHẢI JSON hoặc lỗi parse -> Coi như là chuỗi cách nhau bởi dấu phẩy
+                    print(
+                        f"DEBUG (create_post): Failed to parse as JSON, treating as comma-separated: '{tags_input_value}'")  # Debug
+                    tag_names = [name.strip().lower() for name in str(tags_input_value).split(',') if name.strip()]
+                    print(f"DEBUG (create_post): Parsed tags from string: {tag_names}")  # Debug
+
+                # Chỉ tiếp tục nếu có tên tag hợp lệ sau khi parse
+                if tag_names:
+                    # Tìm các tag đã tồn tại trong DB
+                    existing_tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
+                    existing_tags_map = {tag.name: tag for tag in existing_tags}
+
+                    # Lặp qua các tên tag đã parse được
+                    for name in tag_names:
+                        tag = existing_tags_map.get(name)
+                        if not tag:
+                            # Tạo tag mới nếu chưa có và add vào session
+                            tag = Tag(name=name)
+                            db.session.add(tag)
+                            # print(f"DEBUG (create_post): Added NEW Tag object '{name}' to session.") # Optional Debug
+                        # else:
+                        # print(f"DEBUG (create_post): Using existing Tag object '{name}' (ID: {tag.id})") # Optional Debug
+
+                        # Thêm đối tượng Tag (mới hoặc cũ) vào list
+                        if isinstance(tag, Tag):  # Đảm bảo là đối tượng Tag hợp lệ
+                            post_tags_objects.append(tag)
+                        # else:
+                        #    print(f"!!! WARNING (create_post): Invalid Tag object for name '{name}'") # Optional Debug
+
+            # Gán danh sách các đối tượng Tag cho relationship của post
+            post.tags = post_tags_objects
+            print(
+                f"DEBUG (create_post): Assigned Tag objects to post.tags (before commit): {[t.name for t in post.tags]}")  # Debug
+            # >>>>>>>>>>>>>>>>>> END: KẾT THÚC KHỐI XỬ LÝ TAGS ĐÃ SỬA >>>>>>>>>>>>>>>>>>
+
+            # --- Xử lý Attachments ---
+            if post_id_to_assign:  # Chỉ tiếp tục nếu có ID
+                if form.attachments.data and form.attachments.data[0].filename != '':
+                    # ... (Giữ nguyên code xử lý attachment) ...
+                    for file in form.attachments.data:
+                        original_filename = secure_filename(file.filename)
+                        if original_filename != '':
+                            name, ext = os.path.splitext(original_filename)
+                            unique_filename = f"{uuid.uuid4().hex}{ext}"
+                            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                            try:
+                                file.save(file_path)
+                                attachment = Attachment(original_filename=original_filename,
+                                                        saved_filename=unique_filename, post_id=post_id_to_assign)
+                                attachments_to_add.append(attachment)
+                                saved_physical_files.append(file_path)
+                                files_saved_count += 1
+                            except Exception as file_e:
+                                flash(f'Lỗi khi lưu file {original_filename}: {file_e}.', 'warning')
+
+                # Thêm attachments vào session
                 if attachments_to_add:
                     db.session.add_all(attachments_to_add)
-                db.session.commit()
+
+                # --- Commit cuối cùng ---
+                print("DEBUG (create_post): Attempting final commit...")  # Debug
+                db.session.commit()  # Lưu post, tags, liên kết, attachments
+                print("DEBUG (create_post): Final commit successful!")  # Debug
                 flash(f'Bài đăng đã được tạo thành công! ({files_saved_count} tệp đính kèm).', 'success')
-                return redirect(url_for('dashboard'))
-            except Exception as e:
+                return redirect(url_for('my_posts'))
+            else:
                 db.session.rollback()
-                flash(f'Lỗi khi lưu bài đăng vào database: {e}', 'danger')
-                for file_path in saved_physical_files:  # Xóa file đã lưu nếu commit lỗi
-                    if os.path.exists(file_path):
-                        try:
-                            os.remove(file_path)
-                        except Exception as remove_err:
-                            print(f"Error deleting file after commit fail: {remove_err}")
-        else:
-            flash('Lỗi nghiêm trọng khi tạo bài đăng, không lấy được ID.', 'danger')
+                flash('Lỗi nghiêm trọng: Không thể lấy ID bài đăng.', 'danger')
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Đã xảy ra lỗi khi tạo bài đăng: {e}', 'danger')
+            # Xóa file đã lưu nếu commit lỗi
+            for file_path in saved_physical_files:
+                if os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except Exception as remove_err:
+                        print(f"Error deleting file after create fail: {remove_err}")
 
     elif form.errors:
-        print("Form validation errors (create_post):", form.errors)
-    return render_template('create_post.html', title='Tạo Bài đăng mới', form=form, legend='Tạo Bài đăng / Đề tài')
+        print(f"Form validation errors (create_post): {form.errors}")
+
+    # Render template cho GET hoặc khi validation fail
+    return render_template('create_post.html', title='Tạo Bài đăng mới', form=form,
+                           legend='Tạo Bài đăng / Đề tài', all_tag_names=all_tag_names)
 
 
 # --- SỬA LẠI ROUTE DOWNLOAD FILE ---
@@ -348,12 +428,20 @@ def view_post(post_id):
             interested_students_list = []
     # --- KẾT THÚC LẤY VÀ SẮP XẾP ---
 
+    already_applied = False  # Mặc định là chưa đăng ký
+    if current_user.is_authenticated and current_user.role == 'student':
+        # Query xem có bản ghi TopicApplication nào khớp không
+        existing_app = TopicApplication.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+        if existing_app:
+            already_applied = True  # Nếu có thì đặt thành True
+
     # Render template, truyền thêm danh sách students đã sắp xếp
     return render_template('post_detail.html',
                            title=post.title,
                            post=post,
                            # <<< TRUYỀN BIẾN NÀY VÀO TEMPLATE >>>
                            interested_students=interested_students_list)
+
 
 # --- KẾT THÚC SỬA VIEW_POST ---
 
@@ -365,49 +453,124 @@ def update_post(post_id):
     post = Post.query.get_or_404(post_id)
     if post.author != current_user: abort(403)
     form = PostForm()
+
+    # --- Lấy danh sách tên các tag đã có (cho Tagify whitelist) ---
+    # Cần cho cả GET (hiển thị form) và POST (nếu validation fail)
+    try:
+        all_tags = Tag.query.order_by(Tag.name).all()
+        all_tag_names = [tag.name for tag in all_tags]
+    except Exception as e:
+        print(f"Lỗi khi lấy danh sách tags cho form update: {e}")
+        all_tag_names = []
+    # --------------------------------------------------------------
+
     if form.validate_on_submit():
+        # --- Cập nhật các trường cơ bản ---
         safe_content = bleach.clean(form.content.data, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
         post.title = form.title.data
         post.content = safe_content
         post.post_type = form.post_type.data
         post.status = form.status.data
         post.is_featured = form.is_featured.data
+        # ---------------------------------
 
-        new_files = form.attachments.data
-        files_were_uploaded = bool(new_files and new_files[0].filename != '')
-        old_filenames_to_delete = []
+        # Khởi tạo các biến cho attachment
         attachments_to_add = []
         saved_physical_files = []
-        files_saved_count = 0
-
-        if files_were_uploaded:
-            old_filenames_to_delete = [att.saved_filename for att in post.attachments]
-            post.attachments = []  # Xóa relationship cũ khỏi session
-            for file in new_files:
-                original_filename = secure_filename(file.filename)
-                if original_filename != '':
-                    name, ext = os.path.splitext(original_filename)
-                    unique_filename = f"{uuid.uuid4().hex}{ext}"
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-                    try:
-                        file.save(file_path)
-                        attachment = Attachment(original_filename=original_filename, saved_filename=unique_filename,
-                                                post_id=post.id)
-                        attachments_to_add.append(attachment)
-                        saved_physical_files.append(file_path)  # Chỉ lưu file mới
-                        files_saved_count += 1
-                    except Exception as e:
-                        flash(f'Lỗi khi lưu file mới {original_filename}.', 'warning')
-        else:
-            files_saved_count = len(post.attachments)  # Số lượng file giữ nguyên
+        files_saved_count = 0  # Sẽ tính lại sau
+        old_filenames_to_delete = []
+        files_were_uploaded = bool(form.attachments.data and form.attachments.data[0].filename != '')
 
         try:
-            if attachments_to_add:  # Chỉ add nếu có attachment mới
+            # >>>>>>>>>>>>>>>>>> START: KHỐI XỬ LÝ TAGS ĐÃ SỬA (XỬ LÝ JSON) >>>>>>>>>>>>>>>>>>
+            tags_input_value = form.tags.data  # Giá trị từ input (có thể là JSON string)
+            post_tags_objects = []  # List để giữ các đối tượng Tag cuối cùng
+            tag_names = []  # List để giữ tên tag đã parse
+
+            if tags_input_value:  # Chỉ xử lý nếu có dữ liệu
+                try:
+                    # THỬ parse dữ liệu đầu vào như là một chuỗi JSON
+                    tag_data_list = json.loads(tags_input_value)
+                    # Trích xuất tên tag từ key 'value'
+                    tag_names = [
+                        item['value'].strip().lower()
+                        for item in tag_data_list
+                        if isinstance(item, dict) and item.get('value') and str(item.get('value')).strip()
+                    ]
+                    # print(f"DEBUG (update_post): Parsed tags from JSON: {tag_names}") # Optional Debug
+
+                except (json.JSONDecodeError, TypeError, ValueError):
+                    # NẾU KHÔNG PHẢI JSON -> Coi như là chuỗi cách nhau bởi dấu phẩy
+                    # print(f"DEBUG (update_post): Failed to parse as JSON, treating as comma-separated: '{tags_input_value}'") # Optional Debug
+                    tag_names = [name.strip().lower() for name in str(tags_input_value).split(',') if name.strip()]
+                    # print(f"DEBUG (update_post): Parsed tags from string: {tag_names}") # Optional Debug
+
+                # Chỉ tiếp tục nếu có tên tag hợp lệ sau khi parse
+                if tag_names:
+                    # Tìm các tag đã tồn tại trong DB
+                    existing_tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
+                    existing_tags_map = {tag.name: tag for tag in existing_tags}
+
+                    # Lặp qua các tên tag đã parse được
+                    for name in tag_names:
+                        tag = existing_tags_map.get(name)
+                        if not tag:
+                            # Tạo tag mới nếu chưa có và add vào session
+                            tag = Tag(name=name)
+                            db.session.add(tag)
+                        # Thêm đối tượng Tag (mới hoặc cũ) vào list
+                        if isinstance(tag, Tag):
+                            post_tags_objects.append(tag)
+
+            # Gán lại toàn bộ danh sách tags cho post (SQLAlchemy xử lý M-M update)
+            post.tags = post_tags_objects
+            # print(f"DEBUG (update_post): Assigned Tag objects to post.tags (before commit): {[t.name for t in post.tags]}") # Optional Debug
+            # >>>>>>>>>>>>>>>>>> END: KẾT THÚC KHỐI XỬ LÝ TAGS ĐÃ SỬA >>>>>>>>>>>>>>>>>>
+
+            # --- Xử lý Attachments ---
+            if files_were_uploaded:
+                # Lấy danh sách file cũ để xóa sau khi commit thành công
+                old_filenames_to_delete = [att.saved_filename for att in post.attachments]
+                # Xóa các liên kết attachment cũ trong session (chưa xóa file vật lý)
+                post.attachments = []
+                for file in form.attachments.data:  # Chỉ lặp qua file mới
+                    original_filename = secure_filename(file.filename)
+                    if original_filename != '':
+                        # ... (Code lưu file mới và tạo object Attachment như cũ) ...
+                        name, ext = os.path.splitext(original_filename)
+                        unique_filename = f"{uuid.uuid4().hex}{ext}"
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                        try:
+                            file.save(file_path)
+                            attachment = Attachment(original_filename=original_filename,
+                                                    saved_filename=unique_filename,
+                                                    post_id=post.id)  # Gán post_id trực tiếp
+                            attachments_to_add.append(attachment)
+                            saved_physical_files.append(file_path)
+                            files_saved_count += 1
+                        except Exception as e:
+                            flash(f'Lỗi khi lưu file mới {original_filename}.', 'warning')
+            else:
+                # Nếu không upload file mới, lấy số lượng file hiện có
+                # Query trực tiếp từ DB phòng trường hợp session có thay đổi chưa commit
+                try:
+                    files_saved_count = db.session.query(Attachment).filter_by(post_id=post.id).count()
+                except:  # Tránh lỗi nếu post.id chưa có vì lý do nào đó
+                    files_saved_count = 0
+
+            # Add các attachment mới vào session (nếu có)
+            if attachments_to_add:
                 db.session.add_all(attachments_to_add)
-            db.session.commit()  # Commit tất cả thay đổi
+
+            # --- Commit cuối cùng ---
+            # print("DEBUG (update_post): Attempting final commit...") # Optional Debug
+            db.session.commit()  # Lưu các thay đổi của post, tags, liên kết tags, attachments mới
+            # print("DEBUG (update_post): Final commit successful!") # Optional Debug
             flash(f'Bài đăng đã được cập nhật! ({files_saved_count} tệp đính kèm).', 'success')
 
-            if files_were_uploaded and old_filenames_to_delete:  # Chỉ xóa file cũ nếu upload mới thành công
+            # --- Xóa file vật lý cũ (chỉ khi upload mới thành công) ---
+            if files_were_uploaded and old_filenames_to_delete:
+                # print(f"DEBUG: Deleting old files: {old_filenames_to_delete}") # Optional Debug
                 for filename in old_filenames_to_delete:
                     if filename:
                         old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -418,10 +581,12 @@ def update_post(post_id):
                                 print(f"Update Error deleting old file {old_file_path}: {e}")
 
             return redirect(url_for('view_post', post_id=post.id))
+
         except Exception as e:
             db.session.rollback()
+            # print(f"!!! DEBUG (update_post): Commit FAILED! Error: {e}") # Optional Debug
             flash(f'Lỗi khi cập nhật bài đăng: {e}', 'danger')
-            # Xóa file vật lý MỚI đã lưu nếu commit lỗi
+            # Xóa các file vật lý MỚI đã lưu nếu commit bị lỗi
             for file_path in saved_physical_files:
                 if os.path.exists(file_path):
                     try:
@@ -429,17 +594,28 @@ def update_post(post_id):
                     except Exception as remove_err:
                         print(f"Error deleting NEW file after commit fail: {remove_err}")
 
+    # --- Xử lý GET Request ---
     elif request.method == 'GET':
+        # Điền dữ liệu cũ vào form
         form.title.data = post.title
         form.content.data = post.content
         form.post_type.data = post.post_type
         form.status.data = post.status
         form.is_featured.data = post.is_featured
+        # Điền tags hiện tại vào ô input (dạng chuỗi) cho Tagify đọc
+        current_tags_string = ', '.join([tag.name for tag in post.tags]) if post.tags else ''
+        form.tags.data = current_tags_string
     elif form.errors:
-        print("Form validation errors (update_post):", form.errors)
+        print(f"Form validation errors (update_post): {form.errors}")  # In lỗi validation
 
-    return render_template('create_post.html', title='Cập nhật Bài đăng', form=form, legend=f'Cập nhật: {post.title}',
-                           post=post)
+    # --- Render template ---
+    # Cần truyền cả all_tag_names và current_tags_string cho GET và POST lỗi validation
+    current_tags_string = ', '.join([tag.name for tag in post.tags]) if post.tags else ''  # Lấy lại giá trị mới nhất
+
+    return render_template('create_post.html', title='Cập nhật Bài đăng', form=form,
+                           legend=f'Cập nhật: {post.title}', post=post,  # Truyền post để hiển thị file cũ
+                           all_tag_names=all_tag_names,  # <<< Cho Tagify whitelist
+                           current_tags_string=current_tags_string)
 
 
 # --- ROUTE DELETE POST (Author's Delete) ---
@@ -481,8 +657,6 @@ def account():
     return render_template('account_view.html', title='Thông tin Tài khoản', cohort=cohort)
 
 
-
-
 # --- ĐẢM BẢO CÓ HÀM NÀY VÀ ĐẶT NÓ TRƯỚC CÁC ROUTE SỬ DỤNG NÓ ---
 def save_picture(form_picture, old_picture_filename=None):
     """Lưu ảnh đại diện người dùng upload (resize, tạo tên unique, xóa ảnh cũ)."""
@@ -490,7 +664,8 @@ def save_picture(form_picture, old_picture_filename=None):
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
     # Lấy đường dẫn thư mục user_pics từ config hoặc tạo path
-    user_pics_dir = current_app.config.get('USER_PICS_FOLDER', os.path.join(current_app.root_path, 'static', 'user_pics'))
+    user_pics_dir = current_app.config.get('USER_PICS_FOLDER',
+                                           os.path.join(current_app.root_path, 'static', 'user_pics'))
     picture_path = os.path.join(user_pics_dir, picture_fn)
 
     # Xóa ảnh cũ
@@ -512,6 +687,8 @@ def save_picture(form_picture, old_picture_filename=None):
     except Exception as e:
         print(f"Lỗi khi lưu hoặc resize ảnh: {e}")
         return None
+
+
 # --- KẾT THÚC HÀM ---
 
 @app.route('/account/edit', methods=['GET', 'POST'])
@@ -519,12 +696,12 @@ def save_picture(form_picture, old_picture_filename=None):
 def account_edit():
     form = UpdateAccountForm()
     if form.validate_on_submit():
-        new_image_filename = None # Lưu lại tên file mới
+        new_image_filename = None  # Lưu lại tên file mới
         if form.picture.data:
             picture_file = save_picture(form.picture.data, current_user.image_file)
             if picture_file:
-                new_image_filename = picture_file # Lưu tên file mới vào biến tạm
-                current_user.image_file = new_image_filename # Gán vào đối tượng
+                new_image_filename = picture_file  # Lưu tên file mới vào biến tạm
+                current_user.image_file = new_image_filename  # Gán vào đối tượng
                 print(f"DEBUG: Assigned new image_file to current_user: {current_user.image_file}")
             else:
                 flash('Đã xảy ra lỗi khi tải ảnh lên.', 'danger')
@@ -538,16 +715,17 @@ def account_edit():
         current_user.about_me = form.about_me.data
         current_user.class_name = form.class_name.data
 
-        print(f"DEBUG: User object state BEFORE commit: ImageFile={current_user.image_file}, Phone={current_user.phone_number}, ...") # In trạng thái trước commit
+        print(
+            f"DEBUG: User object state BEFORE commit: ImageFile={current_user.image_file}, Phone={current_user.phone_number}, ...")  # In trạng thái trước commit
 
         # Commit và Redirect
         try:
             print("DEBUG: Attempting db.session.commit()")
-            db.session.commit() # Cố gắng lưu tất cả thay đổi
+            db.session.commit()  # Cố gắng lưu tất cả thay đổi
             print("DEBUG: Commit successful.")
             flash('Thông tin tài khoản của bạn đã được cập nhật!', 'success')
         except Exception as e:
-            db.session.rollback() # Rollback nếu lỗi
+            db.session.rollback()  # Rollback nếu lỗi
             # <<< QUAN TRỌNG: XEM LỖI Ở ĐÂY >>>
             print(f"!!! DEBUG: Commit FAILED in account_edit! Error: {e}")
             flash(f'Lỗi khi cập nhật thông tin: {e}', 'danger')
@@ -640,7 +818,6 @@ def change_password():
 
     # Hiển thị form cho GET request hoặc khi validation thất bại
     return render_template('change_password.html', title='Đổi Mật khẩu', form=form)
-
 
 
 @app.route('/api/search-suggestions')
@@ -782,6 +959,31 @@ def submit_idea():
             db.session.flush()  # Flush để lấy ID và kiểm tra recipients trước khi xử lý file
             idea_id_to_assign = idea.id
 
+            # >>>>>>>>>>>>>>>>>> START: THÊM CODE XỬ LÝ TAGS Ở ĐÂY >>>>>>>>>>>>>>>>>>
+            tags_string = form.tags.data
+            post_tags_objects = []  # List để giữ các đối tượng Tag
+            if tags_string:
+                # Tách chuỗi thành list tên tag, xóa khoảng trắng, chuyển về chữ thường
+                tag_names = [name.strip().lower() for name in tags_string.split(',') if name.strip()]
+                if tag_names:
+                    # Lấy các tag đã tồn tại trong DB ứng với các tên trong list
+                    existing_tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
+                    # Tạo một map để truy cập nhanh tag đã có theo tên
+                    existing_tags_map = {tag.name: tag for tag in existing_tags}
+
+                    for name in tag_names:
+                        tag = existing_tags_map.get(name)  # Lấy tag từ map nếu có
+                        if not tag:
+                            # Nếu tag chưa có trong DB, tạo mới và add vào session
+                            tag = Tag(name=name)
+                            db.session.add(tag)
+                        # Thêm tag (dù mới hay cũ) vào list cho bài post này
+                        post_tags_objects.append(tag)
+
+            # Gán danh sách các đối tượng Tag vào relationship của post
+            # SQLAlchemy sẽ tự xử lý việc thêm vào bảng liên kết post_tags khi commit
+            post.tags = post_tags_objects
+
             # Xử lý file attachments nếu có ID
             if form.attachments.data and form.attachments.data[0].filename != '':
                 for file in form.attachments.data:
@@ -843,10 +1045,6 @@ def submit_idea():
                 # db.session.rollback()
                 flash('Gửi ý tưởng thành công, nhưng có lỗi xảy ra khi tạo thông báo cho giảng viên.', 'warning')
 
-
-
-
-
             flash(f'Ý tưởng của bạn đã được gửi thành công! ({files_saved_count} tệp đính kèm).', 'success')
             redirect_target = 'my_ideas' if 'my_ideas' in app.view_functions else 'dashboard'
             return redirect(url_for(redirect_target))
@@ -887,11 +1085,30 @@ def download_idea_attachment(filename):
 @login_required
 def my_ideas():
     if current_user.role != 'student': abort(403)
+
+    # --- Query Ý tưởng Đang chờ duyệt ---
+    pending_ideas_query = StudentIdea.query.filter_by(
+        student=current_user,  # Lọc theo sinh viên hiện tại
+        status='pending'  # Lọc theo trạng thái
+    ).order_by(StudentIdea.submission_date.desc())
+    pending_ideas = pending_ideas_query.all()  # Lấy tất cả (tạm thời chưa phân trang)
+
+    # --- Query Ý tưởng Đã phản hồi ---
+    responded_ideas_query = StudentIdea.query.filter(
+        StudentIdea.student == current_user,  # Lọc theo sinh viên hiện tại
+        StudentIdea.status != 'pending'  # Lọc các trạng thái KHÁC pending
+    ).order_by(StudentIdea.submission_date.desc())
+    responded_ideas = responded_ideas_query.all()  # Lấy tất cả (tạm thời chưa phân trang)
+
     page = request.args.get('page', 1, type=int)
     PER_PAGE = 10
     pagination = StudentIdea.query.filter_by(student=current_user).order_by(StudentIdea.submission_date.desc()) \
         .paginate(page=page, per_page=PER_PAGE, error_out=False)  # Corrected query
-    return render_template('my_ideas.html', title='Ý tưởng của tôi', ideas_pagination=pagination)
+    # Truyền cả 2 danh sách vào template
+    return render_template('my_ideas.html',  # <<< Giữ nguyên tên template này
+                           title='Ý tưởng của tôi',
+                           pending_ideas=pending_ideas,
+                           responded_ideas=responded_ideas)
 
 
 @app.route('/my-ideas/<int:idea_id>')
@@ -902,7 +1119,6 @@ def view_my_idea(idea_id):
     return render_template('view_my_idea.html', title=idea.title, idea=idea)
 
 
-# --- THÊM ROUTE XÓA Ý TƯỞNG CỦA SINH VIÊN ---
 @app.route('/my-ideas/<int:idea_id>/delete', methods=['POST'])
 @login_required
 def delete_my_idea(idea_id):
@@ -927,8 +1143,8 @@ def delete_my_idea(idea_id):
     return redirect(url_for('my_ideas'))
 
 
-# --- THÊM ROUTE CHO GIẢNG VIÊN XEM Ý TƯỞNG PENDING ---
 @app.route('/pending-ideas')  # Hoặc @admin_bp.route('/pending-ideas')
+
 @login_required
 def view_pending_ideas():
     # Kiểm tra quyền (GV hoặc Admin)
@@ -958,12 +1174,6 @@ def view_pending_ideas():
                            ideas_pagination=pagination,
                            list_title='Danh sách Ý tưởng Chờ Duyệt',
                            active_tab='pending')  # Truyền tab nếu template dùng tabs
-
-
-# --- KẾT THÚC HÀM PENDING ---
-
-
-# --- THÊM ROUTE CHO GIẢNG VIÊN REVIEW Ý TƯỞNG ---
 
 
 @app.route('/idea/<int:idea_id>/review', methods=['GET', 'POST'])
@@ -1073,7 +1283,6 @@ def delete_idea_by_lecturer(idea_id):
     return redirect(url_for('view_pending_ideas'))
 
 
-
 @app.route('/responded-ideas')
 @login_required
 def view_responded_ideas():
@@ -1118,7 +1327,6 @@ def inject_notifications():
     return dict(unread_count=unread_count)
 
 
-
 @app.route('/notifications')
 @login_required
 def notifications():
@@ -1153,7 +1361,6 @@ def notifications():
                            notifications_pagination=pagination)
 
 
-
 @app.route('/notification/<int:notif_id>/delete', methods=['POST'])
 @login_required
 def delete_notification(notif_id):
@@ -1175,7 +1382,6 @@ def delete_notification(notif_id):
     return redirect(url_for('notifications'))
 
 
-
 @app.route('/notifications/delete-all', methods=['POST'])
 @login_required
 def delete_all_notifications():
@@ -1193,6 +1399,58 @@ def delete_all_notifications():
 
     return redirect(url_for('notifications'))
 
+
+@app.route('/apply-topic/<int:post_id>', methods=['POST'])  # Chỉ chấp nhận POST
+@login_required
+def apply_to_topic(post_id):
+    # 1. Kiểm tra vai trò người dùng
+    if current_user.role != 'student':
+        flash('Chỉ sinh viên mới có thể đăng ký đề tài.', 'warning')
+        return redirect(request.referrer or url_for('dashboard'))  # Quay lại trang trước đó
+
+    # 2. Lấy thông tin Post
+    post = Post.query.get_or_404(post_id)
+
+    # 3. Kiểm tra điều kiện của Post
+    if post.post_type != 'topic' or post.status != 'recruiting':
+        flash('Đề tài này không hợp lệ hoặc không còn mở đăng ký.', 'warning')
+        return redirect(url_for('view_post', post_id=post_id))
+
+    # 4. Kiểm tra xem sinh viên đã đăng ký chưa
+    existing_app = TopicApplication.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+    if existing_app:
+        flash('Bạn đã đăng ký đề tài này rồi.', 'info')
+        return redirect(url_for('view_post', post_id=post.id))
+
+    # 5. Tạo bản ghi đăng ký mới
+    application = TopicApplication(user_id=current_user.id, post_id=post.id)
+    # (Tùy chọn) Có thể lấy message từ form nếu bạn thêm field message vào form đăng ký
+    # application.message = request.form.get('message', None)
+
+    # 6. Tạo thông báo cho Giảng viên (tác giả bài post)
+    notification_content = f"Sinh viên {current_user.full_name} đã đăng ký đề tài: '{post.title}'"
+    # Giả định Notification model đã có sender_id và notification_type
+    # Nếu muốn link trực tiếp đến Post, cần thêm related_post_id vào Notification model
+    new_notification = Notification(
+        recipient_id=post.user_id,
+        sender_id=current_user.id,
+        content=notification_content,
+        notification_type='topic_application',  # Loại thông báo mới
+        # related_post_id=post.id, # <<< Cần thêm trường này vào Notification model và migrate
+        is_read=False
+    )
+
+    try:
+        db.session.add(application)
+        db.session.add(new_notification)
+        db.session.commit()
+        flash('Bạn đã đăng ký thành công đề tài!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Đã xảy ra lỗi khi đăng ký: {e}', 'danger')
+
+    # 7. Chuyển hướng lại trang chi tiết bài đăng
+    return redirect(url_for('view_post', post_id=post_id))
 
 
 @app.route('/my-posts')
@@ -1213,13 +1471,113 @@ def my_posts():
         .order_by(Post.date_posted.desc()) \
         .paginate(page=page, per_page=PER_PAGE, error_out=False)
 
+    breadcrumbs = [
+        {'url': url_for('dashboard'), 'title': 'Trang chủ'},
+        {'url': None, 'title': 'Bài đăng của tôi'}  # Mục cuối không cần url
+    ]
+
     # Render template mới, truyền đối tượng pagination
     return render_template('my_posts.html', title='Bài đăng của tôi',
                            posts_pagination=pagination)
 
+    # Phần chạy ứng dụng
 
-# Phần chạy ứng dụng
+    if __name__ == '__main__':
+        app.run(debug=True)
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/post/<int:post_id>/applications')
+@login_required
+def view_topic_applications(post_id):
+    # Lấy thông tin bài đăng/đề tài
+    post = Post.query.get_or_404(post_id)
+
+    # --- Kiểm tra quyền ---
+    # Chỉ tác giả của bài đăng (hoặc Admin nếu muốn) mới xem được đơn đăng ký
+    if post.author != current_user:  # and current_user.role != 'admin':
+        abort(403)  # Báo lỗi không có quyền truy cập
+
+    # --- Kiểm tra loại bài đăng ---
+    # Đảm bảo đây là đề tài mới cho phép đăng ký
+    if post.post_type != 'topic':
+        flash('Chức năng này chỉ áp dụng cho Đề tài Nghiên cứu.', 'warning')
+        return redirect(url_for('view_post', post_id=post.id))  # Quay lại trang post
+
+    # --- Lấy danh sách đơn đăng ký ---
+    # Sử dụng relationship 'applications' từ Post model (được tạo bởi backref)
+    # Sắp xếp theo ngày đăng ký, mới nhất trước hoặc cũ nhất trước tùy bạn chọn
+    try:
+        applications = post.applications.order_by(TopicApplication.application_date.asc()).all()
+    except Exception as e:
+        print(f"Lỗi khi query applications cho post {post.id}: {e}")
+        applications = []
+        flash("Lỗi khi tải danh sách đơn đăng ký.", "danger")
+
+    return render_template('topic_applications.html',  # <<< Tên file template mới
+                           title=f"Đơn đăng ký: {post.title}",
+                           post=post,
+                           applications=applications)
+
+
+@app.route('/application/<int:application_id>/update_status', methods=['POST'])
+@login_required
+def update_application_status(application_id):
+    # Lấy đơn đăng ký
+    application = TopicApplication.query.get_or_404(application_id)
+    post = application.topic # Lấy post liên quan từ relationship
+
+    # --- Kiểm tra quyền ---
+    # Chỉ tác giả của bài đăng mới được duyệt
+    if post.author != current_user: # and current_user.role != 'admin':
+        abort(403)
+
+    # Lấy trạng thái mới từ form submit
+    new_status = request.form.get('status')
+
+    # Kiểm tra giá trị status hợp lệ
+    if new_status not in ['accepted', 'rejected']:
+        flash('Trạng thái cập nhật không hợp lệ.', 'danger')
+        return redirect(url_for('view_topic_applications', post_id=post.id))
+
+    # Cập nhật trạng thái của đơn đăng ký
+    application.status = new_status
+
+    # --- (Tùy chọn) Cập nhật trạng thái của Post ---
+    # Ví dụ: Nếu chấp thuận SV đầu tiên, chuyển Post sang 'working_on'?
+    # Hoặc nếu đủ số lượng SV mong muốn, chuyển sang 'closed'?
+    # Cần logic phức tạp hơn nếu muốn tự động hóa việc này. Ví dụ đơn giản:
+    if new_status == 'accepted':
+         # Có thể thêm logic kiểm tra số lượng đã accept, nếu đủ thì đổi post.status
+         # if post.applications.filter_by(status='accepted').count() >= post.max_students: # Giả sử có max_students
+         #    post.status = 'working_on' # Hoặc 'closed'
+         pass # Tạm thời chưa đổi status post
+
+    # ------------------------------------------------
+
+    # --- Tạo thông báo cho Sinh viên ---
+    student_recipient = application.student
+    if student_recipient:
+        status_text = "chấp thuận" if new_status == 'accepted' else "từ chối"
+        notif_content = f"Đăng ký của bạn cho đề tài \"{post.title[:30]}...\" đã được {status_text}."
+
+        new_notification = Notification(
+            recipient_id=student_recipient.id,
+            sender_id=current_user.id, # Người gửi là Giảng viên
+            content=notif_content,
+            notification_type='application_update', # Loại thông báo mới
+            # related_post_id=post.id, # <<< Cần thêm trường này vào Notification
+            # related_application_id=application.id, # <<< Hoặc trường này?
+            is_read=False
+        )
+        db.session.add(new_notification)
+    # ---------------------------------
+
+    try:
+        db.session.commit() # Lưu thay đổi status application và notification mới
+        flash(f'Đã cập nhật trạng thái đơn đăng ký thành "{new_status}".', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Lỗi khi cập nhật trạng thái: {e}', 'danger')
+
+    # Chuyển hướng lại trang danh sách đơn đăng ký của post đó
+    return redirect(url_for('view_topic_applications', post_id=post.id))

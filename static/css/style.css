@@ -1,31 +1,50 @@
- .fileinput-upload-button {
-            display: none !important;
-        }
+.fileinput-upload-button {
+    display: none !important;
+}
 
 
-        body {
-            padding-top: 75px;
+body {
+    padding-top: 75px;
 
-        }
+}
 
-        .navbar-nav .nav-link {
-            margin-right: 5px;
-            margin-left: 5px; /* Điều chỉnh nhẹ khoảng cách nav-link */
-        }
+.navbar-nav .nav-link {
+    margin-right: 5px;
+    margin-left: 5px; /* Điều chỉnh nhẹ khoảng cách nav-link */
+}
 
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #6c757d;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9em;
+}
 
-        /* Thêm chút padding cho dropdown user để không quá sát mép phải */
-        .navbar-nav .dropdown-menu-end {
-            margin-right: 5px;}
+/* Thêm chút padding cho dropdown user để không quá sát mép phải */
+.navbar-nav .dropdown-menu-end {
+    margin-right: 5px;
+}
+
+
+/* Áp dụng hiệu ứng sticky cho cột lọc trên màn hình từ medium trở lên */
+@media (min-width: 768px) {
+    /* 768px là breakpoint 'md' của Bootstrap 5 */
+    .sticky-filter-column {
+
+        position: sticky;
+        /* Đặt vị trí 'top': Khoảng cách từ mép trên của viewport
+           Giá trị này cần bằng chiều cao navbar CỘNG với một khoảng margin bạn muốn.
+           Ví dụ: Nếu navbar cao 56px và bạn muốn cách 1rem (16px), top sẽ là 72px.
+           Nếu bạn đã đặt body { padding-top: 70px; } thì top: 70px; sẽ làm nó dính ngay dưới padding đó.
+           Hãy thử nghiệm giá trị này! */
+        top: 80px; /* <<< THAY ĐỔI GIÁ TRỊ NÀY CHO PHÙ HỢP (ví dụ 75px, 80px,...) */
+
+        /* Giúp phần tử không bị kéo giãn khi phần tử khác trong row cao hơn */
+        align-self: flex-start;}
+}

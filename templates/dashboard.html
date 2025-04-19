@@ -29,6 +29,8 @@
                                 {% elif post.post_type == 'article' %}
                                     <span class="badge bg-secondary ms-1">Bài viết</span> {% endif %}
                                 <span class="badge bg-warning text-dark ms-1">Nổi bật</span>
+
+
                                 {% if post.post_type == 'topic' and post.status %}
                                     {% if post.status == 'working_on' %}
                                         <span class="badge bg-success ms-1">Đang thực hiện</span>
@@ -37,13 +39,30 @@
                                     {% elif post.status == 'closed' %}
                                         <span class="badge bg-secondary ms-1">Đã đóng</span> {% endif %}
                                 {% endif %}
-                                <a href="{{ url_for('view_post', post_id=post.id) }}" class="text-decoration-none">{{ post.title }}</a>
+                                <a href="{{ url_for('view_post', post_id=post.id) }}"
+                                   class="text-decoration-none">{{ post.title }}</a>
 
                             </h5>
                             <p class="card-text"><small class="text-muted">Đăng bởi {{ post.author.full_name }}
                                 vào {{ post.date_posted.strftime('%d/%m/%Y') }}</small></p>
+
                             {# Dùng striptags để xóa HTML, truncate để cắt ngắn #}
                             <p class="card-text flex-grow-1">{{ post.content | striptags | truncate(150, True, '...') }}</p>
+                            {% if post.tags.count() > 0 %}
+                                <div class="mb-2 post-tags-summary"> {# Dùng mb-2 để có khoảng cách trước nút #}
+                                    <small class="text-muted">
+                                        Thẻ:
+                                        {# Giới hạn số thẻ hiển thị nếu muốn #}
+                                        {% for tag in post.tags.limit(3) %}
+                                            <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>
+                                        {% endfor %}
+                                        {% if post.tags.count() > 3 %}
+                                            <span class="badge rounded-pill bg-light text-dark">...</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                            {# --- END: Kết thúc hiển thị Tags --- #}
                             {% if post.attachments %}
                                 <div class="attachment-link-condensed mb-2">
                                     {% for attachment in post.attachments[:1] %}
@@ -123,13 +142,28 @@
                                     {% elif post.status == 'closed' %}
                                         <span class="badge bg-secondary ms-1">Đã đóng</span> {% endif %}
                                 {% endif %}
-                                <a href="{{ url_for('view_post', post_id=post.id) }}" class="text-decoration-none">{{ post.title }}</a>
+                                <a href="{{ url_for('view_post', post_id=post.id) }}"
+                                   class="text-decoration-none">{{ post.title }}</a>
 
                             </h5>
                             <p class="card-text"><small class="text-muted">Đăng bởi {{ post.author.full_name }}
                                 vào {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</small></p>
                             {# Dùng striptags để xóa HTML, truncate để cắt ngắn #}
                             <p class="card-text">{{ post.content | striptags | truncate(200, True, '...') }}</p>
+                            {% if post.tags.count() > 0 %}
+                                <div class="mb-2 post-tags-summary"> {# Dùng mb-2 để có khoảng cách trước nút #}
+                                    <small class="text-muted">
+                                        Thẻ:
+                                        {% for tag in post.tags.limit(3) %} {# Giới hạn 3 thẻ #}
+                                            <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>
+                                        {% endfor %}
+                                        {% if post.tags.count() > 3 %}
+                                            <span class="badge rounded-pill bg-light text-dark">...</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                            {# --- END: Kết thúc hiển thị Tags --- #}
                             {% if post.attachments %}
                                 <div class="attachment-link-condensed mb-2">
                                     {% for attachment in post.attachments[:1] %}
@@ -206,7 +240,7 @@
         {# --- Kết thúc Phần 2 --- #}
 
         {# --- Phần 3: Bộ lọc (Đã đúng) --- #}
-        <div class="col-md-4">
+        <div class="col-md-4 sticky-filter-column" >
             <div class="card shadow-sm">
                 <div class="card-header">
                     <i class="bi bi-funnel-fill"></i> Lọc & Sắp xếp
