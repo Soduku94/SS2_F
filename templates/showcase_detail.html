@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} - Công trình Tiêu biểu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        {# Sử dụng cột rộng hơn để hiển thị nội dung chi tiết #}
+        <div class="col-lg-9">
+
+            <article class="showcase-article mb-5">
+                 {# (Tùy chọn) Bạn có thể thêm breadcrumb ở đây nếu muốn #}
+                 {# Ví dụ: Trang chủ > Công trình Tiêu biểu > Tiêu đề công trình #}
+                 {# {% if breadcrumbs %} ... render breadcrumbs ... {% endif %} #}
+
+                {# --- Tiêu đề Công trình --- #}
+                <h1 class="display-5 mb-2">{{ item.title }}</h1>
+
+                {# --- Thông tin Metadata --- #}
+                <div class="text-muted mb-3 border-bottom pb-2">
+                    <p class="mb-1">
+                        <strong>Tác giả/Nhóm:</strong> {{ item.authors_text }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Năm:</strong> {{ item.year or 'N/A' }} |
+                        <strong>Loại:</strong>
+                        {% if item.item_type == 'thesis' %}Luận văn / Đồ án Tốt nghiệp
+                        {% elif item.item_type == 'proceeding' %}Bài báo / Kỷ yếu NCKH
+                        {% elif item.item_type == 'project' %}Dự án Nghiên cứu Khác
+                        {% else %}{{ item.item_type | title }} {# Viết hoa chữ cái đầu #}
+                        {% endif %} |
+                        <strong>Ngày đăng:</strong> {{ item.date_added.strftime('%d/%m/%Y') }}
+                    </p>
+                </div>
+
+                 {# --- Ảnh minh họa (nếu có) --- #}
+                 {% if item.image_file %}
+                    {# Giả định ảnh lưu trong static/academic_work_images/ #}
+                    <img src="{{ url_for('static', filename='academic_work_images/' + item.image_file) }}"
+                         class="img-fluid rounded mb-4 shadow-sm"
+                         alt="Ảnh minh họa cho {{ item.title }}">
+                 {% endif %}
+
+                 {# --- Tóm tắt (nếu có) --- #}
+                 {% if item.abstract %}
+                    <blockquote class="blockquote fs-5 mb-4">
+                        <p>{{ item.abstract }}</p>
+                    </blockquote>
+                    <hr class="my-4">
+                 {% endif %}
+
+                 {# --- Nội dung chi tiết --- #}
+                 <div class="showcase-content">
+                    {# Dùng filter |safe nếu nội dung có thể chứa HTML (ví dụ từ Trix editor) #}
+                    {{ item.full_content | safe if item.full_content else '<p><em>(Không có nội dung chi tiết)</em></p>' }}
+                 </div>
+
+                 {# --- Link liên kết ngoài (nếu có) --- #}
+                 {% if item.external_link %}
+                    <hr class="my-4">
+                    <p>
+                        <a href="{{ item.external_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-up-right"></i> Xem tài liệu / Link gốc
+                        </a>
+                    </p>
+                 {% endif %}
+
+                 {# --- Khu vực cho Like/Share (Giai đoạn 2) --- #}
+                 {# Tạm thời ẩn hoặc hiển thị dạng disabled #}
+                 <hr class="my-4">
+                 <div class="d-flex  align-items-center mt-4">
+                     <div>
+                         {# Nút Like Placeholder #}
+                         <button class="btn btn-outline-danger btn-sm disabled" type="button" title="Thích (Chức năng sẽ được thêm)">
+                             <i class="bi bi-heart"></i> Thích <span class="like-count">(0)</span>
+                         </button>
+                     </div>
+                     <div>
+                         {# Nút Share Placeholder #}
+                          <button class="btn btn-outline-secondary btn-sm disabled" type="button" title="Chia sẻ (Chức năng sẽ được thêm)">
+                             <i class="bi bi-share-fill"></i> Chia sẻ
+                         </button>
+                     </div>
+                 </div>
+                 {# --- Kết thúc Placeholder --- #}
+
+            </article>
+
+            {# Nút quay lại danh sách #}
+            <a href="{{ url_for('showcase') }}" class="btn btn-secondary mt-4"><i class="bi bi-arrow-left"></i> Quay lại danh sách</a>
+
+        </div> {# End col-lg-9 #}
+    </div> {# End row #}
+</div> {# End container #}
+{% endblock content %}

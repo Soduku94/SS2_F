@@ -48,3 +48,64 @@ body {
         /* Giúp phần tử không bị kéo giãn khi phần tử khác trong row cao hơn */
         align-self: flex-start;}
 }
+
+
+
+
+
+/* --- CSS cho Showcase Carousel (Đã sửa lại) --- */
+
+#showcaseCarousel .carousel-item {
+  /* Đặt chiều cao tối thiểu - QUAN TRỌNG: CHỈNH LẠI GIÁ TRỊ NÀY */
+  min-height: 450px;
+  /* Màu nền dự phòng nếu không có ảnh */
+  background-color: #6c757d; /* Màu xám tối làm placeholder */
+  position: relative; /* Cần thiết để caption định vị đúng */
+}
+
+#showcaseCarousel .carousel-item img {
+  display: block; /* Đảm bảo là block */
+  width: 100%;
+  /* Đặt chiều cao ảnh bằng min-height của item */
+  /* !!! QUAN TRỌNG: GIÁ TRỊ NÀY NÊN BẰNG min-height Ở TRÊN !!! */
+  height: 450px;
+  /* Ảnh sẽ tự cắt hoặc co giãn để lấp đầy không gian mà không bị méo */
+  object-fit: cover;
+}
+
+/* Sử dụng định vị và style mặc định của Bootstrap cho caption */
+/* Chỉ cần thêm/điều chỉnh nền và màu chữ nếu cần */
+#showcaseCarousel .carousel-caption {
+  /* Để lại các thuộc tính vị trí mặc định của Bootstrap (thường là absolute) */
+  /* position: absolute; */
+  /* right: 15%; */
+  /* bottom: 1.25rem; */
+  /* left: 15%; */
+  /* padding-top: 1.25rem; */
+  /* padding-bottom: 1.25rem; */
+  /* color: #fff; */
+  /* text-align: center; */
+
+  /* Thêm nền để đảm bảo dễ đọc */
+  background-color: rgba(0, 0, 0, 0.6); /* Lớp phủ màu đen mờ */
+  border-radius: .3rem; /* Bo góc nhẹ */
+  padding: 0.75rem 1.25rem; /* Điều chỉnh padding nếu cần */
+}
+
+/* Ép màu chữ caption thành trắng để dễ đọc trên nền tối/ảnh */
+#showcaseCarousel .carousel-caption h5,
+#showcaseCarousel .carousel-caption p {
+    color: #fff;
+}
+#showcaseCarousel .carousel-caption a {
+    color: #fff;
+    /* text-decoration: underline; */ /* Tùy chọn gạch chân link */
+}
+#showcaseCarousel .carousel-caption a:hover {
+    color: #ddd;
+}
+
+/* (Tùy chọn) Ẩn ảnh placeholder nếu bạn thích nền màu xám hơn */
+/* #showcaseCarousel .carousel-item img[src*="via.placeholder.com"] {
+   display: none;
+} */

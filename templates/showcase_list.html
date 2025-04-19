@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-0">
+        {# --- Tiêu đề Trang --- #}
+        {# Có thể đặt tiêu đề "Công trình Tiêu biểu" ở đây hoặc ẩn nếu carousel đã đủ rõ ràng #}
+        <div class="d-flex justify-content-between align-items-center mb-2"> {# Giữ mb-2 #}
+            <h1 class="mt-0 mb-1">{{ title }}</h1> {# <<< Thêm mt-0 và giữ mb-2 #}
+        </div>
+        {# --- START: Thêm Tiêu đề phụ / Nhãn --- #}
+        <div class="showcase-section-label mb-3"> {# Giữ mb-3 hoặc giảm thành mb-2 #}
+            <h4 class="text-muted fst-italic">Kỷ yếu Khoa học & Đồ án Xuất sắc</h4>
+        </div>
+    </div>
+    {# --- END: Thêm Tiêu đề phụ / Nhãn --- #}
+
+    {# --- START: Phần Carousel --- #}
+    {% if carousel_items %} {# Chỉ hiển thị carousel nếu có dữ liệu #}
+        <div id="showcaseCarousel" class="carousel slide mb-4 shadow-sm" data-bs-ride="carousel"
+             data-bs-interval="10000"> {# data-bs-interval là 10000ms = 10s #}
+
+            {# Indicators (Các dấu chấm tròn điều hướng) #}
+            <div class="carousel-indicators">
+                {% for item in carousel_items %}
+                    <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                            class="{{ 'active' if loop.first }}" aria-current="{{ 'true' if loop.first }}"
+                            aria-label="Slide {{ loop.index }}"></button>
+                {% endfor %}
+            </div>
+
+            {# Các Slides #}
+            <div class="carousel-inner rounded">
+                {% for item in carousel_items %}
+                    <div class="carousel-item {{ 'active' if loop.first }}">
+                        {# Ảnh - dùng ảnh placeholder nếu không có #}
+                        {% set img_url = url_for('static', filename='academic_work_images/' + item.image_file) if item.image_file else 'https://via.placeholder.com/1200x400.png?text=Featured+Work' %}
+                        {# Link ảnh đến trang chi tiết #}
+                        <a href="{{ url_for('showcase_detail', item_id=item.id) }}">
+                            <img src="{{ img_url }}" class="d-block w-100" alt="{{ item.title }}"
+                                 style="max-height: 400px; object-fit: cover;"> {# Điều chỉnh max-height nếu cần #}
+                        </a>
+                        {# Chú thích (Caption) - chỉ hiện trên màn hình lớn (d-md-block) #}
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 p-3 rounded">
+                            <h5><a href="{{ url_for('showcase_detail', item_id=item.id) }}"
+                                   class="text-white text-decoration-none stretched-link">{{ item.title }}</a></h5>
+                            <p class="small d-none d-lg-block">{{ item.abstract | truncate(100, True, '...') if item.abstract else item.authors_text }}</p>
+                            {# Hiện abstract trên màn lớn hơn #}
+                            {# Thông tin thêm: Năm, Lượt tim (placeholder) #}
+                            <p class="small mb-0">
+                                    <span class="me-3"><i
+                                            class="bi bi-calendar3"></i> {{ item.year or item.date_added.strftime('%Y') }}</span>
+                                {# Placeholder cho Like - Giai đoạn 2 #}
+                                <span class="me-3"><i class="bi bi-heart"></i> (0)</span>
+                                {# Placeholder cho Share - Giai đoạn 2 #}
+                                {# <span><i class="bi bi-share"></i> Share</span> #}
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Nút điều khiển Previous/Next #}
+            <button class="carousel-control-prev" type="button" data-bs-target="#showcaseCarousel"
+                    data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#showcaseCarousel"
+                    data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    {% else %}
+        {# Có thể hiển thị một ảnh tĩnh hoặc thông báo khác nếu không có item nào được featured #}
+        <div class="p-5 mb-4 bg-light rounded-3 text-center">
+            <h1 class="display-5 fw-bold">{{ title }}</h1>
+            <p class="lead">Chào mừng đến với trang giới thiệu các công trình nghiên cứu và đồ án tiêu biểu của
+                Khoa.</p>
+        </div>
+    {% endif %}
+    {# --- END: Kết thúc Phần Carousel --- #}
+
+
+    <div class="card mb-4 bg-light">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('showcase') }}" class="row g-2 align-items-end">
+
+                <div class="col-md-4">
+                    <label for="item_type" class="form-label fw-bold">Lọc theo Loại:</label>
+                    <select class="form-select form-select-sm" id="item_type" name="item_type">
+                        <option value="">Tất cả Loại</option>
+                        {% for type_val in distinct_types %}
+                            <option value="{{ type_val }}" {% if filter_type == type_val %}selected{% endif %}>
+                                {% if type_val == 'thesis' %}Luận văn/Đồ án
+                                {% elif type_val == 'proceeding' %}Bài báo/Kỷ yếu
+                                {% elif type_val == 'project' %}Dự án khác
+                                {% else %}{{ type_val }}{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="year" class="form-label fw-bold">Lọc theo Năm:</label>
+                    <select class="form-select form-select-sm" id="year" name="year">
+                        <option value="">Tất cả Năm</option>
+                        {% for year_val in distinct_years %}
+                            <option value="{{ year_val }}"
+                                    {% if filter_year == year_val %}selected{% endif %}>{{ year_val }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Lọc</button>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('showcase') }}" class="btn btn-outline-secondary btn-sm w-100">Bỏ lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    {# --- Kết thúc Form Lọc --- #}
+
+    <hr>
+    <h2 class="mb-4">Tất cả Công trình</h2>
+
+    {# --- Phần Hiển thị Lưới Công trình (Giữ nguyên như trước) --- #}
+    {% if items_pagination and items_pagination.items %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for item in items_pagination.items %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        {% if item.image_file %}
+                            <img src="{{ url_for('static', filename='academic_work_images/' + item.image_file) }}"
+                                 class="card-img-top" alt="{{ item.title }}"
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top"
+                                 alt="Placeholder" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="{{ url_for('showcase_detail', item_id=item.id) }}"
+                                   class="text-decoration-none">{{ item.title }}</a>
+                            </h5>
+                            <p class="card-text mb-1"><small class="text-muted">Tác
+                                giả: {{ item.authors_text }}</small></p>
+                            <p class="card-text mb-2">
+                                <small class="text-muted">
+                                    Năm: {{ item.year or 'N/A' }} | Loại:
+                                    {% if item.item_type == 'thesis' %}Luận văn/Đồ án
+                                    {% elif item.item_type == 'proceeding' %}Bài báo/Kỷ yếu
+                                    {% elif item.item_type == 'project' %}Dự án khác
+                                    {% else %}{{ item.item_type }}{% endif %}
+                                </small>
+                            </p>
+                            {% if item.abstract %}
+                                <p class="card-text small flex-grow-1">{{ item.abstract | truncate(120, True, '...') }}</p>
+                            {% else %}
+                                <div class="flex-grow-1"></div>
+                            {% endif %}
+                            <a href="{{ url_for('showcase_detail', item_id=item.id) }}"
+                               class="btn btn-sm btn-outline-primary mt-auto align-self-start">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# --- Phân trang (Giữ nguyên như trước) --- #}
+        {% if items_pagination.pages > 1 %}
+            <nav aria-label="Showcase navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {# ... code phân trang ... #}
+                    <li class="page-item {% if not items_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('showcase', page=items_pagination.prev_num, item_type=filter_type, year=filter_year) if items_pagination.has_prev else '#' }}">&laquo;</a>
+                    </li>
+                    {% for page_num in items_pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == items_pagination.page %}active{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('showcase', page=page_num, item_type=filter_type, year=filter_year) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not items_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('showcase', page=items_pagination.next_num, item_type=filter_type, year=filter_year) if items_pagination.has_next else '#' }}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+        {# --- Kết thúc Phân Trang --- #}
+
+    {% else %}
+        <div class="alert alert-info">Chưa có công trình nào được hiển thị.</div>
+    {% endif %}
+    {# --- Kết thúc Danh sách --- #}
+
+    </div>
+{% endblock %}
