@@ -1,19 +1,33 @@
 # models.py
 from datetime import datetime, timezone
-from extensions import db, bcrypt # Import từ extensions
+from extensions import db, bcrypt  # Import từ extensions
 from flask_login import UserMixin
 from sqlalchemy import Date
 
 # --- Bảng liên kết ---
+# Bảng liên kết Giảng viên nhận Ý tưởng của Sinh viên
 idea_recipient_lecturers = db.Table('idea_recipient_lecturers',
-    db.Column('student_idea_id', db.Integer, db.ForeignKey('student_idea.id', ondelete='CASCADE'), primary_key=True),
-    db.Column('lecturer_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
-)
+                                    db.Column('student_idea_id', db.Integer,
+                                              db.ForeignKey('student_idea.id', ondelete='CASCADE'), primary_key=True),
+                                    db.Column('lecturer_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'),
+                                              primary_key=True)
+                                    )
 
+# Bảng liên kết Sinh viên quan tâm Đề tài (Post)
 student_topic_interest = db.Table('student_topic_interest',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
-    db.Column('post_id', db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), primary_key=True)
-)
+                                  db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'),
+                                            primary_key=True),
+                                  db.Column('post_id', db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'),
+                                            primary_key=True)
+                                  )
+
+# Bảng liên kết Bài đăng (Post) và Thẻ (Tag)
+# (Đã di chuyển ra khỏi User class)
+post_tags = db.Table('post_tags',
+                     db.Column('post_id', db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), primary_key=True),
+                     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id', ondelete='CASCADE'), primary_key=True)
+                     )
+
 
 # --- Model User ---
 class User(db.Model, UserMixin):
@@ -28,39 +42,57 @@ class User(db.Model, UserMixin):
     class_name = db.Column(db.String(50), nullable=True)
     date_of_birth = db.Column(Date, nullable=True)
 
-    phone_number = db.Column(db.String(20), unique=False, nullable=True) # Đã sửa unique=False
+    phone_number = db.Column(db.String(20), unique=False, nullable=True)
     contact_email = db.Column(db.String(120), unique=True, nullable=True)
     about_me = db.Column(db.Text, nullable=True)
 
-    # Relationships
-    # <<< Chỉ giữ lại MỘT posts relationship >>>
+    # --- Relationships ---
+    # Bài đăng của người dùng (Tác giả)
     posts = db.relationship('Post', backref='author', lazy=True, cascade='all, delete-orphan')
 
-    # <<< Sửa lại relationship dùng back_populates >>>
+    # Các đề tài mà người dùng (Sinh viên) quan tâm
     interested_topics = db.relationship('Post', secondary=student_topic_interest, lazy='dynamic',
-                                         back_populates='interested_students') # <<< Sửa thành back_populates
+                                        back_populates='interested_students')
 
-    # <<< Sửa lại relationship dùng back_populates >>>
+    # Các ý tưởng mà người dùng (Giảng viên) nhận được
     received_ideas = db.relationship('StudentIdea', secondary=idea_recipient_lecturers, lazy='dynamic',
-                                     back_populates='recipients') # <<< Sửa thành back_populates
+                                     back_populates='recipients')
 
+    # Các ý tưởng mà người dùng (Sinh viên) đã gửi
     ideas_submitted = db.relationship('StudentIdea', backref='student', lazy='dynamic',
                                       foreign_keys='StudentIdea.student_id', cascade='all, delete-orphan')
 
+    # Các thông báo mà người dùng nhận được
     notifications = db.relationship('Notification', backref='recipient', lazy='dynamic',
                                     foreign_keys='Notification.recipient_id',
                                     order_by='Notification.timestamp.desc()',
                                     cascade='all, delete-orphan')
 
+    # (Không cần định nghĩa post_tags và Tag ở đây nữa)
+
+    # --- Methods ---
     def set_password(self, password):
         """Tạo password hash."""
-        # Đảm bảo bcrypt đã được import đúng
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
-            """Kiểm tra password hash."""
-            # Đảm bảo bcrypt đã được import đúng
-            return bcrypt.check_password_hash(self.password_hash, password)
+        """Kiểm tra password hash."""
+        return bcrypt.check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f"User('{self.full_name}', '{self.email}', '{self.role}')"
+
+
+# --- Model Tag ---
+# (Đã di chuyển ra khỏi User class và đặt trước Post class)
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False, index=True)
+
+    # Relationship 'posts' sẽ được tạo tự động bởi backref từ Post model
+
+    def __repr__(self):
+        return f'<Tag {self.name}>'
 
 
 # === Model Post ===
@@ -72,15 +104,17 @@ class Post(db.Model):
     is_featured = db.Column(db.Boolean, default=False)
     post_type = db.Column(db.String(10), nullable=False, default='article')
     status = db.Column(db.String(20), nullable=True, default='pending')
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False) # Sửa ondelete nếu cần
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
+    # --- Relationships ---
     attachments = db.relationship('Attachment', backref='post', lazy=True, cascade='all, delete-orphan')
 
-    # <<< THÊM RELATIONSHIP NGƯỢC LẠI interested_students >>>
     interested_students = db.relationship('User', secondary=student_topic_interest, lazy='dynamic',
-                                          back_populates='interested_topics') # Trỏ đến thuộc tính trong User
-    # <<< KẾT THÚC THÊM >>>
+                                          back_populates='interested_topics')
 
+    # Relationship với Tag (Tham chiếu đến 'Tag' và 'post_tags' đã định nghĩa ở trên)
+    tags = db.relationship('Tag', secondary=post_tags, lazy='dynamic',
+                           backref=db.backref('posts', lazy='dynamic'))
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
@@ -92,7 +126,9 @@ class Attachment(db.Model):
     original_filename = db.Column(db.String(150), nullable=False)
     saved_filename = db.Column(db.String(100), unique=True, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
-    def __repr__(self): ... # Giữ nguyên
+
+    def __repr__(self):
+        return f"Attachment('{self.original_filename}', Post ID: {self.post_id})"
 
 
 # === Model StudentIdea ===
@@ -105,14 +141,14 @@ class StudentIdea(db.Model):
     feedback = db.Column(db.Text, nullable=True)
     student_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
+    # --- Relationships ---
     attachments = db.relationship('IdeaAttachment', backref='idea', lazy=True, cascade='all, delete-orphan')
 
-    # <<< SỬA LẠI RELATIONSHIP NÀY DÙNG back_populates >>>
     recipients = db.relationship('User', secondary=idea_recipient_lecturers, lazy='dynamic',
-                                 back_populates='received_ideas') # Trỏ đến thuộc tính trong User
-    # <<< KẾT THÚC SỬA >>>
+                                 back_populates='received_ideas')
 
-    def __repr__(self): ... # Giữ nguyên
+    def __repr__(self):
+        return f"StudentIdea('{self.title}', Status: {self.status})"
 
 
 # === Model IdeaAttachment ===
@@ -121,7 +157,9 @@ class IdeaAttachment(db.Model):
     original_filename = db.Column(db.String(150), nullable=False)
     saved_filename = db.Column(db.String(100), unique=True, nullable=False)
     idea_id = db.Column(db.Integer, db.ForeignKey('student_idea.id', ondelete='CASCADE'), nullable=False)
-    def __repr__(self): ... # Giữ nguyên
+
+    def __repr__(self):
+        return f"IdeaAttachment('{self.original_filename}', Idea ID: {self.idea_id})"
 
 
 # === Model Notification ===
@@ -132,11 +170,36 @@ class Notification(db.Model):
     is_read = db.Column(db.Boolean, default=False)
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     related_idea_id = db.Column(db.Integer, db.ForeignKey('student_idea.id', ondelete='SET NULL'), nullable=True)
-
+    # Giả sử bạn đã thêm các trường này ở bước trước
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True)
     notification_type = db.Column(db.String(50), nullable=True)
-    def __repr__(self): ... # Giữ nguyên
+
+    def __repr__(self):
+        return f"Notification('{self.content[:30]}...', Read: {self.is_read})"
 
 
+class TopicApplication(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    application_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    # Trạng thái đơn đăng ký: pending, accepted, rejected
+    status = db.Column(db.String(20), nullable=False, default='pending', index=True)
+    # (Tùy chọn) Lời nhắn của sinh viên khi đăng ký
+    message = db.Column(db.Text, nullable=True)
 
+    # Khóa ngoại đến sinh viên đăng ký
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    # Khóa ngoại đến bài đăng/đề tài được đăng ký
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
 
+    # --- Relationships ---
+    # Liên kết đến người dùng (sinh viên)
+    student = db.relationship('User', backref=db.backref('topic_applications', lazy='dynamic'))
+    # Liên kết đến bài đăng (đề tài)
+    topic = db.relationship('Post', backref=db.backref('applications', lazy='dynamic'))
+
+    # --- Ràng buộc duy nhất ---
+    # Đảm bảo một sinh viên chỉ đăng ký một đề tài một lần
+    __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='uq_user_post_application'),)
+
+    def __repr__(self):
+        return f'<TopicApplication User {self.user_id} -> Post {self.post_id} ({self.status})>'

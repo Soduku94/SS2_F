@@ -46,6 +46,27 @@
                     {% endif %}
                     {# Bỏ phần hiển thị số lượt quan tâm ở đây vì đã chuyển xuống nút bấm #}
                 </div>
+
+                {# --- START: Thêm đoạn code hiển thị Tags --- #}
+                {% if post.tags.count() > 0 %} {# Kiểm tra xem bài đăng có tag nào không #}
+                    <div class="mb-3"> {# Tạo khoảng cách dưới #}
+                        <strong>Thẻ:</strong>
+                        {% for tag in post.tags %}
+                            {# Hiển thị mỗi tag như một badge #}
+                            {# Bạn có thể đổi màu badge nếu muốn, ví dụ bg-primary, bg-info,... #}
+                            <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>
+                            {# Tùy chọn: Nếu sau này bạn muốn làm trang lọc theo tag,
+               bạn có thể bọc span này trong thẻ <a>
+               <a href="{{ url_for('posts_by_tag', tag_name=tag.name) }}" class="text-decoration-none">
+                   <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>
+               </a>
+            #}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {# --- END: Kết thúc đoạn code hiển thị Tags --- #}
+
+
                 {# --- Kết thúc Metadata --- #}
 
                 <hr>
@@ -144,8 +165,31 @@
                                 </form>
                             {% endif %}
                         {% endif %}
+                        {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' %}
+                            <hr> {# Thêm đường kẻ ngang phân cách #}
+                            {# Kiểm tra xem sinh viên đã đăng ký chưa (dùng biến truyền từ view_post) #}
+                            {% if not already_applied %}
+                                {# Nếu chưa đăng ký -> Hiển thị form với nút Đăng ký #}
+                                {# Form này sẽ gửi yêu cầu POST đến route 'apply_to_topic' #}
+                                <form action="{{ url_for('apply_to_topic', post_id=post.id) }}" method="POST"
+                                      class="d-inline">
+                                    {# (Tùy chọn) Thêm input lời nhắn nếu muốn #}
+                                    {# <textarea name="message" class="form-control form-control-sm mb-2" rows="2" placeholder="Lời nhắn cho Giảng viên (tùy chọn)"></textarea> #}
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-check-circle-fill"></i> Đăng ký đề tài này
+                                    </button>
+                                </form>
+                            {% else %}
+                                {# Nếu đã đăng ký -> Hiển thị nút bị vô hiệu hóa #}
+                                <button type="button" class="btn btn-secondary btn-sm" disabled>
+                                    <i class="bi bi-check-circle"></i> Đã đăng ký
+                                </button>
+                                {# (Tùy chọn) Có thể thêm nút Hủy đăng ký nếu muốn #}
+                            {% endif %}
+                        {% endif %}
 
                     </div>
+
                     {# --- KẾT THÚC NHÓM NÚT BÊN TRÁI --- #}
 
 

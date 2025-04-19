@@ -3,22 +3,22 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="row justify-content-center mt-4">
+<div class="container mt-4">
+    <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header"><h2>{{ legend }}</h2></div>
                 <div class="card-body">
                     {# Action để trống submit về URL hiện tại, enctype cần cho upload file #}
                     <form method="POST" action="" novalidate enctype="multipart/form-data">
-                        {{ form.hidden_tag() }}
+                        {{ form.hidden_tag() }} {# CSRF token #}
                         <fieldset>
                             {# Trường title #}
                             <div class="mb-3">
                                 {{ form.title.label(class="form-label") }}
                                 {% if form.title.errors %}
                                     {{ form.title(class="form-control is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.title.errors %}
-                                        <span>{{ error }}</span><br>{% endfor %}</div>
+                                    <div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
                                 {% else %}
                                     {{ form.title(class="form-control") }}
                                 {% endif %}
@@ -26,16 +26,14 @@
 
                             {# Trường content với Trix Editor #}
                             <div class="mb-3">
-                                {# Giả định tên field trong form là 'content' cho Trix #}
-                                {# Nếu trong PostForm bạn đặt tên khác, sửa lại form.xxx ở đây #}
                                 {{ form.content.label(class="form-label") }}
-                                <input type="hidden" name="content" id="content_hidden_input"
-                                       value="{{ form.content.data or (post.content if post is defined else '') }}">
-                                <trix-editor input="content_hidden_input" class="form-control trix-content"
-                                             style="min-height: 150px;"></trix-editor>
+                                {# Đảm bảo giá trị value xử lý trường hợp None/rỗng #}
+                                <input type="hidden" name="content" id="content_hidden_input" value="{{ form.content.data or (post.content if post else '') }}">
+                                <trix-editor input="content_hidden_input" class="form-control trix-content {% if form.content.errors %} is-invalid {% endif %}" style="min-height: 150px;"></trix-editor>
                                 {% if form.content.errors %}
-                                    <div class="invalid-feedback d-block">{% for error in form.content.errors %}
-                                        <span>{{ error }}</span><br>{% endfor %}</div>
+                                    <div class="invalid-feedback d-block"> {# Dùng d-block cho textarea/trix #}
+                                        {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
+                                    </div>
                                 {% endif %}
                             </div>
 
@@ -44,123 +42,164 @@
                                 {{ form.post_type.label(class="form-label") }}
                                 {% if form.post_type.errors %}
                                     {{ form.post_type(class="form-select is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.post_type.errors %}
-                                        <span>{{ error }}</span><br>{% endfor %}</div>
+                                    <div class="invalid-feedback">{% for error in form.post_type.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
                                 {% else %}
                                     {{ form.post_type(class="form-select") }}
                                 {% endif %}
                             </div>
 
-                            {# --- Khối code cho Attachments --- #}
+                            {# --- Trường Tags (sẽ được Tagify nâng cấp) --- #}
+                            <div class="mb-3">
+                                {{ form.tags.label(class="form-label") }} {# Label đơn giản 'Thẻ' #}
+                                {# Render input cơ bản, Tagify JS sẽ biến đổi nó #}
+                                {# Cần có id='tags-input' để JS chọn được #}
+                                {# value được lấy từ form.tags.data (khi validation fail) hoặc current_tags_string (khi edit GET) #}
+                                {{ form.tags(id='tags-input', class='form-control' + (' is-invalid' if form.tags.errors else ''), value=current_tags_string or form.tags.data or '') }}
+                                {% if form.tags.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.tags.errors %}<span>{{ error }}</span>{% endfor %}
+                                    </div>
+                                {% endif %}
+                                {# Hướng dẫn có thể đặt ở đây hoặc trong placeholder của Tagify nếu muốn #}
+                                <div class="form-text">Nhập thẻ mới hoặc chọn từ gợi ý. Nhấn Enter hoặc dấu phẩy để thêm.</div>
+                            </div>
+                            {# --- Kết thúc trường Tags --- #}
+
+                            {# --- Phần Attachments với Krajee File Input --- #}
                             <div class="mb-3">
                                 {{ form.attachments.label(class="form-label") }}
-
-                                {# Hiển thị file hiện tại NẾU đang ở chế độ sửa VÀ có file #}
-                                {% if post is defined and post.attachments %}
+                                {# Hiển thị file hiện tại khi chỉnh sửa #}
+                                {% if post and post.attachments %}
                                     <div class="current-attachments mb-2">
                                         <p class="mb-1"><small>File hiện tại:</small></p>
                                         <ul class="list-unstyled list-group list-group-flush mb-2 small">
                                             {% for attachment in post.attachments %}
                                                 <li class="list-group-item ps-0">
-                                                    <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}"
-                                                       target="_blank" class="text-decoration-none">
-                                                        {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
-                                                        {% if extension == 'pdf' %}
-                                                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
-                                                        {% elif extension in ['doc', 'docx'] %}
-                                                            <i class="bi bi-file-earmark-word text-primary me-1"></i>
-                                                        {% elif extension in ['xls', 'xlsx'] %}
-                                                            <i class="bi bi-file-earmark-excel text-success me-1"></i>
-                                                        {% else %}
-                                                            <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                                    <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}" target="_blank" class="text-decoration-none">
+                                                        {# ... icon logic ... #}
+                                                         {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                                         {% if extension == 'pdf' %} <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                                         {% elif extension in ['doc', 'docx'] %} <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                                         {% elif extension in ['xls', 'xlsx'] %} <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                                         {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
                                                         {{ attachment.original_filename }}
                                                     </a>
                                                 </li>
                                             {% endfor %}
                                         </ul>
-                                        <p class="form-text text-danger">Lưu ý: Chọn file mới sẽ xóa và thay thế tất cả
-                                            các file đính kèm hiện tại.</p>
+                                        <p class="form-text text-danger">Lưu ý: Chọn file mới sẽ xóa và thay thế tất cả các file đính kèm hiện tại.</p>
                                     </div>
                                 {% endif %}
-
                                 {# Input chọn file Krajee #}
                                 <div class="file-loading">
+                                    {{ form.attachments(class="file", multiple=True, id="fileUploadInputKrajee", **{"data-browse-on-zone-click":"true"}) }}
                                     {% if form.attachments.errors %}
-                                        {{ form.attachments(class="file is-invalid", multiple=True, id="fileUploadInputKrajee", **{"data-browse-on-zone-click":"true"}) }}
                                         <div class="invalid-feedback d-block">
-                                            {% for error in form.attachments.errors %}<span>{{ error }}</span>
-                                                <br>{% endfor %}
+                                            {% for error in form.attachments.errors %}<span>{{ error }}</span><br>{% endfor %}
                                         </div>
-                                    {% else %}
-                                        {{ form.attachments(class="file", multiple=True, id="fileUploadInputKrajee", **{"data-browse-on-zone-click":"true"}) }}
                                     {% endif %}
                                 </div>
                             </div>
                             {# --- Kết thúc Attachments --- #}
-
 
                             {# Trường status #}
                             <div class="mb-3">
                                 {{ form.status.label(class="form-label") }}
                                 {% if form.status.errors %}
                                     {{ form.status(class="form-select is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.status.errors %}
-                                        <span>{{ error }}</span><br>{% endfor %}</div>
+                                    <div class="invalid-feedback">{% for error in form.status.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
                                 {% else %}
                                     {{ form.status(class="form-select") }}
                                 {% endif %}
-                                <small class="form-text text-muted">Chỉ áp dụng cho 'Đề tài Nghiên cứu'.</small>
+                                {# <small class="form-text text-muted">Chỉ áp dụng cho 'Đề tài Nghiên cứu'.</small> #}
                             </div>
 
                             {# Trường is_featured #}
                             <div class="mb-3 form-check">
                                 {{ form.is_featured(class="form-check-input") }}
                                 {{ form.is_featured.label(class="form-check-label") }}
-                                <small class="form-text text-muted">Đánh dấu nếu muốn bài đăng này xuất hiện ở khu vực
-                                    nổi bật.</small>
+                                <small class="form-text text-muted">Đánh dấu nếu muốn bài đăng này xuất hiện ở khu vực nổi bật.</small>
                             </div>
 
                         </fieldset>
                         <div class="d-grid mt-3">
-                            {# Đổi Text nút Submit tùy theo legend #}
-                            {% if legend.startswith('Cập nhật') %}
-                                {{ form.submit(class="btn btn-primary", value="Cập nhật Bài đăng") }}
-                            {% else %}
-                                {{ form.submit(class="btn btn-primary") }} {# Value mặc định là 'Đăng bài' #}
-                            {% endif %}
+                            {# Dùng label từ form để nhất quán #}
+                            {{ form.submit(class="btn btn-primary") }}
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-{% endblock %}
+{% endblock content %}
 
+{# --- Block Scripts --- #}
 {% block scripts %}
-    {{ super() }}
-    {# Script khởi tạo Krajee File Input #}
+    {# {{ super() }} #} {# Gọi super nếu base.html có block scripts #}
+
+    {# Script khởi tạo Krajee File Input (Giữ nguyên) #}
     <script>
         $(document).ready(function () {
             $("#fileUploadInputKrajee").fileinput({
                 language: "vi",
-                theme: "bs5", // Dùng theme bs5
+                theme: "bs5",
                 showUpload: false,
                 showCaption: true,
                 showPreview: true,
-                allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'],
+                allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'], // Phải khớp FileAllowed trong form
                 browseOnZoneClick: true,
-                overwriteInitial: false,
-                maxFileSize: 10240, // 10MB
-                maxFileCount: 10,
+                overwriteInitial: false, // Nên là false để không ghi đè preview khi edit
+                maxFileSize: 10240, // Ví dụ 10MB
+                maxFileCount: 10, // Ví dụ 10 files
+                // Thêm initialPreview nếu muốn hiển thị file cũ trong Krajee khi Edit
+                // initialPreview: ... ,
+                // initialPreviewConfig: ... ,
             });
-
-            // Script khởi tạo Trix Editor (nếu cần đặt riêng ở đây thay vì base.html)
-            // Lưu ý: Đảm bảo Trix JS đã được load trước khi script này chạy
-            // var trixEditor = document.querySelector("trix-editor[input='content_hidden_input']");
-            // var hiddenInput = document.getElementById("content_hidden_input");
-            // // Có thể thêm logic nếu cần thiết ở đây
         });
     </script>
-    {# Script xử lý Modal xác nhận (nếu dùng chung template này cho edit) #}
-    {# <script> ... JS xử lý modal ... </script> #}
-{% endblock %}
+
+    {# --- SCRIPT KHỞI TẠO TAGIFY --- #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chọn input gốc bằng ID
+            var input = document.querySelector('#tags-input');
+
+            if (input) {
+                // Lấy danh sách tag có sẵn từ biến Jinja (đã được backend truyền vào)
+                // Sử dụng default([]) để tránh lỗi nếu biến không tồn tại hoặc None
+                var tagWhitelist = {{ all_tag_names | default([]) | tojson | safe }};
+
+                // Khởi tạo Tagify trên input đó
+                var tagify = new Tagify(input, {
+                    // Danh sách các tag đã có để gợi ý và kiểm tra (nếu enforceWhitelist=true)
+                    whitelist: tagWhitelist,
+                    // Không bắt buộc phải chọn từ whitelist, cho phép thêm tag mới
+                    enforceWhitelist: false,
+                    // Cấu hình dropdown gợi ý
+                    dropdown: {
+                        maxItems: 15,           // Số gợi ý tối đa
+                        enabled: 0,             // Hiện gợi ý ngay khi focus hoặc gõ
+                        closeOnSelect: false,   // Không đóng dropdown sau khi chọn để có thể chọn nhiều
+                        highlightFirst: true    // Tự động highlight gợi ý đầu tiên
+                    },
+                    // (Tùy chọn) Các thiết lập khác:
+                     delimiters: ",|\r?\n", // Cho phép thêm tag bằng dấu phẩy hoặc Enter
+                     editTags: {
+                         clicks: 1,              // Nhấn 1 lần để sửa tag
+                         keepInvalid: false      // Xóa tag nếu sửa thành rỗng/không hợp lệ
+                     },
+                     // addTagOnBlur: true,     // Tự động thêm tag khi mất focus khỏi input (cân nhắc)
+                     // ... xem thêm docs của Tagify ...
+                });
+
+                // In giá trị khởi tạo để debug (Tagify đọc giá trị này từ input)
+                // console.log("Tagify initial value read from input:", input.value);
+
+            } else {
+                console.error('Tagify: Input element #tags-input not found.');
+            }
+        });
+    </script>
+    {# --- KẾT THÚC TAGIFY SCRIPT --- #}
+</div>
+{% endblock scripts %}
