@@ -30,7 +30,7 @@
                         <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Trang chủ</a>
                          <li class="nav-item">
                             {# Thêm class 'active' nếu đang ở trang showcase list hoặc detail #}
-                            <a class="nav-link {% if request.endpoint.startswith('showcase') %}active{% endif %}"
+                       <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}" ...
                                href="{{ url_for('showcase') }}">Công trình Tiêu biểu</a>
                             {# Bạn có thể đổi text thành "Đồ án/Kỷ yếu" nếu muốn #}
                         </li>
