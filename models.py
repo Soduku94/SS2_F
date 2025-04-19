@@ -256,3 +256,27 @@ class AcademicWork(db.Model):
     def __repr__(self):
         # Hàm __repr__ giúp hiển thị thông tin object khi debug
         return f'<AcademicWork {self.id}: {self.title[:50]}>'
+
+
+# === THÊM MODEL MỚI CHO LƯỢT LIKE SHOWCASE ===
+class AcademicWorkLike(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # ID của người dùng đã like
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    # ID của công trình được like
+    academic_work_id = db.Column(db.Integer, db.ForeignKey('academic_work.id', ondelete='CASCADE'), nullable=False)
+    # Thời gian like
+    timestamp = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    # --- Relationships ---
+    # Liên kết đến người dùng
+    user = db.relationship('User', backref=db.backref('showcase_likes', lazy='dynamic', cascade='all, delete-orphan'))
+    # Liên kết đến công trình
+    academic_work = db.relationship('AcademicWork', backref=db.backref('likes', lazy='dynamic', cascade='all, delete-orphan'))
+
+    # --- Ràng buộc duy nhất ---
+    # Đảm bảo một người dùng chỉ like một công trình một lần
+    __table_args__ = (db.UniqueConstraint('user_id', 'academic_work_id', name='uq_user_academic_work_like'),)
+
+    def __repr__(self):
+        return f'<AcademicWorkLike User {self.user_id} liked Item {self.academic_work_id}>'

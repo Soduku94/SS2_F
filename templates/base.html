@@ -12,6 +12,7 @@
 
     <title>{% block title %}FIT Research Connect{% endblock %}</title>
     <link rel="stylesheet" href="static/css/style.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
@@ -28,12 +29,13 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Trang chủ</a>
-                         <li class="nav-item">
-                            {# Thêm class 'active' nếu đang ở trang showcase list hoặc detail #}
-                       <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}" ...
-                               href="{{ url_for('showcase') }}">Công trình Tiêu biểu</a>
-                            {# Bạn có thể đổi text thành "Đồ án/Kỷ yếu" nếu muốn #}
-                        </li>
+                    <li class="nav-item">
+                        {# Thêm class 'active' nếu đang ở trang showcase list hoặc detail #}
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
+                           ...
+                           href="{{ url_for('showcase') }}">Công trình Tiêu biểu</a>
+                        {# Bạn có thể đổi text thành "Đồ án/Kỷ yếu" nếu muốn #}
+                    </li>
                     </li>
                     {% if current_user.role == 'lecturer' %}
                         <li class="nav-item">

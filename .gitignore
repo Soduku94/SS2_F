@@ -9,7 +9,7 @@ venv.bak/
 # Python cache files
 __pycache__/
 *.py[cod]
-*$py.class
+# *$py.class # <<< Xóa dòng này
 
 # Database file
 site.db
@@ -22,6 +22,7 @@ instance/
 # Uploaded files (User generated content)
 uploads/
 static/user_pics/
+static/academic_work_images/ # <<< Thêm thư mục ảnh Showcase
 
 # IDE / Editor specific files
 .idea/
@@ -30,8 +31,9 @@ static/user_pics/
 *.bak
 
 # Sensitivity
-.env
+.env # Đảm bảo file này được ignore
 config.env
+config.py # <<< Thêm cả file config.py nếu bạn dùng cách 2 để lưu SECRET_KEY
 
 # OS generated files
 .DS_Store
