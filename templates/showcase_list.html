@@ -3,17 +3,15 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-0">
-        {# --- Tiêu đề Trang --- #}
-        {# Có thể đặt tiêu đề "Công trình Tiêu biểu" ở đây hoặc ẩn nếu carousel đã đủ rõ ràng #}
-        <div class="d-flex justify-content-between align-items-center mb-2"> {# Giữ mb-2 #}
-            <h1 class="mt-0 mb-1">{{ title }}</h1> {# <<< Thêm mt-0 và giữ mb-2 #}
-        </div>
-        {# --- START: Thêm Tiêu đề phụ / Nhãn --- #}
-        <div class="showcase-section-label mb-3"> {# Giữ mb-3 hoặc giảm thành mb-2 #}
-            <h4 class="text-muted fst-italic">Kỷ yếu Khoa học & Đồ án Xuất sắc</h4>
-        </div>
-    </div>
+   <div class="mb-3"> {# <<< Bạn có thể chỉnh mb-3 thành mb-2 nếu muốn gần hơn nữa #}
+
+    {# Tiêu đề chính - Bỏ hết margin bottom #}
+    <h1 class="mt-0 mb-0">{{ title }}</h1>
+
+    {# Tiêu đề phụ - Dùng thẻ <p> với class 'lead' và <small> cho nhỏ lại, bỏ margin bottom #}
+    <p class="lead text-muted mb-0 mt-1 fst-italic"><small>Kỷ yếu Khoa học & Đồ án Xuất sắc</small></p>
+
+</div>
     {# --- END: Thêm Tiêu đề phụ / Nhãn --- #}
 
     {# --- START: Phần Carousel --- #}

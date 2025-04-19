@@ -4,7 +4,7 @@
 
 
 body {
-    padding-top: 75px;
+    padding-top: 45px;
 
 }
 
@@ -57,7 +57,7 @@ body {
 
 #showcaseCarousel .carousel-item {
   /* Đặt chiều cao tối thiểu - QUAN TRỌNG: CHỈNH LẠI GIÁ TRỊ NÀY */
-  min-height: 450px;
+  min-height: 500px;
   /* Màu nền dự phòng nếu không có ảnh */
   background-color: #6c757d; /* Màu xám tối làm placeholder */
   position: relative; /* Cần thiết để caption định vị đúng */
@@ -68,7 +68,7 @@ body {
   width: 100%;
   /* Đặt chiều cao ảnh bằng min-height của item */
   /* !!! QUAN TRỌNG: GIÁ TRỊ NÀY NÊN BẰNG min-height Ở TRÊN !!! */
-  height: 450px;
+  height: 500px;
   /* Ảnh sẽ tự cắt hoặc co giãn để lấp đầy không gian mà không bị méo */
   object-fit: cover;
 }
