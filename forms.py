@@ -8,16 +8,16 @@ from flask_wtf.file import (FileField,
 from wtforms import (StringField,
                      PasswordField,
                      SubmitField, BooleanField,
-                     TextAreaField, SelectField, DateField)
+                     TextAreaField, SelectField, DateField, IntegerField)
 
 from wtforms.validators import (DataRequired,
                                 Length, Email, EqualTo,
-                                ValidationError, Optional)
+                                ValidationError, Optional, URL)
 from flask_login import current_user
 # <<< THÊM SelectMultipleField VÀO IMPORT WTFORMS >>>
 from wtforms import (StringField, TextAreaField, SubmitField,
                      SelectField, MultipleFileField, SelectMultipleField)
-from wtforms.validators import DataRequired, Length, ValidationError, Optional, Email  # Giữ các validators cần thiết
+from wtforms.validators import DataRequired, Length, ValidationError, Optional, Email ,NumberRange # Giữ các validators cần thiết
 
 try:
     from models import User
@@ -327,3 +327,46 @@ class AdminUserUpdateForm(FlaskForm):
                 raise ValidationError('MSSV này đã được sử dụng bởi một tài khoản khác.')
 
 # --- KẾT THÚC FORM UPDATE ---
+
+
+class AcademicWorkForm(FlaskForm):
+    """Form cho Admin/Dean thêm hoặc sửa AcademicWork (Công trình Showcase)."""
+    title = StringField('Tiêu đề Công trình',
+                        validators=[DataRequired(message="Vui lòng nhập tiêu đề."),
+                                    Length(max=200, message="Tiêu đề tối đa 200 ký tự.")])
+
+    is_featured = BooleanField('Hiển thị trên Carousel đầu trang Showcase?')  # <<< Thêm dòng này
+
+    item_type = SelectField('Loại Công trình',
+                            choices=[
+                                ('thesis', 'Luận văn / Đồ án Tốt nghiệp'),
+                                ('proceeding', 'Bài báo / Kỷ yếu NCKH'),
+                                ('project', 'Dự án Nghiên cứu Khác')
+                                # Bạn có thể thêm các lựa chọn khác nếu cần
+                            ],
+                            validators=[DataRequired(message="Vui lòng chọn loại công trình.")])
+
+    authors_text = StringField('Tên Tác giả / Nhóm thực hiện',
+                               validators=[DataRequired(message="Vui lòng nhập tên tác giả/nhóm."),
+                                           Length(max=300)])
+
+    year = IntegerField('Năm hoàn thành / Công bố',
+                        validators=[Optional(), # Cho phép bỏ trống
+                                    NumberRange(min=1990, max=2100, message="Năm không hợp lệ.")]) # Giới hạn năm hợp lý
+
+    abstract = TextAreaField('Tóm tắt / Giới thiệu ngắn',
+                             validators=[Optional()]) # Tùy chọn
+
+    full_content = TextAreaField('Nội dung chi tiết',
+                                 validators=[Optional()]) # Tùy chọn. Template có thể dùng Trix/CKEditor cho trường này.
+
+    image_file = FileField('Ảnh minh họa (Tùy chọn)',
+                           validators=[Optional(), # Ảnh là tùy chọn
+                                       FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Chỉ chấp nhận file ảnh (jpg, png, jpeg, gif)!')])
+
+    external_link = StringField('Link liên kết ngoài (PDF, Github,... Tùy chọn)',
+                                validators=[Optional(), URL(require_tld=True, message="Địa chỉ link không hợp lệ.")]) # Kiểm tra định dạng URL
+
+    is_published = BooleanField('Hiển thị công khai trên trang Showcase?') # Checkbox để chọn publish
+
+    submit = SubmitField('Lưu Công trình')

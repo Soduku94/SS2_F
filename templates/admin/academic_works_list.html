@@ -1,0 +1,197 @@
+{% extends "base.html" %} {# Hoặc "admin/admin_base.html" nếu bạn có layout riêng cho admin #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ title }}</h1>
+            <a href="{{ url_for('admin.create_academic_work') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle-fill"></i> Thêm Công trình mới
+            </a>
+        </div>
+
+        {# --- Phần Form Lọc & Tìm kiếm --- #}
+        <div class="card mb-4">
+            <div class="card-body bg-light">
+                <form method="GET" action="{{ url_for('admin.list_academic_works') }}" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="q" class="form-label">Tìm kiếm (Tiêu đề, Tác giả,...)</label>
+                        <input type="search" class="form-control form-control-sm" id="q" name="q"
+                               value="{{ search_query or '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="item_type" class="form-label">Loại</label>
+                        <select class="form-select form-select-sm" id="item_type" name="item_type">
+                            <option value="">Tất cả</option>
+                            {% for type_val in distinct_types %}
+                                <option value="{{ type_val }}" {% if filter_type == type_val %}selected{% endif %}>
+                                    {# Hiển thị tên dễ đọc hơn nếu cần #}
+                                    {% if type_val == 'thesis' %}Luận văn/Đồ án{% elif type_val == 'proceeding' %}Bài
+                                        báo/Kỷ yếu{% elif type_val == 'project' %}Dự án khác{% else %}
+                                        {{ type_val }}{% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="year" class="form-label">Năm</label>
+                        <select class="form-select form-select-sm" id="year" name="year">
+                            <option value="">Tất cả</option>
+                            {% for year_val in distinct_years %}
+                                <option value="{{ year_val }}"
+                                        {% if filter_year == year_val %}selected{% endif %}>{{ year_val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="published" class="form-label">Trạng thái</label>
+                        <select class="form-select form-select-sm" id="published" name="published">
+                            <option value="any" {% if not filter_published %}selected{% endif %}>Tất cả</option>
+                            <option value="true" {% if filter_published == 'true' %}selected{% endif %}>Đã công khai
+                            </option>
+                            <option value="false" {% if filter_published == 'false' %}selected{% endif %}>Chưa công
+                                khai
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Lọc / Tìm</button>
+                        {# Nút bỏ lọc quay về trang list mặc định #}
+                        <a href="{{ url_for('admin.list_academic_works') }}"
+                           class="btn btn-outline-secondary btn-sm w-100 mt-1">Bỏ lọc</a>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="featured" class="form-label">Nổi bật?</label>
+                        <select class="form-select form-select-sm" id="featured" name="featured">
+                            <option value="any"
+                                    {% if not filter_featured or filter_featured == 'any' %}selected{% endif %}>Tất cả
+                            </option>
+                            <option value="true" {% if filter_featured == 'true' %}selected{% endif %}>Có</option>
+                            <option value="false" {% if filter_featured == 'false' %}selected{% endif %}>Không</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {# --- Kết thúc Form Lọc --- #}
+
+
+        {# --- Phần Bảng Hiển thị Danh sách --- #}
+        {% if items_pagination and items_pagination.items %}
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-striped">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tiêu đề</th>
+                        <th scope="col">Loại</th>
+                        <th scope="col">Tác giả/Nhóm</th>
+                        <th scope="col">Năm</th>
+                        <th scope="col">Công khai?</th>
+                        <th scope="col">Ngày thêm</th>
+                        <th scope="col">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in items_pagination.items %}
+                        <tr>
+                            <th scope="row">{{ loop.index + items_pagination.per_page * (items_pagination.page - 1) }}</th>
+                            <td>{{ item.title }}</td>
+                            <td>
+                                {% if item.item_type == 'thesis' %}Luận văn/Đồ án
+                                {% elif item.item_type == 'proceeding' %}Bài báo/Kỷ yếu
+                                {% elif item.item_type == 'project' %}Dự án khác
+                                {% else %}{{ item.item_type }}{% endif %}
+                            </td>
+                            <td>{{ item.authors_text }}</td>
+                            <td>{{ item.year or 'N/A' }}</td>
+                            <td>
+                                {% if item.is_published %}
+                                    <span class="badge bg-success">Có</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Không</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.date_added.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {# Nút Sửa #}
+                                <a href="{{ url_for('admin.edit_academic_work', item_id=item.id) }}"
+                                   class="btn btn-secondary btn-sm" title="Sửa">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                {# Nút Xóa (dùng Modal) #}
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#deleteAcademicWorkModal{{ item.id }}" title="Xóa">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+
+                                {# Modal Xác nhận Xóa cho từng item #}
+                                <div class="modal fade" id="deleteAcademicWorkModal{{ item.id }}" tabindex="-1"
+                                     aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-sm">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fs-6" id="deleteModalLabel{{ item.id }}">Xác nhận
+                                                    Xóa</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Xóa công trình "{{ item.title }}"?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm"
+                                                        data-bs-dismiss="modal">Hủy
+                                                </button>
+                                                <form action="{{ url_for('admin.delete_academic_work', item_id=item.id) }}"
+                                                      method="POST" style="display: inline;">
+                                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">Không tìm thấy công trình nào. <a
+                    href="{{ url_for('admin.create_academic_work') }}" class="alert-link">Thêm công trình mới</a>.
+            </div>
+        {% endif %}
+        {# --- Kết thúc Bảng --- #}
+
+        {# --- Phân trang --- #}
+        {% if items_pagination and items_pagination.pages > 1 %}
+            <nav aria-label="Academic works navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not items_pagination.has_prev %}disabled{% endif %}">
+                        {# Giữ lại các tham số lọc/tìm kiếm khi chuyển trang #}
+                        <a class="page-link"
+                           href="{{ url_for('admin.list_academic_works', page=items_pagination.prev_num, q=search_query, item_type=filter_type, year=filter_year, published=filter_published) if items_pagination.has_prev else '#' }}">&laquo;</a>
+                    </li>
+                    {% for page_num in items_pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == items_pagination.page %}active{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('admin.list_academic_works', page=page_num, q=search_query, item_type=filter_type, year=filter_year, published=filter_published) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not items_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('admin.list_academic_works', page=items_pagination.next_num, q=search_query, item_type=filter_type, year=filter_year, published=filter_published) if items_pagination.has_next else '#' }}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+        {# --- Kết thúc Phân Trang --- #}
+
+    </div>
+{% endblock %}

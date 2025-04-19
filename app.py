@@ -16,7 +16,7 @@ from sqlalchemy import asc, desc, or_, MetaData
 from sqlalchemy.testing.plugin.plugin_base import post
 from werkzeug.utils import secure_filename
 
-from models import StudentIdea, Notification, TopicApplication
+from models import StudentIdea, Notification, TopicApplication, AcademicWork
 
 # Import Extensions (Một lần)
 from extensions import db, migrate, bcrypt, login_manager
@@ -70,6 +70,17 @@ app.config['USER_PICS_FOLDER'] = USER_PICS_FOLDER
 UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+
+ACADEMIC_WORK_IMAGE_FOLDER = os.path.join(app.root_path, 'static', 'academic_work_images')
+# Tạo thư mục này nếu nó chưa tồn tại khi ứng dụng khởi chạy
+os.makedirs(ACADEMIC_WORK_IMAGE_FOLDER, exist_ok=True)
+# Lưu đường dẫn vào app.config để các phần khác của ứng dụng có thể truy cập
+app.config['ACADEMIC_WORK_IMAGE_FOLDER'] = ACADEMIC_WORK_IMAGE_FOLDER
+
+
+
 
 db.init_app(app)
 migrate.init_app(app, db)
@@ -1581,3 +1592,81 @@ def update_application_status(application_id):
 
     # Chuyển hướng lại trang danh sách đơn đăng ký của post đó
     return redirect(url_for('view_topic_applications', post_id=post.id))
+# === START: THÊM CÁC ROUTE CHO TRANG SHOWCASE CÔNG KHAI ===
+
+# --- Route hiển thị danh sách Showcase ---
+@app.route('/showcase')
+def showcase():
+    # Lấy tham số trang và bộ lọc
+    page = request.args.get('page', 1, type=int)
+    filter_type = request.args.get('item_type', None)
+    filter_year = request.args.get('year', None, type=int)
+
+    # --- Cấu hình số lượng item ---
+    GRID_PER_PAGE = 9  # Số item trên lưới mỗi trang
+    CAROUSEL_LIMIT = 5 # Giới hạn số item trong carousel
+
+    # --- Query lấy item cho CAROUSEL ---
+    # Lấy các item đã publish VÀ được đánh dấu featured
+    try:
+        carousel_items = AcademicWork.query.filter_by(is_published=True, is_featured=True)\
+                                        .order_by(AcademicWork.date_added.desc())\
+                                        .limit(CAROUSEL_LIMIT).all()
+    except Exception as e:
+        print(f"Lỗi khi query carousel items: {e}")
+        carousel_items = [] # Trả về list rỗng nếu lỗi
+    # ----------------------------------
+
+    # --- Query lấy item cho LƯỚI BÊN DƯỚI (có filter và pagination) ---
+    try:
+        query = AcademicWork.query.filter_by(is_published=True) # Chỉ lấy item đã publish
+        # Áp dụng filter
+        if filter_type:
+            query = query.filter(AcademicWork.item_type == filter_type)
+        if filter_year:
+            query = query.filter(AcademicWork.year == filter_year)
+
+        # Sắp xếp
+        query = query.order_by(AcademicWork.year.desc().nullslast(), AcademicWork.date_added.desc())
+        # Phân trang
+        items_pagination = query.paginate(page=page, per_page=GRID_PER_PAGE, error_out=False)
+    except Exception as e:
+        print(f"Lỗi khi query grid items: {e}")
+        items_pagination = None # Hoặc tạo đối tượng pagination rỗng
+        flash("Lỗi khi tải danh sách công trình.", "danger")
+    # -------------------------------------------------------------------
+
+    # --- Lấy dữ liệu cho bộ lọc (Giữ nguyên) ---
+    try:
+        distinct_types = db.session.query(AcademicWork.item_type)\
+                                   .filter(AcademicWork.is_published == True)\
+                                   .distinct().order_by(AcademicWork.item_type).all()
+        distinct_years = db.session.query(AcademicWork.year)\
+                                   .filter(AcademicWork.is_published == True, AcademicWork.year != None)\
+                                   .distinct().order_by(AcademicWork.year.desc()).all()
+    except Exception as e:
+        print(f"Lỗi khi lấy distinct filters: {e}")
+        distinct_types = []
+        distinct_years = []
+    # -------------------------------------------
+
+    # --- Render template, truyền cả carousel_items và items_pagination ---
+    return render_template('showcase_list.html',
+                           title="Công trình Tiêu biểu",
+                           carousel_items=carousel_items, # <<< TRUYỀN BIẾN NÀY
+                           items_pagination=items_pagination, # <<< Biến cũ cho lưới
+                           distinct_types=[t[0] for t in distinct_types],
+                           distinct_years=[y[0] for y in distinct_years],
+                           filter_type=filter_type,
+                           filter_year=filter_year)
+# --- Route hiển thị chi tiết một Showcase Item ---
+@app.route('/showcase/<int:item_id>')
+def showcase_detail(item_id):
+    # Lấy item theo ID và phải được publish, nếu không tìm thấy sẽ trả về lỗi 404
+    item = AcademicWork.query.filter_by(id=item_id, is_published=True).first_or_404()
+
+    # Render template chi tiết
+    return render_template('showcase_detail.html',
+                           title=item.title, # Lấy title của item làm title trang
+                           item=item)
+

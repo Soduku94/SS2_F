@@ -203,3 +203,56 @@ class TopicApplication(db.Model):
 
     def __repr__(self):
         return f'<TopicApplication User {self.user_id} -> Post {self.post_id} ({self.status})>'
+
+
+
+
+# === Model AcademicWork ===
+# Model lưu thông tin các công trình học thuật tiêu biểu (Đồ án, Kỷ yếu, Bài báo,...)
+class AcademicWork(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # Tiêu đề công trình, có index để tìm kiếm/sắp xếp
+    title = db.Column(db.String(200), nullable=False, index=True)
+
+    is_featured = db.Column(db.Boolean, default=False, nullable=False, server_default='0',index=True)
+
+    # Loại công trình: 'thesis', 'proceeding', 'project', etc. Có index để lọc.
+    item_type = db.Column(db.String(20), nullable=False, default='thesis', index=True)
+
+    # Tên tác giả hoặc nhóm tác giả (lưu dạng text cho linh hoạt)
+    authors_text = db.Column(db.String(300), nullable=False)
+
+    # Năm hoàn thành hoặc công bố, có index
+    year = db.Column(db.Integer, nullable=True, index=True)
+
+    # Phần tóm tắt (Abstract)
+    abstract = db.Column(db.Text, nullable=True)
+
+    # Nội dung chi tiết đầy đủ (có thể chứa HTML)
+    full_content = db.Column(db.Text, nullable=True)
+
+    # Tên file ảnh minh họa (lưu trong static, ví dụ: static/academic_work_images/)
+    image_file = db.Column(db.String(128), nullable=True)
+
+    # Link tham khảo bên ngoài (PDF, Github repo, Website,...)
+    external_link = db.Column(db.String(255), nullable=True)
+
+    # Cờ xác định công trình có được hiển thị công khai không (Admin/Dean quản lý)
+    is_published = db.Column(db.Boolean, default=False, nullable=False, index=True)
+
+    # Ngày công trình được thêm vào hệ thống
+    date_added = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    # (Nên có) ID của người dùng (Admin/Dean) đã thêm/quản lý công trình này
+    # ondelete='SET NULL': Nếu user admin bị xóa, công trình vẫn còn
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='SET NULL'), nullable=True)
+
+    # (Tùy chọn) Relationship ngược lại từ User đến các công trình họ quản lý
+    # added_by = db.relationship('User', backref=db.backref('academic_works_managed', lazy='dynamic'))
+
+    # --- Relationship cho chức năng "Like" sẽ thêm ở Giai đoạn 2 ---
+    # likes = db.relationship('AcademicWorkLike', backref='academic_work', lazy='dynamic', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        # Hàm __repr__ giúp hiển thị thông tin object khi debug
+        return f'<AcademicWork {self.id}: {self.title[:50]}>'
