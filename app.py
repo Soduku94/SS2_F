@@ -50,6 +50,24 @@ SECRET_KEY_FALLBACK = 'thay-doi-key-nay-ngay-lap-tuc-cho-dev-012345!'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', SECRET_KEY_FALLBACK)
 
 
+
+
+
+if app.config['SECRET_KEY'] == SECRET_KEY_FALLBACK:
+    print("\n" + "="*60)
+    print("!!! CẢNH BÁO: Đang sử dụng SECRET_KEY dự phòng (fallback)! !!!")
+    print("-> Vui lòng tạo file '.env' ở thư mục gốc và đặt giá trị")
+    print("   SECRET_KEY=... với một key ngẫu nhiên mạnh của riêng bạn.")
+    print("   Tạo key mới bằng: python -c \"import secrets; print(secrets.token_hex(24))\"")
+    # Kiểm tra thêm nếu chạy ở chế độ không phải debug (nguy hiểm hơn)
+    if not app.debug:
+        print("\n!!! LỖI NGHIÊM TRỌNG: KHÔNG ĐƯỢC CHẠY PRODUCTION VỚI KEY FALLBACK NÀY !!!")
+        # Bạn có thể raise Exception ở đây để dừng hẳn app nếu chạy production với key fallback
+        # raise ValueError("Không thể chạy production với SECRET_KEY dự phòng không an toàn.")
+    print("="*60 + "\n")
+# --- Kết thúc kiểm tra SECRET_KEY ---
+
+
 csrf = CSRFProtect()
 csrf.init_app(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
