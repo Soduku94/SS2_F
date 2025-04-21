@@ -50,7 +50,7 @@
                                     <span class="me-3"><i
                                             class="bi bi-calendar3"></i> {{ item.year or item.date_added.strftime('%Y') }}</span>
                                 {# Placeholder cho Like - Giai đoạn 2 #}
-                                <span class="me-3"><i class="bi bi-heart"></i> (0)</span>
+                                <span class="me-3"><i class="bi bi-heart"></i> ({{ item.likes.count() }})</span>
                                 {# Placeholder cho Share - Giai đoạn 2 #}
                                 {# <span><i class="bi bi-share"></i> Share</span> #}
                             </p>
