@@ -114,7 +114,17 @@
                                 {% endif %}
                             </td>
                             <td>{{ item.date_added.strftime('%d/%m/%Y') }}</td>
+
+
                             <td>
+                                {# Link này trỏ đến route 'showcase_detail' công khai #}
+                                {# target="_blank" sẽ mở link trong tab mới #}
+                                <a href="{{ url_for('showcase_detail', item_id=item.id) }}"
+                                   class="btn btn-outline-info btn-sm" {# Dùng màu info và outline cho nút Xem #}
+                                   title="Xem trang công khai"
+                                   target="_blank">
+                                    <i class="bi bi-eye-fill"></i> {# Icon con mắt #}
+                                </a>
                                 {# Nút Sửa #}
                                 <a href="{{ url_for('admin.edit_academic_work', item_id=item.id) }}"
                                    class="btn btn-secondary btn-sm" title="Sửa">
@@ -141,11 +151,13 @@
                                                 Xóa công trình "{{ item.title }}"?
                                             </div>
                                             <div class="modal-footer">
+
                                                 <button type="button" class="btn btn-secondary btn-sm"
                                                         data-bs-dismiss="modal">Hủy
                                                 </button>
                                                 <form action="{{ url_for('admin.delete_academic_work', item_id=item.id) }}"
                                                       method="POST" style="display: inline;">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                                     <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
                                                 </form>
                                             </div>
