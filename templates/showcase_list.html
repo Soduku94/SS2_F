@@ -3,15 +3,15 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-   <div class="mb-3"> {# <<< Bạn có thể chỉnh mb-3 thành mb-2 nếu muốn gần hơn nữa #}
+    <div class="mb-3"> {# <<< Bạn có thể chỉnh mb-3 thành mb-2 nếu muốn gần hơn nữa #}
 
-    {# Tiêu đề chính - Bỏ hết margin bottom #}
-    <h1 class="mt-0 mb-0">{{ title }}</h1>
+        {# Tiêu đề chính - Bỏ hết margin bottom #}
+        <h1 class="mt-0 mb-0">{{ title }}</h1>
 
-    {# Tiêu đề phụ - Dùng thẻ <p> với class 'lead' và <small> cho nhỏ lại, bỏ margin bottom #}
-    <p class="lead text-muted mb-0 mt-1 fst-italic"><small>Kỷ yếu Khoa học & Đồ án Xuất sắc</small></p>
+        {# Tiêu đề phụ - Dùng thẻ <p> với class 'lead' và <small> cho nhỏ lại, bỏ margin bottom #}
+        <p class="lead text-muted mb-0 mt-1 fst-italic"><small>Kỷ yếu Khoa học & Đồ án Xuất sắc</small></p>
 
-</div>
+    </div>
     {# --- END: Thêm Tiêu đề phụ / Nhãn --- #}
 
     {# --- START: Phần Carousel --- #}
@@ -32,13 +32,24 @@
             <div class="carousel-inner rounded">
                 {% for item in carousel_items %}
                     <div class="carousel-item {{ 'active' if loop.first }}">
-                        {# Ảnh - dùng ảnh placeholder nếu không có #}
-                        {% set img_url = url_for('static', filename='academic_work_images/' + item.image_file) if item.image_file else 'https://via.placeholder.com/1200x400.png?text=Featured+Work' %}
-                        {# Link ảnh đến trang chi tiết #}
+                        {# --- START: Sửa logic lấy URL ảnh --- #}
+                        {# 1. Đặt đường dẫn tương đối đến ảnh mặc định CỦA BẠN (tính từ thư mục static) #}
+                        {% set default_image_filename = 'academic_work_images/placeholder/placeholder.png' %}
+                        {# <<< THAY ĐỔI TÊN FILE/ĐƯỜNG DẪN NẾU CẦN #}
+
+                        {# 2. Kiểm tra xem item có image_file không, nếu có dùng nó, nếu không dùng ảnh mặc định #}
+                        {% set image_filename_in_static = ('academic_work_images/' + item.image_file) if item.image_file else default_image_filename %}
+
+                        {# 3. Tạo URL hoàn chỉnh bằng url_for #}
+                        {% set img_url = url_for('static', filename=image_filename_in_static) %}
+                        {# --- END: Sửa logic lấy URL ảnh --- #}
+
+                        {# Sử dụng img_url đã tạo cho thẻ img #}
                         <a href="{{ url_for('showcase_detail', item_id=item.id) }}">
                             <img src="{{ img_url }}" class="d-block w-100" alt="{{ item.title }}"
-                                 style="max-height: 400px; object-fit: cover;"> {# Điều chỉnh max-height nếu cần #}
+                                 style="height: 500px; object-fit: cover;"> {# Giữ nguyên height 500px như bạn đặt #}
                         </a>
+
                         {# Chú thích (Caption) - chỉ hiện trên màn hình lớn (d-md-block) #}
                         <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 p-3 rounded">
                             <h5><a href="{{ url_for('showcase_detail', item_id=item.id) }}"
@@ -130,14 +141,23 @@
             {% for item in items_pagination.items %}
                 <div class="col">
                     <div class="card h-100 shadow-sm">
-                        {% if item.image_file %}
-                            <img src="{{ url_for('static', filename='academic_work_images/' + item.image_file) }}"
-                                 class="card-img-top" alt="{{ item.title }}"
-                                 style="height: 200px; object-fit: cover;">
-                        {% else %}
-                            <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top"
-                                 alt="Placeholder" style="height: 200px; object-fit: cover;">
-                        {% endif %}
+                        {# --- START: Sửa logic lấy URL ảnh --- #}
+                        {# 1. Đặt đường dẫn tương đối đến ảnh mặc định CỦA BẠN (tính từ thư mục static) #}
+                        {% set default_image_filename = 'academic_work_images/placeholder/placeholder.png' %}
+                        {# <<< THAY ĐỔI TÊN FILE/ĐƯỜNG DẪN NẾU CẦN #}
+
+                        {# 2. Kiểm tra xem item có image_file không, nếu có dùng nó, nếu không dùng ảnh mặc định #}
+                        {% set image_filename_in_static = ('academic_work_images/' + item.image_file) if item.image_file else default_image_filename %}
+
+                        {# 3. Tạo URL hoàn chỉnh bằng url_for #}
+                        {% set img_url = url_for('static', filename=image_filename_in_static) %}
+                        {# --- END: Sửa logic lấy URL ảnh --- #}
+
+                        {# Sử dụng img_url đã tạo cho thẻ img #}
+                        <a href="{{ url_for('showcase_detail', item_id=item.id) }}">
+                            <img src="{{ img_url }}" class="d-block w-100" alt="{{ item.title }}"
+                                 style="height: 200px; object-fit: cover;"> {# Giữ nguyên height 500px như bạn đặt #}
+                        </a>
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">
                                 <a href="{{ url_for('showcase_detail', item_id=item.id) }}"

@@ -25,8 +25,9 @@
 
                     {# --- Ảnh minh họa --- #}
                     {% if item.image_file %}
-                        <img src="{{ url_for('static', filename=config.get('ACADEMIC_WORK_IMAGE_FOLDER', 'static/academic_work_images').split('static/')[-1] + '/' + item.image_file) }}"
-                             class="img-fluid rounded mb-4 shadow-sm" alt="Ảnh minh họa cho {{ item.title }}">
+
+                        <img src="{{ url_for('static', filename=config.get('academic_work_images', 'static/academic_work_images').split('static/')[-1] + '/' + item.image_file) }}"
+                             class="img-fluid rounded mb-4 shadow-sm d-block mx-auto" alt="Ảnh minh họa cho {{ item.title }}">
                     {% endif %}
 
                     {# --- Tóm tắt --- #}
