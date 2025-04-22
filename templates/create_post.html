@@ -13,7 +13,8 @@
                     <form method="POST" action="" novalidate enctype="multipart/form-data">
                         {{ form.hidden_tag() }} {# CSRF token #}
                         <fieldset>
-                            {# Trường title #}
+
+                            {# tile bai viết #}
                             <div class="mb-3">
                                 {{ form.title.label(class="form-label") }}
                                 {% if form.title.errors %}
@@ -24,20 +25,7 @@
                                 {% endif %}
                             </div>
 
-                            {# Trường content với Trix Editor #}
-                            <div class="mb-3">
-                                {{ form.content.label(class="form-label") }}
-                                {# Đảm bảo giá trị value xử lý trường hợp None/rỗng #}
-                                <input type="hidden" name="content" id="content_hidden_input" value="{{ form.content.data or (post.content if post else '') }}">
-                                <trix-editor input="content_hidden_input" class="form-control trix-content {% if form.content.errors %} is-invalid {% endif %}" style="min-height: 150px;"></trix-editor>
-                                {% if form.content.errors %}
-                                    <div class="invalid-feedback d-block"> {# Dùng d-block cho textarea/trix #}
-                                        {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            {# Trường post_type #}
+                                {#loại baì đăng #}
                             <div class="mb-3">
                                 {{ form.post_type.label(class="form-label") }}
                                 {% if form.post_type.errors %}
@@ -48,7 +36,18 @@
                                 {% endif %}
                             </div>
 
-                            {# --- Trường Tags (sẽ được Tagify nâng cấp) --- #}
+                  {#trạng thái của đề tài #}
+                            <div class="mb-3">
+                                {{ form.status.label(class="form-label") }}
+                                {% if form.status.errors %}
+                                    {{ form.status(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">{% for error in form.status.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                                {% else %}
+                                    {{ form.status(class="form-select") }}
+                                {% endif %}
+                                 <small class="form-text text-muted">Chỉ áp dụng cho 'Đề tài Nghiên cứu'.</small>
+                            </div>
+                            {#tag của bài viết #}
                             <div class="mb-3">
                                 {{ form.tags.label(class="form-label") }} {# Label đơn giản 'Thẻ' #}
                                 {# Render input cơ bản, Tagify JS sẽ biến đổi nó #}
@@ -63,7 +62,23 @@
                                 {# Hướng dẫn có thể đặt ở đây hoặc trong placeholder của Tagify nếu muốn #}
                                 <div class="form-text">Nhập thẻ mới hoặc chọn từ gợi ý. Nhấn Enter hoặc dấu phẩy để thêm.</div>
                             </div>
-                            {# --- Kết thúc trường Tags --- #}
+
+
+
+                            {# Trường content với Trix Editor #}
+                            <div class="mb-3">
+                                {{ form.content.label(class="form-label") }}
+                                {# Đảm bảo giá trị value xử lý trường hợp None/rỗng #}
+                                <input type="hidden" name="content" id="content_hidden_input" value="{{ form.content.data or (post.content if post else '') }}">
+                                <trix-editor input="content_hidden_input" class="form-control trix-content {% if form.content.errors %} is-invalid {% endif %}" style="min-height: 150px;"></trix-editor>
+                                {% if form.content.errors %}
+                                    <div class="invalid-feedback d-block"> {# Dùng d-block cho textarea/trix #}
+                                        {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
 
                             {# --- Phần Attachments với Krajee File Input --- #}
                             <div class="mb-3">
@@ -103,16 +118,7 @@
                             {# --- Kết thúc Attachments --- #}
 
                             {# Trường status #}
-                            <div class="mb-3">
-                                {{ form.status.label(class="form-label") }}
-                                {% if form.status.errors %}
-                                    {{ form.status(class="form-select is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.status.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                                {% else %}
-                                    {{ form.status(class="form-select") }}
-                                {% endif %}
-                                {# <small class="form-text text-muted">Chỉ áp dụng cho 'Đề tài Nghiên cứu'.</small> #}
-                            </div>
+
 
                             {# Trường is_featured #}
                             <div class="mb-3 form-check">

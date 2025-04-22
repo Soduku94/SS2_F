@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/css/fileinput.min.css">
     <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
-
+    <link rel="stylesheet" href="static/css/style.css">
 
     <title>{% block title %}FIT Research Connect{% endblock %}</title>
     <link rel="stylesheet" href="static/css/style.css">
@@ -327,6 +327,176 @@
         if (!resultsDropdown) console.error("Không tìm thấy #searchResultsDropdown");
     }
 </script>
+<script>
+
+    // Đặt trong base.html, block scripts, hoặc file JS riêng
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Lắng nghe sự kiện click trên toàn bộ document,
+        // nhưng chỉ xử lý nếu phần tử được click có class 'interest-toggle-btn'
+        document.body.addEventListener('click', function (event) {
+            const button = event.target.closest('.interest-toggle-btn'); // Tìm nút gần nhất được click
+
+            if (button) {
+                event.preventDefault(); // Ngăn hành vi mặc định nếu là link/submit
+
+                // Lấy thông tin từ data attributes của nút
+                const postId = button.dataset.postId;
+                const currentAction = button.dataset.currentAction;
+                const addUrl = button.dataset.addUrl;
+                const removeUrl = button.dataset.removeUrl;
+
+                // Xác định URL cần gọi dựa trên hành động hiện tại
+                const targetUrl = (currentAction === 'add') ? addUrl : removeUrl;
+
+                // Tìm CSRF token gần nhất (từ input ẩn chúng ta đã thêm)
+                const csrfInput = button.closest('.interest-button-container')?.querySelector('input[name="csrf_token"]');
+                const csrfToken = csrfInput ? csrfInput.value : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'); // Fallback lấy từ meta tag
+
+                const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+                if (isCsrfEnabled && !csrfToken) {
+                    console.error('Interest Button: CSRF Token not found!');
+                    alert('Lỗi bảo mật, không thể thực hiện. Vui lòng tải lại trang (F5).');
+                    return;
+                }
+
+                // Gửi yêu cầu POST bằng Fetch API
+                fetch(targetUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // Hoặc để trống nếu backend không cần JSON body
+                        'X-CSRFToken': csrfToken // Gửi token qua header
+                    },
+                    body: JSON.stringify({}) // Body rỗng cho POST toggle
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errData => {
+                                throw new Error(errData.message || `HTTP error ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // --- Cập nhật giao diện nút ---
+                            const icon = button.querySelector('i');
+                            const textSpan = button.querySelector('.button-text');
+
+                            if (data.interested) { // Nếu kết quả là ĐÃ QUAN TÂM
+                                button.classList.remove('btn-success');
+                                button.classList.add('btn-outline-danger');
+                                icon.classList.remove('bi-heart-fill');
+                                icon.classList.add('bi-heartbreak-fill');
+                                textSpan.textContent = 'Bỏ quan tâm';
+                                button.title = 'Bỏ quan tâm';
+                                button.dataset.currentAction = 'remove'; // Đổi hành động cho lần click sau
+                            } else { // Nếu kết quả là ĐÃ BỎ QUAN TÂM
+                                button.classList.remove('btn-outline-danger');
+                                button.classList.add('btn-success');
+                                icon.classList.remove('bi-heartbreak-fill');
+                                icon.classList.add('bi-heart-fill');
+                                textSpan.textContent = 'Quan tâm';
+                                button.title = 'Đăng ký quan tâm';
+                                button.dataset.currentAction = 'add'; // Đổi hành động cho lần click sau
+                            }
+                            // (Tùy chọn) Cập nhật số lượt quan tâm nếu có hiển thị
+                            // Ví dụ: const countSpan = button.closest('.card-body').querySelector('.interest-count');
+                            // if (countSpan && data.interest_count !== undefined) { countSpan.textContent = data.interest_count; }
+
+                        } else {
+                            console.error('Error from backend:', data.message);
+                            alert(data.message || 'Đã có lỗi xảy ra.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        alert('Lỗi kết nối hoặc xử lý dữ liệu, vui lòng thử lại.');
+                    });
+            } // end if(button)
+        }); // end event listener
+
+    }); // end DOMContentLoaded
+</script>
+
+
+
+
+
+{# Đặt trong base.html, {% block scripts %} #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- Xử lý nút Post Like ---
+    document.body.addEventListener('click', function(event) {
+        const likeButton = event.target.closest('.post-like-toggle-btn'); // Tìm nút like được click
+
+        if (likeButton) {
+            event.preventDefault();
+            if (likeButton.disabled) return;
+
+            const postId = likeButton.dataset.postId;
+            const url = likeButton.dataset.url;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || likeButton.closest('.post-like-button-container')?.querySelector('input[name="csrf_token"]')?.value;
+            const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+
+            if (isCsrfEnabled && !csrfToken) {
+                console.error('Post Like: CSRF Token not found!');
+                alert('Lỗi bảo mật, không thể thực hiện.');
+                return;
+            }
+
+            likeButton.disabled = true; // Vô hiệu hóa tạm thời
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({})
+            })
+            .then(response => { /* Xử lý response tốt hơn */
+                if (!response.ok) {
+                     return response.json().catch(() => { throw new Error(`HTTP error ${response.status}`); })
+                                      .then(errData => { throw new Error(errData.message || `HTTP error ${response.status}`); });
+                }
+                 return response.json();
+             })
+            .then(data => {
+                if (data.status === 'success') {
+                    const likeIcon = likeButton.querySelector('i');
+                    const likeCountSpan = likeButton.querySelector('.like-count');
+                    if (likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`; // Cập nhật count
+
+                    if (data.liked) { // Cập nhật UI khi đã like
+                        likeButton.classList.remove('btn-outline-danger');
+                        likeButton.classList.add('btn-danger');
+                        if(likeIcon) { likeIcon.classList.remove('bi-heart'); likeIcon.classList.add('bi-heart-fill'); }
+                        likeButton.title = 'Bỏ thích';
+                    } else { // Cập nhật UI khi đã bỏ like
+                        likeButton.classList.remove('btn-danger');
+                        likeButton.classList.add('btn-outline-danger');
+                        if(likeIcon) { likeIcon.classList.remove('bi-heart-fill'); likeIcon.classList.add('bi-heart'); }
+                        likeButton.title = 'Thích';
+                    }
+                } else { alert(data.message || 'Có lỗi.'); }
+            })
+            .catch(error => { console.error('Post Like Fetch error:', error); alert(error.message || 'Lỗi kết nối.'); })
+            .finally(() => {
+                 if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true'){ likeButton.disabled = false; } // Kích hoạt lại nút
+            });
+        }
+    }); // Kết thúc listener nút like
+
+    // --- Các listener khác (vd: Showcase Like, Apply Modal confirm) cũng có thể đặt ở đây ---
+
+});
+</script>
+
+
+
+
+
+
 
 <footer class="bg-dark text-light text-center py-3 mt-auto">
     {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
