@@ -280,3 +280,30 @@ class AcademicWorkLike(db.Model):
 
     def __repr__(self):
         return f'<AcademicWorkLike User {self.user_id} liked Item {self.academic_work_id}>'
+
+class PostLike(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        # ID của người dùng đã like
+        user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+        # ID của bài đăng (Post) được like
+        post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
+        # Thời gian like
+        timestamp = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+        # --- Relationships ---
+        # Không cần relationship ngược lại user và post ở đây nếu không dùng trực tiếp thường xuyên
+        # Nhưng nên có để tiện truy vấn nếu cần
+
+        # Liên kết đến người dùng (ví dụ: truy cập user_liked = post_like.user)
+        user = db.relationship('User', backref=db.backref('post_likes', lazy='dynamic', cascade='all, delete-orphan'))
+        # Liên kết đến bài đăng (ví dụ: truy cập liked_post = post_like.post)
+        post = db.relationship('Post', backref=db.backref('likes', lazy='dynamic', cascade='all, delete-orphan'))
+
+        # --- Ràng buộc duy nhất ---
+        # Đảm bảo một người dùng chỉ like một bài đăng một lần
+        __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='uq_user_post_like'),)
+
+        def __repr__(self):
+            return f'<PostLike User {self.user_id} liked Post {self.post_id}>'
+
+
