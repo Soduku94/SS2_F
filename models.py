@@ -50,9 +50,7 @@ class User(db.Model, UserMixin):
     # Bài đăng của người dùng (Tác giả)
     posts = db.relationship('Post', backref='author', lazy=True, cascade='all, delete-orphan')
 
-    # Các đề tài mà người dùng (Sinh viên) quan tâm
-    interested_topics = db.relationship('Post', secondary=student_topic_interest, lazy='dynamic',
-                                        back_populates='interested_students')
+
 
     # Các ý tưởng mà người dùng (Giảng viên) nhận được
     received_ideas = db.relationship('StudentIdea', secondary=idea_recipient_lecturers, lazy='dynamic',
@@ -108,9 +106,6 @@ class Post(db.Model):
 
     # --- Relationships ---
     attachments = db.relationship('Attachment', backref='post', lazy=True, cascade='all, delete-orphan')
-
-    interested_students = db.relationship('User', secondary=student_topic_interest, lazy='dynamic',
-                                          back_populates='interested_topics')
 
     # Relationship với Tag (Tham chiếu đến 'Tag' và 'post_tags' đã định nghĩa ở trên)
     tags = db.relationship('Tag', secondary=post_tags, lazy='dynamic',

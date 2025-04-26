@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    {% if applications_pagination and applications_pagination.items %}
+        <div class="list-group shadow-sm">
+            {% for app in applications_pagination.items %} {# Bắt đầu vòng lặp #}
+                {# Item cho mỗi đơn đăng ký #}
+                <div class="list-group-item list-group-item-action flex-column align-items-start">
+                    {# Phần hiển thị thông tin đơn (Title, GV, Ngày ĐK, Trạng thái, Lời nhắn) #}
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">
+                            <a href="{{ url_for('view_post', post_id=app.post_id) }}" class="text-decoration-none">
+                                {{ app.topic.title if app.topic else 'Đề tài không tồn tại' }}
+                            </a>
+                        </h5>
+                        <small class="text-muted" title="Ngày đăng ký">{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </div>
+                    <p class="mb-1"><small class="text-muted">Giảng viên: {{ app.topic.author.full_name if app.topic and app.topic.author else 'N/A' }}</small></p>
+                    <div class="mb-2">
+                        Trạng thái:
+                        {% if app.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Chờ phản hồi</span>
+                        {% elif app.status == 'accepted' %}
+                            <span class="badge bg-success">Đã được chấp thuận</span>
+                        {% elif app.status == 'rejected' %}
+                            <span class="badge bg-danger">Đã bị từ chối</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ app.status }}</span>
+                        {% endif %}
+                    </div>
+                    {% if app.message %}
+                        <p class="mb-1 fst-italic"><small>Lời nhắn của bạn: "{{ app.message }}"</small></p>
+                    {% endif %}
+
+                    {# === START: Đặt Nút Hủy Đăng ký VÀO ĐÂY (Bên trong vòng lặp) === #}
+                    {% if app.status == 'pending' %} {# Chỉ hiện nút khi trạng thái là pending #}
+                        <div class="mt-2"> {# Thêm div để nút xuống dòng hoặc cách ra #}
+                            <form action="{{ url_for('withdraw_application', application_id=app.id) }}" method="POST" style="display: inline;">
+                                {# CSRF token #}
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                {# Nút Hủy #}
+                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký đề tài này không?')">
+                                    <i class="bi bi-x-circle"></i> Hủy đăng ký
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    {# === END: Kết thúc nút Hủy === #}
+
+                </div> {# Đóng thẻ list-group-item #}
+            {% endfor %} {# Đóng vòng lặp for #}
+
+            {# --- KHỐI CODE NÚT HỦY Ở ĐÂY ĐÃ BỊ XÓA ĐI VÌ SAI VỊ TRÍ --- #}
+
+        </div> {# Đóng thẻ list-group #}
+
+        {# --- Phân trang --- #}
+        {% if applications_pagination.pages > 1 %}
+            <nav aria-label="My Applications navigation" class="mt-4">
+                 {# ... Code phân trang giữ nguyên ... #}
+                 <ul class="pagination justify-content-center"> ... </ul>
+            </nav>
+        {% endif %}
+        {# --- Kết thúc Phân Trang --- #}
+
+    {% else %}
+        <div class="alert alert-info">Bạn chưa đăng ký đề tài nào.</div>
+    {% endif %}
+</div> {# Đóng container #}
+{% endblock %} {# Đóng block content #}

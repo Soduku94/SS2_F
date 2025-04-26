@@ -47,7 +47,8 @@
                     {% endif %}
                     {% if current_user.role == 'student' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('my_interests') }}">Đề tài quan tâm</a>
+                            <a class="nav-link {% if request.endpoint == 'my_applications' %}active{% endif %}"
+                               href="{{ url_for('my_applications') }}">Đề tài đã đăng ký</a>
                         </li>
 
 
@@ -128,6 +129,7 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUserLink">
                             <li><a class="dropdown-item" href="{{ url_for('account') }}">Hồ sơ</a></li>
                             <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+
                             {# Khối chỉ hiển thị cho Admin #}
                             {% if current_user.is_authenticated and current_user.role == 'admin' %}
                                 <li>
@@ -421,81 +423,90 @@
 </script>
 
 
-
-
-
 {# Đặt trong base.html, {% block scripts %} #}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    // --- Xử lý nút Post Like ---
-    document.body.addEventListener('click', function(event) {
-        const likeButton = event.target.closest('.post-like-toggle-btn'); // Tìm nút like được click
+        // --- Xử lý nút Post Like ---
+        document.body.addEventListener('click', function (event) {
+            const likeButton = event.target.closest('.post-like-toggle-btn'); // Tìm nút like được click
 
-        if (likeButton) {
-            event.preventDefault();
-            if (likeButton.disabled) return;
+            if (likeButton) {
+                event.preventDefault();
+                if (likeButton.disabled) return;
 
-            const postId = likeButton.dataset.postId;
-            const url = likeButton.dataset.url;
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || likeButton.closest('.post-like-button-container')?.querySelector('input[name="csrf_token"]')?.value;
-            const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+                const postId = likeButton.dataset.postId;
+                const url = likeButton.dataset.url;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || likeButton.closest('.post-like-button-container')?.querySelector('input[name="csrf_token"]')?.value;
+                const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
 
-            if (isCsrfEnabled && !csrfToken) {
-                console.error('Post Like: CSRF Token not found!');
-                alert('Lỗi bảo mật, không thể thực hiện.');
-                return;
-            }
-
-            likeButton.disabled = true; // Vô hiệu hóa tạm thời
-
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({})
-            })
-            .then(response => { /* Xử lý response tốt hơn */
-                if (!response.ok) {
-                     return response.json().catch(() => { throw new Error(`HTTP error ${response.status}`); })
-                                      .then(errData => { throw new Error(errData.message || `HTTP error ${response.status}`); });
+                if (isCsrfEnabled && !csrfToken) {
+                    console.error('Post Like: CSRF Token not found!');
+                    alert('Lỗi bảo mật, không thể thực hiện.');
+                    return;
                 }
-                 return response.json();
-             })
-            .then(data => {
-                if (data.status === 'success') {
-                    const likeIcon = likeButton.querySelector('i');
-                    const likeCountSpan = likeButton.querySelector('.like-count');
-                    if (likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`; // Cập nhật count
 
-                    if (data.liked) { // Cập nhật UI khi đã like
-                        likeButton.classList.remove('btn-outline-danger');
-                        likeButton.classList.add('btn-danger');
-                        if(likeIcon) { likeIcon.classList.remove('bi-heart'); likeIcon.classList.add('bi-heart-fill'); }
-                        likeButton.title = 'Bỏ thích';
-                    } else { // Cập nhật UI khi đã bỏ like
-                        likeButton.classList.remove('btn-danger');
-                        likeButton.classList.add('btn-outline-danger');
-                        if(likeIcon) { likeIcon.classList.remove('bi-heart-fill'); likeIcon.classList.add('bi-heart'); }
-                        likeButton.title = 'Thích';
-                    }
-                } else { alert(data.message || 'Có lỗi.'); }
-            })
-            .catch(error => { console.error('Post Like Fetch error:', error); alert(error.message || 'Lỗi kết nối.'); })
-            .finally(() => {
-                 if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true'){ likeButton.disabled = false; } // Kích hoạt lại nút
-            });
-        }
-    }); // Kết thúc listener nút like
+                likeButton.disabled = true; // Vô hiệu hóa tạm thời
 
-    // --- Các listener khác (vd: Showcase Like, Apply Modal confirm) cũng có thể đặt ở đây ---
+                fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+                    body: JSON.stringify({})
+                })
+                    .then(response => { /* Xử lý response tốt hơn */
+                        if (!response.ok) {
+                            return response.json().catch(() => {
+                                throw new Error(`HTTP error ${response.status}`);
+                            })
+                                .then(errData => {
+                                    throw new Error(errData.message || `HTTP error ${response.status}`);
+                                });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const likeIcon = likeButton.querySelector('i');
+                            const likeCountSpan = likeButton.querySelector('.like-count');
+                            if (likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`; // Cập nhật count
 
-});
+                            if (data.liked) { // Cập nhật UI khi đã like
+                                likeButton.classList.remove('btn-outline-danger');
+                                likeButton.classList.add('btn-danger');
+                                if (likeIcon) {
+                                    likeIcon.classList.remove('bi-heart');
+                                    likeIcon.classList.add('bi-heart-fill');
+                                }
+                                likeButton.title = 'Bỏ thích';
+                            } else { // Cập nhật UI khi đã bỏ like
+                                likeButton.classList.remove('btn-danger');
+                                likeButton.classList.add('btn-outline-danger');
+                                if (likeIcon) {
+                                    likeIcon.classList.remove('bi-heart-fill');
+                                    likeIcon.classList.add('bi-heart');
+                                }
+                                likeButton.title = 'Thích';
+                            }
+                        } else {
+                            alert(data.message || 'Có lỗi.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Post Like Fetch error:', error);
+                        alert(error.message || 'Lỗi kết nối.');
+                    })
+                    .finally(() => {
+                        if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true') {
+                            likeButton.disabled = false;
+                        } // Kích hoạt lại nút
+                    });
+            }
+        }); // Kết thúc listener nút like
+
+        // --- Các listener khác (vd: Showcase Like, Apply Modal confirm) cũng có thể đặt ở đây ---
+
+    });
 </script>
-
-
-
-
-
 
 
 <footer class="bg-dark text-light text-center py-3 mt-auto">

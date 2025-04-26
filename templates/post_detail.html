@@ -148,30 +148,35 @@
                         {% endif %}
 
                         {# Nút Quan tâm/Bỏ quan tâm (chỉ cho Sinh viên) #}
-                        {% if post.post_type == 'topic' and post.status != 'closed' and current_user.is_authenticated and current_user.role == 'student' %}
-                            {# Thêm container nếu cần và đặt các nút khác (như Đăng ký) vào cùng nếu muốn #}
-                            <div> {# Thêm margin top ví dụ #}
+                        {# --- START: THAY THẾ NÚT QUAN TÂM CŨ BẰNG NÚT LIKE MỚI --- #}
+                        {# Chỉ hiển thị nếu người dùng đăng nhập, hoặc hiển thị dạng disabled #}
+                        <div class="d-inline-block  post-like-button-container"> {# Thêm me-2 để cách nút khác #}
+                            <button
+                                    type="button"
+                                    {# ID có thể dùng post-like-button vì chỉ có 1 nút trên trang này #}
+                                    id="post-like-button"
+                                    {# Class để JS chung (trong base.html) bắt sự kiện #}
+                                    class="btn btn-sm post-like-toggle-btn {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif user_has_liked %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                    {# Data attributes #}
+                                    data-post-id="{{ post.id }}"
+                                    data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
+                                    {# Tooltip #}
+                                    title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif user_has_liked %}Bỏ thích{% else %}Thích{% endif %}"
+                                    {# Disable #}
+                                    {% if not current_user.is_authenticated %}disabled{% endif %}>
 
-                                {# Cấu trúc nút Quan tâm/Bỏ quan tâm AJAX #}
-                                <button
-                                        type="button"
-                                        {# QUAN TRỌNG: Phải có class này để JS bắt sự kiện #}
-                                        class="btn btn-sm interest-toggle-btn {% if post in current_user.interested_topics %}btn-outline-danger{% else %}btn-success{% endif %}"
-                                        data-post-id="{{ post.id }}"
-                                        data-current-action="{% if post in current_user.interested_topics %}remove{% else %}add{% endif %}"
-                                        data-add-url="{{ url_for('register_interest', post_id=post.id) }}"
-                                        data-remove-url="{{ url_for('remove_interest', post_id=post.id) }}"
-                                        title="{% if post in current_user.interested_topics %}Bỏ quan tâm{% else %}Đăng ký quan tâm{% endif %}">
-
-                                    <i class="bi {% if post in current_user.interested_topics %}bi-heartbreak-fill{% else %}bi-heart-fill{% endif %}"></i>
-                                    <span class="button-text">{% if post in current_user.interested_topics %}Bỏ quan
-                                        tâm{% else %}Quan tâm{% endif %}</span>
-                                </button>
-                                {# Input CSRF ẩn - nên đặt gần nút để JS dễ tìm #}
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                            </div> {# Đóng .interest-button-container #}
-                        {% endif %}
+                                {# Icon #}
+                                <i id="post-like-icon"
+                                   class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                {# Chữ "Thích" #}
+                                Thích
+                                {# Số lượt like - DÙNG BIẾN like_count ĐÃ TRUYỀN TỪ VIEW #}
+                                <span id="post-like-count" class="like-count">({{ like_count }})</span>
+                            </button>
+                            {# CSRF Token Input (cần thiết cho AJAX POST) #}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        </div>
+                        {# --- END: KẾT THÚC NÚT LIKE MỚI --- #}
                         {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' %}
                             <hr>
                             {% if not already_applied %}
@@ -274,92 +279,92 @@
             </div>
         </div>
     {% endif %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const applyModalElement = document.getElementById('applyConfirmModal');
-        const confirmApplyButton = document.getElementById('confirmApplyBtn');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const applyModalElement = document.getElementById('applyConfirmModal');
+            const confirmApplyButton = document.getElementById('confirmApplyBtn');
 
-        // Chỉ thực hiện nếu modal và nút xác nhận tồn tại trên trang
-        if (applyModalElement && confirmApplyButton) {
-            // Lấy đối tượng Modal của Bootstrap
-            const applyModal = new bootstrap.Modal(applyModalElement);
-            const messageTextarea = document.getElementById('applicationMessage');
-            const postIdInput = document.getElementById('applyPostId'); // Input ẩn chứa post ID
+            // Chỉ thực hiện nếu modal và nút xác nhận tồn tại trên trang
+            if (applyModalElement && confirmApplyButton) {
+                // Lấy đối tượng Modal của Bootstrap
+                const applyModal = new bootstrap.Modal(applyModalElement);
+                const messageTextarea = document.getElementById('applicationMessage');
+                const postIdInput = document.getElementById('applyPostId'); // Input ẩn chứa post ID
 
-            confirmApplyButton.addEventListener('click', function () {
-                const postId = postIdInput.value;
-                const message = messageTextarea.value.trim(); // Lấy lời nhắn và xóa khoảng trắng thừa
-                const url = `/apply-topic/${postId}`; // Hoặc dùng url_for nếu render JS bằng Jinja
-                // const url = "{{ url_for('apply_to_topic', post_id=post.id) }}"; // Cần truyền post.id vào JS này
+                confirmApplyButton.addEventListener('click', function () {
+                    const postId = postIdInput.value;
+                    const message = messageTextarea.value.trim(); // Lấy lời nhắn và xóa khoảng trắng thừa
+                    const url = `/apply-topic/${postId}`; // Hoặc dùng url_for nếu render JS bằng Jinja
+                    // const url = "{{ url_for('apply_to_topic', post_id=post.id) }}"; // Cần truyền post.id vào JS này
 
-                // Lấy CSRF Token (từ meta tag hoặc input ẩn)
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+                    // Lấy CSRF Token (từ meta tag hoặc input ẩn)
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
 
-                if (isCsrfEnabled && !csrfToken) {
-                    console.error('Apply Modal: CSRF Token not found!');
-                    alert('Lỗi bảo mật, không thể thực hiện. Vui lòng tải lại trang (F5).');
-                    return;
-                }
+                    if (isCsrfEnabled && !csrfToken) {
+                        console.error('Apply Modal: CSRF Token not found!');
+                        alert('Lỗi bảo mật, không thể thực hiện. Vui lòng tải lại trang (F5).');
+                        return;
+                    }
 
-                // Vô hiệu hóa nút để tránh nhấn nhiều lần
-                confirmApplyButton.disabled = true;
-                confirmApplyButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...';
+                    // Vô hiệu hóa nút để tránh nhấn nhiều lần
+                    confirmApplyButton.disabled = true;
+                    confirmApplyButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...';
 
 
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json', // Gửi dạng JSON
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({message: message}) // Gửi message trong body
-                })
-                    .then(response => response.json()) // Luôn cố gắng parse JSON
-                    .then(data => {
-                        if (data.status === 'success') {
-                            // Đăng ký thành công
-                            applyModal.hide(); // Ẩn modal
-                            // Thay thế nút "Đăng ký" ban đầu bằng nút "Đã đăng ký"
-                            const originalButton = document.querySelector(`button[data-bs-target="#applyConfirmModal"][data-post-id="${postId}"]`);
-                            if (originalButton) {
-                                const alreadyAppliedButton = document.createElement('button');
-                                alreadyAppliedButton.type = 'button';
-                                alreadyAppliedButton.className = 'btn btn-secondary btn-sm';
-                                alreadyAppliedButton.disabled = true;
-                                alreadyAppliedButton.innerHTML = '<i class="bi bi-check-circle"></i> Đã đăng ký / Chờ duyệt';
-                                originalButton.parentNode.replaceChild(alreadyAppliedButton, originalButton);
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', // Gửi dạng JSON
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({message: message}) // Gửi message trong body
+                    })
+                        .then(response => response.json()) // Luôn cố gắng parse JSON
+                        .then(data => {
+                            if (data.status === 'success') {
+                                // Đăng ký thành công
+                                applyModal.hide(); // Ẩn modal
+                                // Thay thế nút "Đăng ký" ban đầu bằng nút "Đã đăng ký"
+                                const originalButton = document.querySelector(`button[data-bs-target="#applyConfirmModal"][data-post-id="${postId}"]`);
+                                if (originalButton) {
+                                    const alreadyAppliedButton = document.createElement('button');
+                                    alreadyAppliedButton.type = 'button';
+                                    alreadyAppliedButton.className = 'btn btn-secondary btn-sm';
+                                    alreadyAppliedButton.disabled = true;
+                                    alreadyAppliedButton.innerHTML = '<i class="bi bi-check-circle"></i> Đã đăng ký / Chờ duyệt';
+                                    originalButton.parentNode.replaceChild(alreadyAppliedButton, originalButton);
+                                }
+                                // Hiển thị thông báo thành công (có thể dùng Toast của Bootstrap thay vì alert)
+                                alert(data.message || 'Đăng ký thành công!');
+
+                            } else {
+                                // Hiển thị lỗi từ backend
+                                alert(data.message || 'Có lỗi xảy ra khi đăng ký.');
+                                // Kích hoạt lại nút nếu lỗi
+                                confirmApplyButton.disabled = false;
+                                confirmApplyButton.textContent = 'Xác nhận Đăng ký';
                             }
-                            // Hiển thị thông báo thành công (có thể dùng Toast của Bootstrap thay vì alert)
-                            alert(data.message || 'Đăng ký thành công!');
-
-                        } else {
-                            // Hiển thị lỗi từ backend
-                            alert(data.message || 'Có lỗi xảy ra khi đăng ký.');
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            alert('Lỗi kết nối hoặc xử lý dữ liệu, vui lòng thử lại.');
                             // Kích hoạt lại nút nếu lỗi
                             confirmApplyButton.disabled = false;
                             confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        alert('Lỗi kết nối hoặc xử lý dữ liệu, vui lòng thử lại.');
-                        // Kích hoạt lại nút nếu lỗi
-                        confirmApplyButton.disabled = false;
-                        confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-                    });
-            });
+                        });
+                });
 
-            // Reset textarea và kích hoạt lại nút khi modal đóng (phòng trường hợp đóng mà không submit)
-            applyModalElement.addEventListener('hidden.bs.modal', event => {
-                messageTextarea.value = ''; // Xóa lời nhắn cũ
-                confirmApplyButton.disabled = false;
-                confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-            });
+                // Reset textarea và kích hoạt lại nút khi modal đóng (phòng trường hợp đóng mà không submit)
+                applyModalElement.addEventListener('hidden.bs.modal', event => {
+                    messageTextarea.value = ''; // Xóa lời nhắn cũ
+                    confirmApplyButton.disabled = false;
+                    confirmApplyButton.textContent = 'Xác nhận Đăng ký';
+                });
 
-        } // end if(applyModalElement && confirmApplyButton)
-    });
-</script>
+            } // end if(applyModalElement && confirmApplyButton)
+        });
+    </script>
 {% endblock %}
 
 {# === END: JavaScript cho Modal Đăng ký Đề tài === #}
