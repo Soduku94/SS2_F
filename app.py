@@ -11,11 +11,12 @@ load_dotenv()
 import secrets
 import uuid
 import bleach
-from models import AcademicWork, AcademicWorkLike,Post, PostLike, db
+from models import TopicApplication,AcademicWork, AcademicWorkLike,Post, PostLike, db
 from flask import jsonify
 from flask_login import current_user
 from sqlalchemy import func
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy.orm import joinedload
 
 from PIL import Image
 from functools import wraps
@@ -393,7 +394,7 @@ def dashboard():
                            selected_status=selected_status,
                            selected_tag_id=selected_tag_id, # <<< Truyền tag đã chọn
                            search_query=search_query,
-                           # --- Truyền Dữ liệu Mới ---
+
                            like_counts=like_counts,
                            user_liked_posts=user_liked_posts,
                            user_application_status=user_application_status
@@ -921,68 +922,10 @@ def account_edit():
 from flask import jsonify
 # Import các model, db, current_user, login_required, abort, request, Post, etc.
 
-@app.route('/interest/add/<int:post_id>', methods=['POST'])
-@login_required
-def register_interest(post_id):
-    # Kiểm tra vai trò
-    if current_user.role != 'student':
-        return jsonify({'status': 'error', 'message': 'Chỉ sinh viên mới có thể quan tâm.'}), 403 # Forbidden
-
-    post = Post.query.get_or_404(post_id)
-
-    # Kiểm tra điều kiện post
-    if post.post_type != 'topic' or post.status == 'closed':
-         return jsonify({'status': 'error', 'message': 'Không thể quan tâm đề tài này.'}), 400 # Bad Request
-
-    # Kiểm tra xem đã quan tâm chưa (có thể dùng cách của bạn hoặc cách này)
-    # is_interested = current_user.interested_topics.filter(student_topic_interest.c.post_id == post.id).count() > 0
-    is_interested = post in current_user.interested_topics # Cách kiểm tra trực tiếp trên relationship
-
-    if is_interested:
-        # Nếu đã quan tâm rồi -> trả về thành công, trạng thái là true
-        return jsonify({'status': 'success', 'interested': True})
-    else:
-        # Nếu chưa -> thêm vào và commit
-        current_user.interested_topics.append(post)
-        try:
-            db.session.commit()
-            # Trả về thành công, trạng thái là true
-            return jsonify({'status': 'success', 'interested': True})
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error register interest user {current_user.id} post {post_id}: {e}") # Log lỗi
-            # Trả về lỗi server
-            return jsonify({'status': 'error', 'message': 'Lỗi hệ thống khi đăng ký quan tâm.'}), 500
 
 
-@app.route('/interest/remove/<int:post_id>', methods=['POST'])
-@login_required
-def remove_interest(post_id):
-    # Kiểm tra vai trò
-    if current_user.role != 'student':
-         return jsonify({'status': 'error', 'message': 'Chỉ sinh viên mới có thể thao tác.'}), 403
 
-    post = Post.query.get_or_404(post_id)
 
-    # Kiểm tra xem có đang quan tâm không
-    # is_interested = current_user.interested_topics.filter(student_topic_interest.c.post_id == post.id).count() > 0
-    is_interested = post in current_user.interested_topics
-
-    if not is_interested:
-        # Nếu vốn không quan tâm -> trả về thành công, trạng thái là false
-        return jsonify({'status': 'success', 'interested': False})
-    else:
-        # Nếu đang quan tâm -> xóa đi và commit
-        current_user.interested_topics.remove(post)
-        try:
-            db.session.commit()
-            # Trả về thành công, trạng thái là false
-            return jsonify({'status': 'success', 'interested': False})
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error remove interest user {current_user.id} post {post_id}: {e}") # Log lỗi
-            # Trả về lỗi server
-            return jsonify({'status': 'error', 'message': 'Lỗi hệ thống khi bỏ quan tâm.'}), 500
 @app.route('/my_interests')
 @login_required
 def my_interests():
@@ -993,7 +936,50 @@ def my_interests():
         .paginate(page=page, per_page=PER_PAGE, error_out=False)
     return render_template('interested_topics.html', title='Đề tài đã quan tâm',
                            posts_pagination=pagination)
+@app.route('/application/<int:application_id>/withdraw', methods=['POST']) # Chỉ nhận POST
+@login_required
+def withdraw_application(application_id):
+    # Tìm đơn đăng ký theo ID
+    application = TopicApplication.query.get_or_404(application_id)
 
+    # --- Kiểm tra quyền ---
+    # Chỉ sinh viên đã tạo đơn này mới được hủy
+    if application.user_id != current_user.id:
+        abort(403) # Không có quyền
+
+    # --- Kiểm tra trạng thái ---
+    # Chỉ cho phép hủy nếu đơn đang ở trạng thái 'pending'
+    if application.status != 'pending':
+        flash('Bạn không thể hủy đơn đăng ký đã được xử lý hoặc có trạng thái khác.', 'warning')
+        return redirect(url_for('my_applications')) # Quay về trang danh sách đơn
+
+    # --- Thực hiện xóa ---
+    try:
+        # (Tùy chọn) Tạo thông báo cho Giảng viên biết là SV đã hủy
+        post_author_id = application.topic.user_id # Lấy ID giảng viên
+        if post_author_id:
+             notification_content = f"Sinh viên {current_user.full_name} đã hủy đăng ký đề tài: '{application.topic.title[:30]}...'"
+             new_notification = Notification(
+                 recipient_id=post_author_id,
+                 sender_id=current_user.id, # Người gửi là Sinh viên
+                 content=notification_content,
+                 notification_type='application_withdrawn', # Loại thông báo mới
+                 # related_post_id=application.post_id, # Cần thêm trường này nếu muốn link
+                 # related_application_id=application.id, # Hoặc trường này
+                 is_read=False
+             )
+             db.session.add(new_notification) # Thêm thông báo vào session
+
+        # Xóa bản ghi đơn đăng ký
+        db.session.delete(application)
+        db.session.commit() # Lưu thay đổi (xóa đơn và thêm thông báo)
+        flash('Đã hủy đăng ký đề tài .', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Đã xảy ra lỗi khi hủy đăng ký: {e}', 'danger')
+
+    # Chuyển hướng về trang danh sách đơn đăng ký
+    return redirect(url_for('my_applications'))
 
 # --- THÊM ROUTE MỚI ĐỂ ĐỔI MẬT KHẨU ---
 @app.route('/change-password', methods=['GET', 'POST'])
@@ -1666,29 +1652,60 @@ def apply_to_topic(post_id):
 @app.route('/my-posts')
 @login_required
 def my_posts():
-    # Có thể cho phép cả Admin xem bài của họ nếu cần, tạm thời chỉ Giảng viên
+    # Kiểm tra vai trò Giảng viên
     if current_user.role != 'lecturer':
-        # Hoặc có thể chỉ trả về trang trống thay vì abort
         flash('Chức năng này dành cho Giảng viên.', 'info')
         return redirect(url_for('dashboard'))
-        # abort(403)
 
+    # Lấy thông tin trang hiện tại cho phân trang
     page = request.args.get('page', 1, type=int)
     PER_PAGE = 10  # Số bài đăng mỗi trang
 
-    # Truy vấn các bài đăng/đề tài mà user hiện tại là tác giả
-    pagination = Post.query.filter_by(author=current_user) \
-        .order_by(Post.date_posted.desc()) \
-        .paginate(page=page, per_page=PER_PAGE, error_out=False)
+    # Query các bài đăng của giảng viên hiện tại, sắp xếp, phân trang
+    posts_query = Post.query.filter_by(author=current_user) \
+                        .order_by(Post.date_posted.desc())
+    pagination = posts_query.paginate(page=page, per_page=PER_PAGE, error_out=False)
 
-    breadcrumbs = [
-        {'url': url_for('dashboard'), 'title': 'Trang chủ'},
-        {'url': None, 'title': 'Bài đăng của tôi'}  # Mục cuối không cần url
-    ]
+    # Lấy danh sách các đối tượng Post và ID của chúng trên trang hiện tại
+    posts_on_page = pagination.items
+    post_ids_on_page = [p.id for p in posts_on_page if p.id is not None]
 
-    # Render template mới, truyền đối tượng pagination
-    return render_template('my_posts.html', title='Bài đăng của tôi',
-                           posts_pagination=pagination)
+    # --- START: LẤY DỮ LIỆU LIKE HIỆU QUẢ (Đã thêm) ---
+    like_counts = {}          # Dict lưu {post_id: count}
+    user_liked_posts = set()  # Set lưu các post_id user này đã like
+
+    if post_ids_on_page: # Chỉ query nếu có bài đăng trên trang này
+        # 1. Query số lượt like
+        try:
+            like_counts_query = db.session.query(
+                PostLike.post_id, func.count(PostLike.id)
+            ).filter(
+                PostLike.post_id.in_(post_ids_on_page)
+            ).group_by(
+                PostLike.post_id
+            ).all()
+            like_counts = {post_id: count for post_id, count in like_counts_query}
+        except Exception as e:
+            print(f"Error fetching like counts for my_posts: {e}")
+
+        # 2. Query trạng thái like của user hiện tại (là giảng viên)
+        # Vẫn cần để nút Like hiển thị đúng trạng thái (đã like/chưa like)
+        try:
+            user_likes_query = db.session.query(PostLike.post_id).filter(
+                PostLike.user_id == current_user.id,
+                PostLike.post_id.in_(post_ids_on_page)
+            ).all()
+            user_liked_posts = {post_id for (post_id,) in user_likes_query}
+        except Exception as e:
+            print(f"Error fetching user likes for my_posts: {e}")
+
+
+    # Render template, truyền object pagination và dữ liệu like
+    return render_template('my_posts.html',
+                           title='Bài đăng của tôi',
+                           posts_pagination=pagination,       # <<< Truyền object pagination
+                           like_counts=like_counts,           # <<< Truyền dict số lượt like
+                           user_liked_posts=user_liked_posts) # <<< Truyền set các post đã like
 
     # Phần chạy ứng dụng
 
@@ -1984,3 +2001,29 @@ def toggle_post_like(post_id):
         db.session.rollback() # Hoàn tác nếu lỗi
         print(f"Error toggling like for post {post_id}, user {current_user.id}: {e}") # Log lỗi
         return jsonify({'status': 'error', 'message': 'Đã xảy ra lỗi khi xử lý lượt thích.'}), 500
+
+    # === START: ROUTE HIỂN THỊ ĐỀ TÀI SINH VIÊN ĐÃ ĐĂNG KÝ ===
+@app.route('/my-applications')
+@login_required
+def my_applications():
+        # Chỉ sinh viên mới truy cập được trang này
+        if current_user.role != 'student':
+            abort(403)
+
+        page = request.args.get('page', 1, type=int)
+        PER_PAGE = 15  # Số lượng đơn đăng ký mỗi trang
+
+        # Query các đơn đăng ký của sinh viên hiện tại
+        applications_query = TopicApplication.query.filter_by(user_id=current_user.id) \
+            .options(
+            # Tải sẵn thông tin Post và Author liên quan để tránh N+1 query trong template
+            joinedload(TopicApplication.topic).joinedload(Post.author)
+        ) \
+            .order_by(TopicApplication.application_date.desc())  # Sắp xếp mới nhất trước
+
+        pagination = applications_query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+
+        # CẦN TẠO TEMPLATE: 'my_applications.html'
+        return render_template('my_applications.html',
+                               title='Đề tài Đã Đăng ký',
+                               applications_pagination=pagination)
