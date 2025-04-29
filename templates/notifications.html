@@ -3,39 +3,37 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <h1 class="mb-4">{{ title }}</h1>
+<div class="container mt-4">
+    <h1 class="mb-4">{{ title }}</h1>
 
-        {# <<< THÊM NÚT XÓA TẤT CẢ >>> #}
-        {# Chỉ hiển thị nếu có thông báo #}
-        {% if notifications_pagination and notifications_pagination.items %}
-            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                    data-bs-target="#deleteAllNotifsModal">
-                <i class="bi bi-trash3-fill"></i> Xóa Tất cả Thông báo
-            </button>
-        {% endif %}
-        {# <<< KẾT THÚC NÚT XÓA TẤT CẢ >>> #}
+    {# <<< NÚT KÍCH HOẠT MODAL XÓA TẤT CẢ >>> #}
+    {% if notifications_pagination and notifications_pagination.items %}
+        {# Nút này chỉ để mở modal, không cần form hay token ở đây #}
+        <button type="button" class="btn btn-sm btn-outline-danger mb-3" data-bs-toggle="modal"
+                data-bs-target="#deleteAllNotifsModal">
+            <i class="bi bi-trash3-fill"></i> Xóa Tất cả Thông báo
+        </button>
+        {# Dòng input token thừa ở đây đã bị xóa #}
+    {% endif %}
+    {# <<< KẾT THÚC NÚT XÓA TẤT CẢ >>> #}
 
-        {% if notifications_pagination and notifications_pagination.items %}
-            <div class="list-group shadow-sm">
-                {% for notification in notifications_pagination.items %}
-                    {# Thêm class 'list-group-item-light' cho thông báo đã đọc để phân biệt #}
-                    <div class="list-group-item list-group-item-action {% if notification.is_read %}list-group-item-light text-muted{% endif %}">
-                        <div class="d-flex w-100 justify-content-between">
-                            {# Nội dung thông báo #}
+    {% if notifications_pagination and notifications_pagination.items %}
+        <div class="list-group shadow-sm">
+            {% for notification in notifications_pagination.items %}
+                <div class="list-group-item list-group-item-action {% if notification.is_read %}list-group-item-light text-muted{% endif %}">
+                    <div class="d-flex w-100 justify-content-between align-items-start"> {# align-items-start để nút xóa không bị đẩy xuống quá #}
+                        {# Nội dung và thời gian thông báo #}
+                        <div class="me-auto"> {# Cho nội dung chiếm phần lớn không gian #}
                             <p class="mb-1">
-                                {# === SỬA LẠI LOGIC LINK === #}
+                                {# === LOGIC LINK === #}
                                 {% set target_url = None %}
                                 {% if notification.related_idea_id %}
-                                    {# Nếu là Sinh viên, link đến trang xem của họ #}
                                     {% if current_user.role == 'student' %}
                                         {% set target_url = url_for('view_my_idea', idea_id=notification.related_idea_id) %}
-                                        {# Nếu là Giảng viên, link đến trang review #}
                                     {% elif current_user.role == 'lecturer' %}
                                         {% set target_url = url_for('review_idea', idea_id=notification.related_idea_id) %}
                                     {% endif %}
                                 {% endif %}
-                                {# Nếu có URL thì tạo link, nếu không thì chỉ hiển thị text #}
                                 {% if target_url %}
                                     <a href="{{ target_url }}"
                                        class="text-decoration-none {% if notification.is_read %}text-muted{% else %}text-dark{% endif %}">
@@ -44,76 +42,67 @@
                                 {% else %}
                                     {{ notification.content }}
                                 {% endif %}
-                                {# === KẾT THÚC SỬA LOGIC LINK === #}
+                                {# === KẾT THÚC LOGIC LINK === #}
                             </p>
-                            {# Thời gian thông báo #}
                             <small title="{{ notification.timestamp.strftime('%d/%m/%Y %H:%M:%S') }}">
-                                {# Hiển thị thời gian tương đối (vd: 5 phút trước) - cần thư viện như Flask-Moment hoặc tính toán #}
-                                {# Tạm hiển thị ngày tháng #}
                                 {{ notification.timestamp.strftime('%H:%M %d/%m/%Y') }}
                             </small>
-
-                            {# <<< THÊM NÚT XÓA CÁ NHÂN >>> #}
-                            <form action="{{ url_for('delete_notification', notif_id=notification.id) }}" method="POST"
-                                  style="display: inline;" class="ms-2">
-                                <button type="button" class="btn btn-sm btn-outline-danger border-0"
-                                        data-bs-toggle="modal" data-bs-target="#deleteNotifModal{{ notification.id }}"
-                                        title="Xóa thông báo này">
-                                    <i class="bi bi-x-lg"></i> {# Icon dấu X #}
-                                </button>
-                            </form>
-                            {# <<< KẾT THÚC THÊM NÚT XÓA >>> #}
                         </div>
 
-
-
-
-
-
+                        {# <<< NÚT KÍCH HOẠT MODAL XÓA CÁ NHÂN >>> #}
+                        {# Nút này chỉ để mở modal, không cần form ở đây #}
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0 ms-2 flex-shrink-0" {# flex-shrink-0 để nút không bị co lại #}
+                                data-bs-toggle="modal" data-bs-target="#deleteNotifModal{{ notification.id }}"
+                                title="Xóa thông báo này">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        {# Form và Token thừa ở đây đã bị xóa #}
+                        {# <<< KẾT THÚC NÚT KÍCH HOẠT MODAL XÓA >>> #}
                     </div>
+                </div> {# Kết thúc list-group-item #}
 
-                    {# === THÊM MODAL XÁC NHẬN XÓA (VẪN NẰM TRONG FOR LOOP) === #}
-                    <div class="modal fade" id="deleteNotifModal{{ notification.id }}" tabindex="-1"
-                         aria-labelledby="deleteNotifModalLabel{{ notification.id }}" aria-hidden="true">
-                        <div class="modal-dialog modal-sm"> {# Dùng modal-sm cho nhỏ gọn #}
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteNotifModalLabel{{ notification.id }}">Xác nhận
-                                        Xóa</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Bạn có chắc muốn xóa thông báo này không?
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy
-                                    </button>
-                                    <form action="{{ url_for('delete_notification', notif_id=notification.id) }}"
-                                          method="POST" style="display: inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                    </form>
-                                </div>
+                {# === MODAL XÁC NHẬN XÓA CÁ NHÂN (NẰM TRONG FOR LOOP) === #}
+                <div class="modal fade" id="deleteNotifModal{{ notification.id }}" tabindex="-1"
+                     aria-labelledby="deleteNotifModalLabel{{ notification.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fs-6" id="deleteNotifModalLabel{{ notification.id }}">Xác nhận Xóa</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Bạn có chắc muốn xóa thông báo này không?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                {# === FORM SUBMIT XÓA CÁ NHÂN === #}
+                                <form action="{{ url_for('delete_notification', notif_id=notification.id) }}"
+                                      method="POST" style="display: inline;">
+                                    {# >>> THÊM TOKEN VÀO ĐÚNG FORM NÀY <<< #}
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                </form>
+                                {# === KẾT THÚC FORM SUBMIT === #}
                             </div>
                         </div>
                     </div>
-                    {# === KẾT THÚC MODAL === #}
+                </div>
+                {# === KẾT THÚC MODAL CÁ NHÂN === #}
 
+            {% endfor %} {# Kết thúc vòng lặp for #}
+        </div> {# Kết thúc list-group #}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Bạn không có thông báo nào.
+        </div>
+    {% endif %}
 
-
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                Bạn không có thông báo nào.
-            </div>
-        {% endif %}
-
-        {# --- Phân Trang --- #}
-        {% if notifications_pagination and notifications_pagination.pages > 1 %}
-            <nav aria-label="Notifications navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item {% if not notifications_pagination.has_prev %}disabled{% endif %}">
+    {# --- Phân Trang --- #}
+    {% if notifications_pagination and notifications_pagination.pages > 1 %}
+        <nav aria-label="Notifications navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {# ... code phân trang ... #}
+                 <li class="page-item {% if not notifications_pagination.has_prev %}disabled{% endif %}">
                         <a class="page-link"
                            href="{{ url_for('notifications', page=notifications_pagination.prev_num) if notifications_pagination.has_prev else '#' }}">&laquo;</a>
                     </li>
@@ -131,35 +120,37 @@
                         <a class="page-link"
                            href="{{ url_for('notifications', page=notifications_pagination.next_num) if notifications_pagination.has_next else '#' }}">&raquo;</a>
                     </li>
-                </ul>
-            </nav>
-        {% endif %}
-        {# --- Kết thúc Phân Trang --- #}
+            </ul>
+        </nav>
+    {% endif %}
+    {# --- Kết thúc Phân Trang --- #}
 
-    </div>
+</div> {# Kết thúc container #}
 
 
-    {# <<< THÊM MODAL XÓA TẤT CẢ (NGOÀI VÒNG LẶP) >>> #}
-    <div class="modal fade" id="deleteAllNotifsModal" tabindex="-1" aria-labelledby="deleteAllNotifsModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteAllNotifsModalLabel">Xác nhận Xóa Tất cả</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Bạn có chắc chắn muốn xóa **tất cả** thông báo của mình không?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-                    {# Form trỏ đến route xóa tất cả #}
-                    <form action="{{ url_for('delete_all_notifications') }}" method="POST" style="display: inline;">
-                        <button type="submit" class="btn btn-danger btn-sm">Xóa Tất cả</button>
-                    </form>
-                </div>
+{# <<< MODAL XÓA TẤT CẢ (NGOÀI VÒNG LẶP) >>> #}
+<div class="modal fade" id="deleteAllNotifsModal" tabindex="-1" aria-labelledby="deleteAllNotifsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fs-6" id="deleteAllNotifsModalLabel">Xác nhận Xóa Tất cả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa **tất cả** thông báo của mình không?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                {# === FORM SUBMIT XÓA TẤT CẢ === #}
+                <form action="{{ url_for('delete_all_notifications') }}" method="POST" style="display: inline;">
+                     {# >>> THÊM TOKEN VÀO ĐÚNG FORM NÀY <<< #}
+                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Xóa Tất cả</button>
+                </form>
+                 {# === KẾT THÚC FORM SUBMIT === #}
             </div>
         </div>
     </div>
-    {# <<< KẾT THÚC MODAL XÓA TẤT CẢ >>> #}
+</div>
+{# <<< KẾT THÚC MODAL XÓA TẤT CẢ >>> #}
 {% endblock %}

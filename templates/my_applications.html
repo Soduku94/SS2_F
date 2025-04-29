@@ -37,26 +37,12 @@
                         <p class="mb-1 fst-italic"><small>Lời nhắn của bạn: "{{ app.message }}"</small></p>
                     {% endif %}
 
-                    {# === START: Đặt Nút Hủy Đăng ký VÀO ĐÂY (Bên trong vòng lặp) === #}
-                    {% if app.status == 'pending' %} {# Chỉ hiện nút khi trạng thái là pending #}
-                        <div class="mt-2"> {# Thêm div để nút xuống dòng hoặc cách ra #}
-                            <form action="{{ url_for('withdraw_application', application_id=app.id) }}" method="POST" style="display: inline;">
-                                {# CSRF token #}
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                {# Nút Hủy #}
-                                <button type="submit" class="btn btn-outline-danger btn-sm"
-                                        onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký đề tài này không?')">
-                                    <i class="bi bi-x-circle"></i> Hủy đăng ký
-                                </button>
-                            </form>
-                        </div>
-                    {% endif %}
-                    {# === END: Kết thúc nút Hủy === #}
+
 
                 </div> {# Đóng thẻ list-group-item #}
             {% endfor %} {# Đóng vòng lặp for #}
 
-            {# --- KHỐI CODE NÚT HỦY Ở ĐÂY ĐÃ BỊ XÓA ĐI VÌ SAI VỊ TRÍ --- #}
+
 
         </div> {# Đóng thẻ list-group #}
 

@@ -3,369 +3,409 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <article class="card shadow-sm mb-4">
-            <div class="card-header">
-                {# Hiển thị tiêu đề bài đăng #}
-                <h2 class="mb-0">{{ post.title }}</h2>
-            </div>
-            <div class="card-body">
-                {# --- Metadata của bài đăng --- #}
-                <div class="d-flex flex-wrap align-items-center mb-3 text-muted small">
-                    <div class="me-3">
-                        <i class="bi bi-person-fill"></i> Đăng bởi:
-                        <a href="#" class="text-decoration-none">{{ post.author.full_name }}</a>
-                        {# TODO: Link đến profile tác giả? #}
+    <div class="container mt-5 "> {# Giảm margin top #}
+        <div class="row justify-content-center">
+            <div class="col-lg-9"> {# Cột nội dung chính #}
+                <article class="showcase-article card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h2 class="mb-0">{{ post.title }}</h2>
                     </div>
-                    <div class="me-3">
-                        <i class="bi bi-calendar3"></i> Ngày đăng: {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}
-                    </div>
-                    <div class="me-3">
-                        {% if post.post_type == 'topic' %}
-                            <span class="badge bg-primary"><i class="bi bi-lightbulb-fill"></i> Đề tài</span>
-                        {% elif post.post_type == 'article' %}
-                            <span class="badge bg-secondary"><i class="bi bi-file-text-fill"></i> Bài viết</span>
+                    <div class="card-body">
+                        {# --- Metadata của bài đăng --- #}
+                        <div class="d-flex flex-wrap align-items-center mb-3 text-muted small border-bottom pb-2">
+                            <div class="me-3"><i class="bi bi-person-fill"></i> Đăng bởi: <a href="#"
+                                                                                             class="text-decoration-none">{{ post.author.full_name }}</a>
+                            </div>
+                            <div class="me-3"><i class="bi bi-calendar3"></i> Ngày
+                                đăng: {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</div>
+                            <div class="me-3">{% if post.post_type == 'topic' %}<span class="badge bg-primary"><i
+                                    class="bi bi-lightbulb-fill"></i> Đề tài</span>{% elif post.post_type == 'article' %}
+                                <span class="badge bg-secondary"><i
+                                        class="bi bi-file-text-fill"></i> Bài viết</span>{% endif %}</div>
+                            {% if post.status %}
+                                <div class="me-3">Trạng thái: {% if post.status == 'recruiting' %}
+                                    <span class="badge bg-success">Tìm sinh viên</span>{% elif post.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>{% elif post.status == 'closed' %}
+                                    <span class="badge bg-secondary">Đã đóng</span>{% elif post.status == 'working_on' %}
+                                    <span class="badge bg-info">Đang thực hiện</span>{% elif post.status == 'published' %}
+                                    <span class="badge bg-light text-dark">Công khai</span>{% else %}
+                                    <span class="badge bg-dark">{{ post.status }}</span>{% endif %}</div>{% endif %}
+                            {% if post.is_featured %}
+                                <div class="me-3"><span class="badge bg-warning text-dark"><i
+                                        class="bi bi-pin-angle-fill"></i> Nổi bật</span></div>{% endif %}
+                        </div>
+
+                        {# --- Hiển thị Tags --- #}
+                        {% if post.tags.count() > 0 %}
+                            <div class="mb-3">
+                                <strong>Thẻ:</strong>
+                                {% for tag in post.tags %}
+                                    <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>{% endfor %}
+                            </div>
+                            <hr>
                         {% endif %}
-                    </div>
-                    {% if post.post_type == 'topic' and post.status %}
-                        <div class="me-3">
-                            Trạng thái:
-                            {% if post.status == 'working_on' %}
-                                <span class="badge bg-success">Đang thực hiện</span>
-                            {% elif post.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">Chờ duyệt/Tìm SV</span>
-                            {% elif post.status == 'closed' %}
-                                <span class="badge bg-secondary">Đã đóng</span>
-                            {% endif %}
+
+                        {# --- Nội dung bài đăng --- #}
+                        <div class="post-content mb-4">
+                            <h5>Nội dung chi tiết:</h5>
+                            <div>{{ post.content | safe if post.content else '<p><em>(Không có nội dung)</em></p>' }}</div>
                         </div>
-                    {% endif %}
-                    {% if post.is_featured %}
-                        <div class="me-3">
-                            <span class="badge bg-warning text-dark"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span>
-                        </div>
-                    {% endif %}
-                    {# Bỏ phần hiển thị số lượt quan tâm ở đây vì đã chuyển xuống nút bấm #}
-                </div>
 
-                {# --- START: Thêm đoạn code hiển thị Tags --- #}
-                {% if post.tags.count() > 0 %} {# Kiểm tra xem bài đăng có tag nào không #}
-                    <div class="mb-3"> {# Tạo khoảng cách dưới #}
-                        <strong>Thẻ:</strong>
-                        {% for tag in post.tags %}
-                            {# Hiển thị mỗi tag như một badge #}
-                            {# Bạn có thể đổi màu badge nếu muốn, ví dụ bg-primary, bg-info,... #}
-                            <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>
-                            {# Tùy chọn: Nếu sau này bạn muốn làm trang lọc theo tag,
-               bạn có thể bọc span này trong thẻ <a>
-               <a href="{{ url_for('posts_by_tag', tag_name=tag.name) }}" class="text-decoration-none">
-                   <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>
-               </a>
-            #}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                {# --- END: Kết thúc đoạn code hiển thị Tags --- #}
-
-
-                {# --- Kết thúc Metadata --- #}
-
-                <hr>
-
-                {# --- Nội dung bài đăng --- #}
-                <div class="post-content mb-4">
-                    <h5>Nội dung chi tiết:</h5>
-                    {# Hiển thị nội dung RTE đã làm sạch #}
-                    <div class="border p-3 bg-light rounded"
-                         style="white-space: pre-wrap;">{{ post.content | safe }}</div>
-                </div>
-
-                {# --- File đính kèm (nếu có) --- #}
-                {% if post.attachments %}
-                    <hr>
-                    <div class="attachments-section mb-4">
-                        <h5><i class="bi bi-paperclip"></i> Tệp đính kèm:</h5>
-                        <ul class="list-unstyled">
-                            {% for attachment in post.attachments %}
-                                <li class="mb-1">
-                                    <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}"
-                                       target="_blank" class="text-decoration-none">
-                                        {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
-                                        {% if extension == 'pdf' %}
-                                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
-                                        {% elif extension in ['doc', 'docx'] %}
-                                            <i class="bi bi-file-earmark-word text-primary me-1"></i>
-                                        {% elif extension in ['xls', 'xlsx'] %}
-                                            <i class="bi bi-file-earmark-excel text-success me-1"></i>
-                                        {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
-                                        {{ attachment.original_filename }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-                {# --- Kết thúc File đính kèm --- #}
-
-                <hr>
-
-                {# --- Các nút hành động --- #}
-                {# --- KHỐI NÚT HÀNH ĐỘNG (ĐÃ SẮP XẾP LẠI) --- #}
-                <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    {# --- NHÓM NÚT BÊN TRÁI --- #}
-                    <div class="d-flex align-items-center flex-wrap gap-2">
-                        {# Nút Quay lại Dashboard #}
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-arrow-left-circle"></i> Quay lại Dashboard
-                        </a>
-
-                        {# Dropdown Lượt quan tâm (chỉ cho tác giả, là topic, có người quan tâm) #}
-                        {% if post.author == current_user and post.post_type == 'topic' and post.interested_students.count() > 0 %}
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-info text-dark position-relative">
-                                    <i class="bi bi-heart-fill me-1"></i>
-                                    {{ post.interested_students.count() }}
-                                </button>
-                                <button type="button"
-                                        class="btn btn-sm btn-info dropdown-toggle dropdown-toggle-split text-dark"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="visually-hidden">Xem danh sách</span>
-                                </button>
-                                <ul class="dropdown-menu"> {# Bỏ dropdown-menu-end để nó không bị lệch quá #}
-                                    <li><h6 class="dropdown-header">Sinh viên quan tâm</h6></li>
-                                    {% if interested_students %} {# Dùng biến đã query từ route view_post #}
-                                        {% for student in interested_students %}
-                                            <li><span
-                                                    class="dropdown-item-text small">{{ student.full_name }} ({{ student.student_id or student.email }})</span>
-                                            </li>
-                                        {% endfor %}
-                                    {% else %}
-                                        <li><span
-                                                class="dropdown-item-text small text-muted">Lỗi khi tải danh sách.</span>
+                        {# --- File đính kèm --- #}
+                        {% if post.attachments %}
+                            <hr>
+                            <div class="attachments-section mb-4">
+                                <h5><i class="bi bi-paperclip"></i> Tệp đính kèm:</h5>
+                                <ul class="list-unstyled">
+                                    {% for attachment in post.attachments %}
+                                        <li class="mb-1">
+                                            <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}"
+                                               target="_blank" class="text-decoration-none">
+                                                {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                                {% if extension == 'pdf' %}
+                                                    <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                                {% elif extension in ['doc', 'docx'] %}
+                                                    <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                                {% elif extension in ['xls', 'xlsx'] %}
+                                                    <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                                {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                                {{ attachment.original_filename }}
+                                            </a>
                                         </li>
-                                    {% endif %}
+                                    {% endfor %}
                                 </ul>
                             </div>
                         {% endif %}
+                        {# --- Kết thúc File đính kèm --- #}
 
-                        {# Nút Quan tâm/Bỏ quan tâm (chỉ cho Sinh viên) #}
-                        {# --- START: THAY THẾ NÚT QUAN TÂM CŨ BẰNG NÚT LIKE MỚI --- #}
-                        {# Chỉ hiển thị nếu người dùng đăng nhập, hoặc hiển thị dạng disabled #}
-                        <div class="d-inline-block  post-like-button-container"> {# Thêm me-2 để cách nút khác #}
-                            <button
-                                    type="button"
-                                    {# ID có thể dùng post-like-button vì chỉ có 1 nút trên trang này #}
-                                    id="post-like-button"
-                                    {# Class để JS chung (trong base.html) bắt sự kiện #}
-                                    class="btn btn-sm post-like-toggle-btn {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif user_has_liked %}btn-danger{% else %}btn-outline-danger{% endif %}"
-                                    {# Data attributes #}
-                                    data-post-id="{{ post.id }}"
-                                    data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
-                                    {# Tooltip #}
-                                    title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif user_has_liked %}Bỏ thích{% else %}Thích{% endif %}"
-                                    {# Disable #}
-                                    {% if not current_user.is_authenticated %}disabled{% endif %}>
+                        <hr>
 
-                                {# Icon #}
-                                <i id="post-like-icon"
-                                   class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-                                {# Chữ "Thích" #}
-                                Thích
-                                {# Số lượt like - DÙNG BIẾN like_count ĐÃ TRUYỀN TỪ VIEW #}
-                                <span id="post-like-count" class="like-count">({{ like_count }})</span>
-                            </button>
-                            {# CSRF Token Input (cần thiết cho AJAX POST) #}
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        </div>
-                        {# --- END: KẾT THÚC NÚT LIKE MỚI --- #}
-                        {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' %}
-                            <hr>
-                            {% if not already_applied %}
-                                {# Nút này giờ chỉ dùng để MỞ MODAL #}
-                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#applyConfirmModal" data-post-id="{{ post.id }}">
-                                    <i class="bi bi-check-circle-fill"></i> Đăng ký đề tài này
-                                </button>
-                            {% else %}
-                                {# Nút bị vô hiệu hóa nếu đã đăng ký/duyệt #}
-                                <button type="button" class="btn btn-secondary btn-sm" disabled>
-                                    <i class="bi bi-check-circle"></i> Đã đăng ký / Chờ duyệt
-                                    {# Có thể hiển thị trạng thái cụ thể nếu cần: {{ existing_app.status }} #}
-                                </button>
+                        {# --- KHỐI NÚT HÀNH ĐỘNG TỔNG HỢP --- #}
+                        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            {# --- NHÓM NÚT BÊN TRÁI (Chung & Sinh viên) --- #}
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                {# Nút Quay lại Dashboard #}
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm"><i
+                                        class="bi bi-arrow-left-circle"></i> Dashboard</a>
+
+                                {# Nút Like (AJAX) #}
+                                <div class="d-inline-block post-like-button-container">
+                                    <button type="button" id="post-like-button"
+                                            class="btn btn-sm post-like-toggle-btn {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif user_has_liked %}btn-danger{% else %}btn-outline-danger{% endif %}"
+                                            data-post-id="{{ post.id }}"
+                                            data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
+                                            title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif user_has_liked %}Bỏ thích{% else %}Thích{% endif %}"
+                                            {% if not current_user.is_authenticated %}disabled{% endif %}>
+                                        <i id="post-like-icon"
+                                           class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                        Thích <span id="post-like-count" class="like-count">({{ like_count }})</span>
+                                    </button>
+                                    {# CSRF token nên lấy từ meta tag trong base.html #}
+                                </div>
+
+                                {# Nút Đăng ký / Hủy / Trạng thái (Cho Sinh viên) #}
+                                {% if current_user.is_authenticated and current_user.role == 'student' and post.post_type == 'topic' %}
+                                    <div class="d-inline-block application-action-container"
+                                         data-post-id="{{ post.id }}"> {# Thêm data-post-id vào container #}
+                                        {% set current_app_status = application.status if application else None %}
+                                        {% set application_id = application.id if application else None %}
+                                        {# 1. Chưa đăng ký VÀ đang tuyển #}
+                                        {% if not application and post.status == 'recruiting' %}
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#applyConfirmModal" data-post-id="{{ post.id }}">
+                                                <i class="bi bi-check-circle-fill"></i> Đăng ký đề tài này
+                                            </button>
+                                            {# 2. Đã đăng ký VÀ đang chờ duyệt -> Hiện nút Hủy trigger modal #}
+                                        {% elif application and current_app_status == 'pending' %}
+                                            <button type="button" class="btn btn-warning btn-sm withdraw-trigger-btn"
+                                                    data-bs-toggle="modal" data-bs-target="#withdrawConfirmModal"
+                                                    data-application-id="{{ application_id }}">
+                                                <i class="bi bi-x-circle"></i> Hủy đăng ký (Chờ duyệt)
+                                            </button>
+                                            {# 3. Đã đăng ký và có kết quả #}
+                                        {% elif application and current_app_status == 'accepted' %}
+                                            <button type="button" class="btn btn-info btn-sm" disabled><i
+                                                    class="bi bi-check-lg"></i> Đã được chấp thuận
+                                            </button>
+                                        {% elif application and current_app_status == 'rejected' %}
+                                            <button type="button" class="btn btn-secondary btn-sm" disabled><i
+                                                    class="bi bi-x-lg"></i> Đã bị từ chối
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {# --- KẾT THÚC NHÓM NÚT BÊN TRÁI --- #}
+
+                            {# --- NHÓM NÚT BÊN PHẢI (SỬA/XÓA - chỉ cho tác giả) --- #}
+                            {% if post.author == current_user %}
+                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                    <a href="{{ url_for('update_post', post_id=post.id) }}"
+                                       class="btn btn-secondary btn-sm"><i class="bi bi-pencil-fill"></i> Sửa</a>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#deletePostModal{{ post.id }}"><i
+                                            class="bi bi-trash-fill"></i> Xóa
+                                    </button>
+                                </div>
                             {% endif %}
-                        {% endif %}
-
-
-                    </div>
-
-                    {# --- KẾT THÚC NHÓM NÚT BÊN TRÁI --- #}
-
-
-                    {# --- NHÓM NÚT BÊN PHẢI (SỬA/XÓA - chỉ cho tác giả) --- #}
-                    {% if post.author == current_user %}
-                        <div class="d-flex align-items-center flex-wrap gap-2">
-                            <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-secondary btn-sm"><i
-                                    class="bi bi-pencil-fill"></i> Sửa</a>
-                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#deletePostModal{{ post.id }}">
-                                <i class="bi bi-trash-fill"></i> Xóa
-                            </button>
+                            {# --- KẾT THÚC NHÓM NÚT BÊN PHẢI --- #}
                         </div>
-                    {% endif %}
-                    {# --- KẾT THÚC NHÓM NÚT BÊN PHẢI --- #}
-
-                </div>
-                {# --- Kết thúc hàng nút hành động --- #}
-                {# --- Kết thúc hàng nút hành động --- #}
+                        {# --- Kết thúc Khối nút hành động --- #}
+                    </div>
+                    {# End card-body #}
+                </article>
+                {# End article #}
             </div>
-            {# End card-body #}
-        </article>
-        {# End article #}
+            {# End col-lg-9 #}
+        </div>
+        {# End row #}
+
+        {# --- Các Modal --- #}
+        {# Modal Xóa Post (Cho tác giả) #}
+        {% if post.author == current_user %}
+            <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1"
+                 aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title fs-6" id="deletePostModalLabel{{ post.id }}">Xác nhận Xóa Bài
+                                Đăng</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Bạn có chắc chắn muốn xóa bài đăng "{{ post.title }}" không? Hành động này không thể hoàn
+                            tác. File đính kèm (nếu có) cũng sẽ bị xóa.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST"
+                                  style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                {# CSRF cho form xóa #}
+                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Modal Xác nhận Đăng ký (Cho Sinh viên) #}
+        {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' and not application %}
+            <div class="modal fade" id="applyConfirmModal" tabindex="-1" aria-labelledby="applyConfirmModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg"> {# Giữ centered và large #}
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="applyConfirmModalLabel">Xác nhận Đăng ký Đề tài</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Đăng ký vào đề tài: <strong>{{ post.title }}</strong></p>
+                            <div class="mb-3">
+                                <label for="applicationMessage" class="form-label">Lời nhắn cho Giảng viên (tùy
+                                    chọn):</label>
+                                <textarea class="form-control" id="applicationMessage" rows="3"
+                                          placeholder="Ví dụ: Em rất quan tâm đến hướng nghiên cứu này..."></textarea>
+                            </div>
+                            {# Input ẩn để lưu post_id #}
+                            <input type="hidden" id="applyPostId" value="{{ post.id }}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="button" class="btn btn-primary" id="confirmApplyBtn">Xác nhận Đăng ký</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Modal Xác nhận HỦY Đăng ký (Cho Sinh viên) #}
+        {% if application and application.status == 'pending' and current_user.is_authenticated and current_user.role == 'student' %}
+            <div class="modal fade" id="withdrawConfirmModal" tabindex="-1" aria-labelledby="withdrawConfirmModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg"> {# Giữ centered #}
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="withdrawConfirmModalLabel">Xác nhận Hủy Đăng ký</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Bạn có chắc chắn muốn hủy đăng ký khỏi đề tài: <strong>{{ post.title }}</strong>?</p>
+                            <div class="mb-3">
+                                <label for="withdrawReason" class="form-label">Lý do hủy (tùy chọn):</label>
+                                <textarea class="form-control" id="withdrawReason" rows="3"></textarea>
+                            </div>
+                            {# Input ẩn lưu application ID #}
+                            <input type="hidden" id="withdrawAppId" value="{{ application.id }}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không hủy</button>
+                            <button type="button" class="btn btn-danger" id="confirmWithdrawBtn">Xác nhận Hủy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {# --- Kết thúc các Modal --- #}
+
     </div> {# End container #}
+{% endblock content %}
 
 
-    {# --- Modal Xác nhận Xóa Post --- #}
-    {% if post.author == current_user %}
-        <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1"
-             aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
-            <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deletePostModalLabel{{ post.id }}">Xác nhận Xóa Bài Đăng</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Bạn có chắc chắn muốn xóa bài đăng "{{ post.title }}" không? Hành động này không thể hoàn tác.
-                        File đính kèm (nếu có) cũng sẽ bị xóa.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-                        <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST"
-                              style="display: inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {# --- Kết thúc Modal --- #}
+{# --- Block Scripts --- #}
+{% block scripts %}
+     {{ super() }}  {# Gọi script từ base nếu base có block scripts và bạn muốn kế thừa #}
 
-    {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' and not already_applied %}
-        <div class="modal fade" id="applyConfirmModal" tabindex="-1" aria-labelledby="applyConfirmModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="applyConfirmModalLabel">Xác nhận Đăng ký Đề tài</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Đăng ký vào đề tài: <strong>{{ post.title }}</strong></p>
-                        <div class="mb-3">
-                            <label for="applicationMessage" class="form-label">Lời nhắn cho Giảng viên (tùy
-                                chọn):</label>
-                            <textarea class="form-control" id="applicationMessage" rows="3"
-                                      placeholder="Ví dụ: Em rất quan tâm đến hướng nghiên cứu này..."></textarea>
-                        </div>
-                        {# Input ẩn để lưu post_id, tiện cho JS lấy #}
-                        <input type="hidden" id="applyPostId" value="{{ post.id }}">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                        {# Nút này sẽ trigger gửi AJAX #}
-                        <button type="button" class="btn btn-primary" id="confirmApplyBtn">Xác nhận Đăng ký</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
+    {# --- START: TOÀN BỘ JAVASCRIPT CHO post_detail.html --- #}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        // --- START: Hàm Helper Hiển thị Bootstrap Toast ---
+        // (Bạn có thể chuyển hàm này ra file JS chung nếu muốn)
+        function showBootstrapToast(message, category = 'info', delay = 5000) {
+            const toastContainer = document.querySelector('.toast-container'); // Tìm container trong base.html
+            if (!toastContainer) { console.error('Toast container not found!'); alert(message); return; }
+            const toastId = 'dynamic-toast-' + Date.now();
+            const bgClass = `text-bg-${category}`;
+            const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="d-flex"><div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div></div>`;
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+            if (toastElement) {
+                const toast = new bootstrap.Toast(toastElement, { delay: delay });
+                toast.show();
+                toastElement.addEventListener('hidden.bs.toast', function () { toastElement.remove(); });
+            }
+        }
+        // --- END: Hàm Helper ---
+
+
+        // --- Chạy code sau khi DOM đã tải xong ---
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("post_detail.html scripts loading...");
+
+            // --- CSRF Token Helper ---
+            function getCsrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'); }
+            const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+            //--------------------------
+
+            // --- 1. Logic Nút Like ---
+            const likeButton = document.getElementById('post-like-button');
+            if (likeButton) {
+                const likeIcon = document.getElementById('post-like-icon');
+                const likeCountSpan = document.getElementById('post-like-count');
+                likeButton.addEventListener('click', function() {
+                    if (this.disabled) return;
+                    const postId = this.dataset.postId;
+                    const url = this.dataset.url;
+                    const csrfToken = getCsrfToken();
+                    if (isCsrfEnabled && !csrfToken) { console.error('Post Like: CSRF Token missing!'); showBootstrapToast('Lỗi bảo mật (CSRF). Vui lòng F5 trang.', 'danger'); return; }
+                    likeButton.disabled = true;
+                    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({}) })
+                    .then(response => {
+                        if (!response.ok) { return response.json().catch(()=>{}).then(errData=>{throw new Error(errData?.message||`Lỗi HTTP ${response.status}`)}) }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            if(likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`;
+                            if (data.liked) { likeButton.classList.replace('btn-outline-danger','btn-danger'); if(likeIcon) likeIcon.classList.replace('bi-heart','bi-heart-fill'); likeButton.title = 'Bỏ thích'; }
+                            else { likeButton.classList.replace('btn-danger','btn-outline-danger'); if(likeIcon) likeIcon.classList.replace('bi-heart-fill','bi-heart'); likeButton.title = 'Thích'; }
+                        } else { showBootstrapToast(data.message || 'Có lỗi xảy ra khi thích.', 'warning'); }
+                    }).catch(error => { console.error('Post Like Fetch error:', error); showBootstrapToast(error.message || 'Lỗi kết nối.', 'danger'); })
+                    .finally(() => { if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true'){ likeButton.disabled = false; } });
+                });
+            } else { console.log("Like button not found."); } // End Like logic
+
+            // --- 2. Logic Modal Đăng ký (Apply Modal) ---
             const applyModalElement = document.getElementById('applyConfirmModal');
             const confirmApplyButton = document.getElementById('confirmApplyBtn');
-
-            // Chỉ thực hiện nếu modal và nút xác nhận tồn tại trên trang
             if (applyModalElement && confirmApplyButton) {
-                // Lấy đối tượng Modal của Bootstrap
                 const applyModal = new bootstrap.Modal(applyModalElement);
                 const messageTextarea = document.getElementById('applicationMessage');
-                const postIdInput = document.getElementById('applyPostId'); // Input ẩn chứa post ID
-
+                const postIdInput = document.getElementById('applyPostId');
+                // console.log("Apply Modal found, adding listener.");
                 confirmApplyButton.addEventListener('click', function () {
-                    const postId = postIdInput.value;
-                    const message = messageTextarea.value.trim(); // Lấy lời nhắn và xóa khoảng trắng thừa
-                    const url = `/apply-topic/${postId}`; // Hoặc dùng url_for nếu render JS bằng Jinja
-                    // const url = "{{ url_for('apply_to_topic', post_id=post.id) }}"; // Cần truyền post.id vào JS này
-
-                    // Lấy CSRF Token (từ meta tag hoặc input ẩn)
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                    const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
-
-                    if (isCsrfEnabled && !csrfToken) {
-                        console.error('Apply Modal: CSRF Token not found!');
-                        alert('Lỗi bảo mật, không thể thực hiện. Vui lòng tải lại trang (F5).');
-                        return;
-                    }
-
-                    // Vô hiệu hóa nút để tránh nhấn nhiều lần
-                    confirmApplyButton.disabled = true;
-                    confirmApplyButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...';
-
-
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json', // Gửi dạng JSON
-                            'X-CSRFToken': csrfToken
-                        },
-                        body: JSON.stringify({message: message}) // Gửi message trong body
+                    const postId = postIdInput ? postIdInput.value : null;
+                    const message = messageTextarea ? messageTextarea.value.trim() : '';
+                    const url = postId ? `/apply-topic/${postId}` : null;
+                    const csrfToken = getCsrfToken();
+                    if (!url) { alert("Lỗi: Không tìm thấy ID đề tài."); return; }
+                    if (isCsrfEnabled && !csrfToken) { console.error('Apply Modal: CSRF Token not found!'); alert('Lỗi bảo mật (CSRF), vui lòng F5.'); return; }
+                    // console.log("Apply Modal: Fetching...");
+                    confirmApplyButton.disabled = true; confirmApplyButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang gửi...';
+                    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({message: message}) })
+                    .then(response => { if (!response.ok) { return response.json().catch(()=>{}).then(errData=>{throw new Error(errData?.message||`Lỗi ${response.status}`)}) } return response.json(); })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            applyModal.hide();
+                            showBootstrapToast(data.message || 'Đăng ký thành công! Đang tải lại trang...', 'success');
+                            setTimeout(() => { window.location.reload(); }, 3000); // Tải lại để cập nhật UI
+                        } else {
+                            showBootstrapToast(data.message || 'Có lỗi khi đăng ký.', 'danger');
+                            confirmApplyButton.disabled = false; confirmApplyButton.textContent = 'Xác nhận Đăng ký';
+                        }
                     })
-                        .then(response => response.json()) // Luôn cố gắng parse JSON
-                        .then(data => {
-                            if (data.status === 'success') {
-                                // Đăng ký thành công
-                                applyModal.hide(); // Ẩn modal
-                                // Thay thế nút "Đăng ký" ban đầu bằng nút "Đã đăng ký"
-                                const originalButton = document.querySelector(`button[data-bs-target="#applyConfirmModal"][data-post-id="${postId}"]`);
-                                if (originalButton) {
-                                    const alreadyAppliedButton = document.createElement('button');
-                                    alreadyAppliedButton.type = 'button';
-                                    alreadyAppliedButton.className = 'btn btn-secondary btn-sm';
-                                    alreadyAppliedButton.disabled = true;
-                                    alreadyAppliedButton.innerHTML = '<i class="bi bi-check-circle"></i> Đã đăng ký / Chờ duyệt';
-                                    originalButton.parentNode.replaceChild(alreadyAppliedButton, originalButton);
-                                }
-                                // Hiển thị thông báo thành công (có thể dùng Toast của Bootstrap thay vì alert)
-                                alert(data.message || 'Đăng ký thành công!');
-
-                            } else {
-                                // Hiển thị lỗi từ backend
-                                alert(data.message || 'Có lỗi xảy ra khi đăng ký.');
-                                // Kích hoạt lại nút nếu lỗi
-                                confirmApplyButton.disabled = false;
-                                confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            alert('Lỗi kết nối hoặc xử lý dữ liệu, vui lòng thử lại.');
-                            // Kích hoạt lại nút nếu lỗi
-                            confirmApplyButton.disabled = false;
-                            confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-                        });
+                    .catch(error => { console.error('Apply Fetch error:', error); showBootstrapToast(error.message || 'Lỗi kết nối.', 'danger'); confirmApplyButton.disabled = false; confirmApplyButton.textContent = 'Xác nhận Đăng ký'; });
                 });
+                applyModalElement.addEventListener('hidden.bs.modal', event => { if (messageTextarea) messageTextarea.value = ''; confirmApplyButton.disabled = false; confirmApplyButton.textContent = 'Xác nhận Đăng ký'; });
+            } else { console.log("Apply Modal elements not found."); } // End Apply modal logic
 
-                // Reset textarea và kích hoạt lại nút khi modal đóng (phòng trường hợp đóng mà không submit)
-                applyModalElement.addEventListener('hidden.bs.modal', event => {
-                    messageTextarea.value = ''; // Xóa lời nhắn cũ
-                    confirmApplyButton.disabled = false;
-                    confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-                });
+            // --- 3. Logic Modal Hủy Đăng ký (Withdraw Modal) ---
+            const withdrawModalElement = document.getElementById('withdrawConfirmModal');
+            const confirmWithdrawButton = document.getElementById('confirmWithdrawBtn');
+            if (withdrawModalElement && confirmWithdrawButton) {
+                const withdrawModal = new bootstrap.Modal(withdrawModalElement);
+                const withdrawAppIdInput = document.getElementById('withdrawAppId');
+                const withdrawReasonTextarea = document.getElementById('withdrawReason');
+                // console.log("Withdraw Modal found, adding listener.");
+                confirmWithdrawButton.addEventListener('click', function() {
+                     const applicationId = withdrawAppIdInput ? withdrawAppIdInput.value : null;
+                     const reason = withdrawReasonTextarea ? withdrawReasonTextarea.value.trim() : '';
+                     const url = applicationId ? `/application/${applicationId}/withdraw` : null;
+                     const csrfToken = getCsrfToken();
+                     if (!url) { alert('Lỗi: Không tìm thấy ID đơn đăng ký.'); return; }
+                     if (isCsrfEnabled && !csrfToken) { console.error('Withdraw Modal: CSRF Token not found!'); alert('Lỗi bảo mật (CSRF), vui lòng F5.'); return; }
+                     // console.log("Withdraw Modal: Fetching...");
+                     confirmWithdrawButton.disabled = true; confirmWithdrawButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang hủy...';
+                     fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({ reason: reason }) })
+                     .then(response => { if (!response.ok) { return response.json().catch(()=>{}).then(errData=>{throw new Error(errData?.message||`Lỗi ${response.status}`)}) } return response.json(); })
+                     .then(data => {
+                         if (data.status === 'success') {
+                            withdrawModal.hide();
+                            showBootstrapToast(data.message || 'Đã hủy đăng ký thành công! Đang tải lại trang...', 'info');
+                            setTimeout(() => { window.location.reload(); }, 3000); // Tải lại để cập nhật UI
+                         } else {
+                             showBootstrapToast(data.message || 'Có lỗi khi hủy đăng ký.', 'danger');
+                             confirmWithdrawButton.disabled = false; confirmWithdrawButton.textContent = 'Xác nhận Hủy';
+                         }
+                     })
+                     .catch(error => { console.error('Withdraw Fetch error:', error); showBootstrapToast(error.message || 'Lỗi kết nối.', 'danger'); confirmWithdrawButton.disabled = false; confirmWithdrawButton.textContent = 'Xác nhận Hủy'; });
+                }); // End confirmWithdrawButton listener
+                if(withdrawModalElement && withdrawReasonTextarea) { withdrawModalElement.addEventListener('hidden.bs.modal', event => { withdrawReasonTextarea.value = ''; if(confirmWithdrawButton){ confirmWithdrawButton.disabled = false; confirmWithdrawButton.textContent = 'Xác nhận Hủy'; } }); }
+            } else { console.log("Withdraw Modal elements not found."); } // End Withdraw modal logic
 
-            } // end if(applyModalElement && confirmApplyButton)
-        });
-    </script>
-{% endblock %}
+            // --- 4. Logic Nút Share ---
+            const shareButton = document.getElementById('share-button'); // <<< Cần có nút với ID này trong HTML
+            const fallbackLinks = document.getElementById('fallback-share-links'); // <<< Cần div này trong HTML
+            if (shareButton) {
+                 // console.log("Share button found, adding listener.");
+                 shareButton.addEventListener('click', async () => {e
+                     const shareData = {
+                        title: {{ post.title | tojson | safe }}, // Dùng post
+                        text: {{ (post.abstract or post.title) | truncate(100) | tojson | safe }}, // Dùng post
+                        url: {{ url_for("view_post", post_id=post.id, _external=True) | tojson | safe }} // Dùng view_post
+                     };
+                     // console.log("Share data:", shareData);
+                     if (navigator.share) {
+                         try { await navigator.share(shareData); console.log('Shared successfully via Web Share API'); }
+                         catch (err) { console.error('Web Share API failed:', err); /* if (fallbackLinks) fallbackLinks.classList.remove('d-none'); */ }
+                     } else { console.log('Web Share API not supported, showing fallback.'); if (fallbackLinks) fallbackLinks.classList.remove('d-none'); }
+                 });
+             } else { console.log("Share button not found."); } // End Share logic
 
-{# === END: JavaScript cho Modal Đăng ký Đề tài === #}
-
+        }); // End DOMContentLoaded listener chung
+        </script>
+{% endblock scripts %}
