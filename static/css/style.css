@@ -5,6 +5,7 @@
 
 body {
     padding-top: 45px;
+     font-family: 'Bookman Old Style', Bookman, Georgia, Times, 'Times New Roman', serif
 
 }
 
@@ -109,3 +110,12 @@ body {
 /* #showcaseCarousel .carousel-item img[src*="via.placeholder.com"] {
    display: none;
 } */
+
+.modal.fade .modal-dialog {
+    transform: translate(0, 0); /* Bắt đầu và kết thúc ở vị trí giữa (không trượt) */
+    /* Giữ lại transition cho opacity (fade) nếu muốn */
+    /* transition: opacity .15s linear; */ /* Có thể không cần dòng này */
+}
+.modal.show .modal-dialog {
+    transform: none; /* Hoặc translate(0,0) */
+}

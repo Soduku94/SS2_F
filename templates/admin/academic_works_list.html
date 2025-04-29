@@ -83,14 +83,17 @@
                 <table class="table table-hover table-bordered table-striped">
                     <thead class="table-light">
                     <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Tiêu đề</th>
-                        <th scope="col">Loại</th>
-                        <th scope="col">Tác giả/Nhóm</th>
-                        <th scope="col">Năm</th>
-                        <th scope="col">Công khai?</th>
-                        <th scope="col">Ngày thêm</th>
-                        <th scope="col">Hành động</th>
+                        {# Thêm style="width: X%;" cho từng cột #}
+                        <th scope="col" style="width: 5%;">STT</th>
+                        <th scope="col" style="width: 35%;">Tiêu đề</th>
+                        {# << Giảm % này để cột bé lại #}
+                        <th scope="col" style="width: 12%;">Loại</th>
+                        <th scope="col" style="width: 15%;">Tác giả/Nhóm</th>
+                        <th scope="col" style="width: 6%;">Năm</th>
+                        <th scope="col" style="width: 8%;">Công khai?</th>
+                        <th scope="col" style="width: 10%;">Ngày thêm</th>
+                        {# Cột Hành động có thể cần cả min-width để nút không vỡ #}
+                        <th scope="col" style="width: 9%; min-width: 120px;">Hành động</th>
                     </tr>
                     </thead>
                     <tbody>

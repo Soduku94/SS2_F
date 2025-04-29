@@ -570,47 +570,47 @@ def download_file(filename):
 @app.route('/post/<int:post_id>')
 @login_required
 def view_post(post_id):
+    # Lấy thông tin bài đăng
     post = Post.query.get_or_404(post_id)
-    # --- START: Lấy thông tin Like cho Post này (Hệ thống Like mới) ---
+
+    # --- Lấy thông tin Like (Giữ nguyên như phiên bản trước) ---
     post_like_count = 0
-    user_has_liked_post = False # Đổi tên biến cho rõ ràng
+    user_has_liked_post = False
     try:
-        # Đếm tổng số lượt like
         post_like_count = db.session.query(func.count(PostLike.id))\
                                     .filter(PostLike.post_id == post.id)\
                                     .scalar() or 0
-
-        # Kiểm tra user hiện tại đã like post này chưa (nếu đã đăng nhập)
         if current_user.is_authenticated:
-            user_like = PostLike.query.filter_by(
-                user_id=current_user.id,
-                post_id=post.id
-            ).first()
-            if user_like:
-                user_has_liked_post = True
-
+            user_like = PostLike.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+            if user_like: user_has_liked_post = True
     except Exception as e:
         print(f"Error fetching like info for post {post_id}: {e}")
-    # --- END: Lấy thông tin Like ---
+    # --- Kết thúc lấy Like ---
 
 
-    # --- Lấy thông tin Đăng ký Topic (Giữ nguyên) ---
-    already_applied = False
+    # --- START: Lấy thông tin Đăng ký Topic (Lấy cả object) ---
+    application = None # Khởi tạo là None (chưa đăng ký)
+    # Chỉ query nếu người xem là sinh viên và bài đăng là topic
     if post.post_type == 'topic' and current_user.is_authenticated and current_user.role == 'student':
-        existing_app = TopicApplication.query.filter_by(user_id=current_user.id, post_id=post.id).first()
-        if existing_app:
-            already_applied = True
-    # --- Kết thúc Lấy thông tin Đăng ký ---
+        try:
+            # Tìm đơn đăng ký (nếu có) của sinh viên này cho post này
+            application = TopicApplication.query.filter_by(
+                user_id=current_user.id,
+                post_id=post.id
+            ).first() # Dùng first() để lấy object hoặc None
+        except Exception as e:
+            print(f"Error fetching application info for post {post_id}, user {current_user.id}: {e}")
+            application = None # Đảm bảo là None nếu có lỗi query
+    # --- END: Lấy thông tin Đăng ký Topic ---
 
 
-    # --- Truyền tất cả dữ liệu cần thiết vào template ---
+    # --- Render template, truyền 'application' thay vì 'already_applied' ---
     return render_template('post_detail.html',
                            title=post.title,
                            post=post,
-                           already_applied=already_applied,           # <<< Giữ lại biến này cho nút Đăng ký
-                           like_count=post_like_count,                # <<< Truyền số lượt like mới
-                           user_has_liked=user_has_liked_post)        # <<< Truyền trạng thái like của user
-
+                           application=application,         # <<< THAY THẾ: Truyền đối tượng application (hoặc None)
+                           like_count=post_like_count,
+                           user_has_liked=user_has_liked_post)
 
 # --- KẾT THÚC SỬA VIEW_POST ---
 
@@ -926,60 +926,46 @@ from flask import jsonify
 
 
 
-@app.route('/my_interests')
-@login_required
-def my_interests():
-    if current_user.role != 'student': abort(403)
-    page = request.args.get('page', 1, type=int)
-    PER_PAGE = 10
-    pagination = current_user.interested_topics.order_by(Post.date_posted.desc()) \
-        .paginate(page=page, per_page=PER_PAGE, error_out=False)
-    return render_template('interested_topics.html', title='Đề tài đã quan tâm',
-                           posts_pagination=pagination)
-@app.route('/application/<int:application_id>/withdraw', methods=['POST']) # Chỉ nhận POST
+
+@app.route('/application/<int:application_id>/withdraw', methods=['POST'])
 @login_required
 def withdraw_application(application_id):
-    # Tìm đơn đăng ký theo ID
     application = TopicApplication.query.get_or_404(application_id)
-
-    # --- Kiểm tra quyền ---
-    # Chỉ sinh viên đã tạo đơn này mới được hủy
-    if application.user_id != current_user.id:
-        abort(403) # Không có quyền
-
-    # --- Kiểm tra trạng thái ---
-    # Chỉ cho phép hủy nếu đơn đang ở trạng thái 'pending'
+    if application.user_id != current_user.id: abort(403)
     if application.status != 'pending':
-        flash('Bạn không thể hủy đơn đăng ký đã được xử lý hoặc có trạng thái khác.', 'warning')
-        return redirect(url_for('my_applications')) # Quay về trang danh sách đơn
+        flash('Bạn không thể hủy đơn đăng ký đã được xử lý.', 'warning')
+        # Trả về lỗi JSON thay vì redirect để AJAX xử lý
+        return jsonify({'status': 'error', 'message': 'Đơn đã được xử lý.'}), 400
 
-    # --- Thực hiện xóa ---
     try:
-        # (Tùy chọn) Tạo thông báo cho Giảng viên biết là SV đã hủy
-        post_author_id = application.topic.user_id # Lấy ID giảng viên
+        post_author_id = application.topic.user_id if application.topic else None
+        post_title = application.topic.title if application.topic else "Không rõ"
+
+        db.session.delete(application) # Xóa đơn đăng ký
+
+        # Tạo thông báo cho Giảng viên (tùy chọn)
         if post_author_id:
-             notification_content = f"Sinh viên {current_user.full_name} đã hủy đăng ký đề tài: '{application.topic.title[:30]}...'"
+             notification_content = f"Sinh viên {current_user.full_name} đã hủy đăng ký đề tài: '{post_title[:30]}...'"
              new_notification = Notification(
-                 recipient_id=post_author_id,
-                 sender_id=current_user.id, # Người gửi là Sinh viên
-                 content=notification_content,
-                 notification_type='application_withdrawn', # Loại thông báo mới
-                 # related_post_id=application.post_id, # Cần thêm trường này nếu muốn link
-                 # related_application_id=application.id, # Hoặc trường này
+                 recipient_id=post_author_id, sender_id=current_user.id,
+                 content=notification_content, notification_type='application_withdrawn',
                  is_read=False
              )
-             db.session.add(new_notification) # Thêm thông báo vào session
+             db.session.add(new_notification)
 
-        # Xóa bản ghi đơn đăng ký
-        db.session.delete(application)
-        db.session.commit() # Lưu thay đổi (xóa đơn và thêm thông báo)
-        flash('Đã hủy đăng ký đề tài .', 'success')
+        db.session.commit()
+        # flash('Đã hủy đăng ký đề tài thành công.', 'success') # Không dùng flash cho AJAX
+        # Trả về JSON thành công cho JavaScript
+        return jsonify({'status': 'success', 'applied': False, 'message': 'Đã hủy đăng ký đề tài!', })
     except Exception as e:
         db.session.rollback()
-        flash(f'Đã xảy ra lỗi khi hủy đăng ký: {e}', 'danger')
+        # flash(f'Đã xảy ra lỗi khi hủy đăng ký: {e}', 'danger') # Không dùng flash
+        print(f"Error withdrawing application {application_id}: {e}")
+        # Trả về JSON lỗi cho JavaScript
+        return jsonify({'status': 'error', 'message': f'Lỗi khi hủy đăng ký: {e}'}), 500
 
-    # Chuyển hướng về trang danh sách đơn đăng ký
-    return redirect(url_for('my_applications'))
+
+
 
 # --- THÊM ROUTE MỚI ĐỂ ĐỔI MẬT KHẨU ---
 @app.route('/change-password', methods=['GET', 'POST'])
