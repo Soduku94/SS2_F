@@ -32,14 +32,14 @@ except ImportError:
 
 
 class LoginForm(FlaskForm):
-    """Form dùng cho người dùng đăng nhập."""
+    """Login form."""
     email = StringField('Email',
-                        validators=[DataRequired(message="Vui lòng nhập email."),
-                                    Email(message="Email không hợp lệ.")])
-    password = PasswordField('Mật khẩu',
-                             validators=[DataRequired(message="Vui lòng nhập mật khẩu.")])
-    remember = BooleanField('Ghi nhớ đăng nhập')  # Đảm bảo đã bỏ comment ở login_user nếu dùng
-    submit = SubmitField('Đăng nhập')
+                        validators=[DataRequired(message="Please enter your email address"),
+                                    Email(message="Email invalidated")])
+    password = PasswordField('Password',
+                             validators=[DataRequired(message="Please enter your password")])
+    remember = BooleanField('Remember my login')  # Đảm bảo đã bỏ comment ở login_user nếu dùng
+    submit = SubmitField('Log in')
 
 
 # forms.py
@@ -370,3 +370,4 @@ class AcademicWorkForm(FlaskForm):
     is_published = BooleanField('Hiển thị công khai trên trang Showcase?') # Checkbox để chọn publish
 
     submit = SubmitField('Lưu Công trình')
+
