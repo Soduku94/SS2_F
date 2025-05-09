@@ -1,96 +1,162 @@
 {% extends "base.html" %}
-
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Đơn đăng ký: {{ topic.title }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    {# Hiển thị tiêu đề bài đăng/đề tài #}
-    <h1 class="mb-1">Đơn Đăng ký cho Đề tài:</h1>
-    <h2 class="mb-4 text-primary">{{ post.title }}</h2>
-    <p>
-        <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Quay lại trang đề tài
-        </a>
-         <a href="{{ url_for('my_posts') }}" class="btn btn-sm btn-outline-secondary ms-2">
-            <i class="bi bi-journals"></i> Xem các bài đăng của tôi
-        </a>
-    </p>
-    <hr>
+    {# --- Tiêu đề trang và tên đề tài --- #}
+    <h2>Đơn Đăng ký cho Đề tài:</h2>
+    <h3 class="text-primary mb-4">{{ topic.title }}</h3>
 
-    {# --- Danh sách đơn đăng ký --- #}
-    <h3>Danh sách Sinh viên Đăng ký ({{ applications|length }})</h3>
+    {# === Phần Tabs === #}
+    <ul class="nav nav-tabs mb-3" id="applicationStatusTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            {# Nút tab Chờ duyệt - active mặc định #}
+            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-tab-pane" type="button" role="tab" aria-controls="pending-tab-pane" aria-selected="true">
+                Chờ duyệt <span class="badge bg-secondary">{{ pending_apps|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+             {# Nút tab Đã duyệt #}
+            <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved-tab-pane" type="button" role="tab" aria-controls="approved-tab-pane" aria-selected="false">
+                Đã duyệt <span class="badge bg-success">{{ approved_apps|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+             {# Nút tab Đã từ chối #}
+            <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected-tab-pane" type="button" role="tab" aria-controls="rejected-tab-pane" aria-selected="false">
+                Đã từ chối <span class="badge bg-danger">{{ rejected_apps|length }}</span> {# Giả sử có rejected_apps #}
+            </button>
+        </li>
+    </ul>
+    {# === Kết thúc Tabs === #}
 
-    {% if applications %}
-        <div class="table-responsive">
-            <table class="table table-hover table-striped table-bordered caption-top">
-                <caption>Danh sách các đơn đăng ký</caption>
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Sinh viên</th>
-                        <th scope="col">MSSV</th>
-                        <th scope="col">Lớp</th>
-                        <th scope="col">Ngày ĐK</th>
-                        <th scope="col">Trạng thái</th>
-                        <th scope="col">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for app in applications %}
-                    <tr>
-                        <th scope="row">{{ loop.index }}</th>
-                        <td>
-                            {# Link đến profile sinh viên nếu có #}
-                            {{ app.student.full_name if app.student else 'N/A' }}
-                            {% if app.message %}<br><small class="text-muted fst-italic" title="Lời nhắn">"{{ app.message }}"</small>{% endif %}
-                        </td>
-                        <td>{{ app.student.student_id if app.student else 'N/A' }}</td>
-                        <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
-                        <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
-                        <td>
-                            {# Hiển thị trạng thái bằng badge #}
-                            {% if app.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">Chờ xử lý</span>
-                            {% elif app.status == 'accepted' %}
-                                <span class="badge bg-success">Đã chấp thuận</span>
-                            {% elif app.status == 'rejected' %}
-                                <span class="badge bg-danger">Đã từ chối</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{{ app.status }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {# --- Nút Hành động (Accept/Reject) --- #}
-                            {# Chỉ hiển thị nút nếu trạng thái đang là 'pending' #}
-                            {% if app.status == 'pending' %}
-                                <form action="{{ url_for('update_application_status', application_id=app.id) }}" method="POST" style="display: inline-block;" class="me-1">
-                                    {# Truyền trạng thái mới qua input ẩn hoặc value của nút #}
-                                    <input type="hidden" name="status" value="accepted">
-                                    <button type="submit" class="btn btn-success btn-sm" title="Chấp thuận sinh viên này">
-                                        <i class="bi bi-check-lg"></i> Duyệt
-                                    </button>
-                                </form>
-                                <form action="{{ url_for('update_application_status', application_id=app.id) }}" method="POST" style="display: inline-block;">
-                                    <input type="hidden" name="status" value="rejected">
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Từ chối sinh viên này">
-                                        <i class="bi bi-x-lg"></i> Từ chối
-                                    </button>
-                                </form>
-                            {% else %}
-                                {# Nếu đã xử lý thì không có hành động gì thêm ở đây #}
-                                <small class="text-muted">Đã xử lý</small>
-                            {% endif %}
-                            {# --- Kết thúc nút hành động --- #}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {# === Nội dung các Tab (Tab Content) === #}
+    <div class="tab-content" id="applicationStatusTabsContent">
+
+        {# --- Nội dung Tab Chờ duyệt --- #}
+        <div class="tab-pane fade show active" id="pending-tab-pane" role="tabpanel" aria-labelledby="pending-tab" tabindex="0">
+            <h4>Danh sách chờ duyệt</h4>
+            {% if pending_apps %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sinh viên</th>
+                                <th>MSSV</th>
+                                <th>Lớp</th>
+                                <th>Ngày ĐK</th>
+                                <th>Lời nhắn</th> {# Ví dụ thêm cột lời nhắn #}
+                                <th>Hành động</th> {# Cột Duyệt/Từ chối #}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in pending_apps %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ student.full_name }}</td>
+                                <td>{{ student.student_id }}</td> {# Sửa tên trường nếu cần #}
+                                <td>{{ student.class_name }}</td> {# Sửa tên trường nếu cần #}
+                                <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ app.message | truncate(50) if app.message else '' }}</td> {# Ví dụ #}
+                                <td>
+                                    {# Form Duyệt - Nhớ thêm CSRF Token #}
+                                    <form action="{{ url_for('approve_application', application_id=app.id) }}" method="POST" style="display: inline-block; margin-bottom: 5px;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-success btn-sm w-100">Duyệt</button>
+                                    </form>
+                                    {# Form Từ chối - Nhớ thêm CSRF Token #}
+                                    <form action="{{ url_for('reject_application', application_id=app.id) }}" method="POST" style="display: inline-block;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-danger btn-sm w-100">Từ chối</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>Không có đơn đăng ký nào đang chờ duyệt.</p>
+            {% endif %}
         </div>
-    {% else %}
-        <div class="alert alert-info">Chưa có sinh viên nào đăng ký đề tài này.</div>
-    {% endif %}
-    {# --- Kết thúc danh sách --- #}
+        {# --- Kết thúc Tab Chờ duyệt --- #}
+
+        {# --- Nội dung Tab Đã duyệt --- #}
+        <div class="tab-pane fade" id="approved-tab-pane" role="tabpanel" aria-labelledby="approved-tab" tabindex="0">
+            <h4>Danh sách đã duyệt</h4>
+             {% if approved_apps %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sinh viên</th>
+                                <th>MSSV</th>
+                                <th>Lớp</th>
+                                <th>Ngày ĐK</th>
+                                <th>Ngày duyệt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in approved_apps %}
+                             <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ student.full_name }}</td>
+                                <td>{{ student.student_id }}</td>
+                                <td>{{ student.class_name }}</td>
+                                <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ app.processed_date.strftime('%d/%m/%Y %H:%M') if app.processed_date else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+             {% else %}
+                <p>Chưa có đơn đăng ký nào được duyệt.</p>
+             {% endif %}
+        </div>
+        {# --- Kết thúc Tab Đã duyệt --- #}
+
+        {# --- Nội dung Tab Đã từ chối --- #}
+        <div class="tab-pane fade" id="rejected-tab-pane" role="tabpanel" aria-labelledby="rejected-tab" tabindex="0">
+             <h4>Danh sách đã từ chối</h4>
+             {% if rejected_apps %} {# Giả sử có rejected_apps #}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered table-striped table-sm">
+                       <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sinh viên</th>
+                                <th>MSSV</th>
+                                <th>Lớp</th>
+                                <th>Ngày ĐK</th>
+                                <th>Ngày từ chối</th>
+                                {# Thêm lý do nếu có #}
+                            </tr>
+                        </thead>
+                         <tbody>
+                            {% for app in rejected_apps %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ student.full_name }}</td>
+                                <td>{{ student.student_id }}</td>
+                                <td>{{ student.class_name }}</td>
+                                <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ app.processed_date.strftime('%d/%m/%Y %H:%M') if app.processed_date else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+             {% else %}
+                <p>Không có đơn đăng ký nào bị từ chối.</p>
+             {% endif %}
+        </div>
+        {# --- Kết thúc Tab Đã từ chối --- #}
+
+    </div>
+    {# === Kết thúc Tab Content === #}
 
 </div>
 {% endblock %}
