@@ -6,6 +6,7 @@
 from dotenv import load_dotenv
 import json
 import os
+from datetime import datetime, timezone # Đảm bảo đã import
 
 load_dotenv()
 import secrets
@@ -1112,30 +1113,6 @@ def submit_idea():
             db.session.flush()  # Flush để lấy ID và kiểm tra recipients trước khi xử lý file
             idea_id_to_assign = idea.id
 
-            # >>>>>>>>>>>>>>>>>> START: THÊM CODE XỬ LÝ TAGS Ở ĐÂY >>>>>>>>>>>>>>>>>>
-            tags_string = form.tags.data
-            post_tags_objects = []  # List để giữ các đối tượng Tag
-            if tags_string:
-                # Tách chuỗi thành list tên tag, xóa khoảng trắng, chuyển về chữ thường
-                tag_names = [name.strip().lower() for name in tags_string.split(',') if name.strip()]
-                if tag_names:
-                    # Lấy các tag đã tồn tại trong DB ứng với các tên trong list
-                    existing_tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
-                    # Tạo một map để truy cập nhanh tag đã có theo tên
-                    existing_tags_map = {tag.name: tag for tag in existing_tags}
-
-                    for name in tag_names:
-                        tag = existing_tags_map.get(name)  # Lấy tag từ map nếu có
-                        if not tag:
-                            # Nếu tag chưa có trong DB, tạo mới và add vào session
-                            tag = Tag(name=name)
-                            db.session.add(tag)
-                        # Thêm tag (dù mới hay cũ) vào list cho bài post này
-                        post_tags_objects.append(tag)
-
-            # Gán danh sách các đối tượng Tag vào relationship của post
-            # SQLAlchemy sẽ tự xử lý việc thêm vào bảng liên kết post_tags khi commit
-            post.tags = post_tags_objects
 
             # Xử lý file attachments nếu có ID
             if form.attachments.data and form.attachments.data[0].filename != '':
@@ -1216,8 +1193,9 @@ def submit_idea():
     # Render form cho GET hoặc validation fail
     # Đảm bảo choices vẫn còn nếu validation fail ở POST
     if request.method == 'POST' and not form.validate_on_submit():
-        print("Form validation errors (submit_idea):", form.errors)
-        # Choices đã được đặt ở đầu hàm nên vẫn còn
+        print("!!!!!!!!!!!!!!!!! FORM SUBMIT IDEA - VALIDATION ERRORS !!!!!!!!!!!!!!!!!")
+        print(form.errors)  # <<<< THÊM DÒNG NÀY ĐỂ DEBUG
+        flash('Vui lòng kiểm tra lại các thông tin đã nhập.', 'danger')
     return render_template('submit_idea.html', title='Gửi Ý tưởng Mới', form=form)
 
 
@@ -1687,12 +1665,13 @@ def my_posts():
         app.run(debug=True)
 
 
+# app.py
+
 @app.route('/post/<int:post_id>/applications')
 @login_required
-def view_topic_applications(post_id):
+def view_topic_applications(post_id): # post_id này là ID của Post/Topic
     # Lấy thông tin bài đăng/đề tài
-    # Sử dụng tên biến 'topic' thay vì 'post' để khớp với template mới
-    topic = Post.query.options(joinedload(Post.author)).get_or_404(post_id)  # Lấy cả author để check
+    topic = Post.query.options(joinedload(Post.author)).get_or_404(post_id)
 
     # --- Kiểm tra quyền ---
     if topic.author != current_user:  # and current_user.role != 'admin':
@@ -1705,69 +1684,57 @@ def view_topic_applications(post_id):
 
     # --- Lấy và Phân loại Đơn đăng ký ---
     try:
-        # Lấy tất cả đơn đăng ký kèm thông tin người nộp đơn (applicant)
-        # Sắp xếp theo ngày đăng ký tăng dần (cũ nhất trước) hoặc .desc() (mới nhất trước)
-        all_apps = TopicApplication.query.filter_by(topic_id=topic.id) \
+        # SỬA Ở ĐÂY: Dùng post_id để filter
+        all_apps = TopicApplication.query.filter_by(post_id=topic.id) \
                                             .options(joinedload(TopicApplication.student)) \
                                             .order_by(TopicApplication.application_date.desc()).all()
 
         # Phân loại dựa trên trường 'status' của model TopicApplication
-        # !!! Quan trọng: Đảm bảo các giá trị 'pending', 'approved', 'rejected' là đúng
-        #     với các giá trị bạn lưu trong CSDL cho trường status !!!
         pending_apps = [app for app in all_apps if app.status == 'pending']
-        approved_apps = [app for app in all_apps if app.status == 'accepted']
-        rejected_apps = [app for app in all_apps if app.status == 'rejected']
+        approved_apps = [app for app in all_apps if app.status == 'accepted'] # Đảm bảo 'accepted' là giá trị đúng
+        rejected_apps = [app for app in all_apps if app.status == 'rejected'] # Đảm bảo 'rejected' là giá trị đúng
 
     except Exception as e:
-        print(f"Lỗi khi query applications cho post {topic.id}: {e}")
-        pending_apps, approved_apps, rejected_apps = [], [], []  # Khởi tạo list rỗng nếu lỗi
+        print(f"Lỗi khi query applications cho post {topic.id}: {e}") # Lỗi sẽ không còn nếu sửa đúng
+        pending_apps, approved_apps, rejected_apps = [], [], []
         flash("Lỗi khi tải danh sách đơn đăng ký.", "danger")
 
     # --- Render Template với các biến mới ---
     return render_template(
-        'topic_applications.html',  # Tên file template của bạn
-        topic=topic,  # Gửi đối tượng đề tài (đã đổi tên từ post)
-        pending_apps=pending_apps,  # Gửi danh sách chờ
-        approved_apps=approved_apps,  # Gửi danh sách duyệt
-        rejected_apps=rejected_apps  # Gửi danh sách từ chối
-        # Biến 'title' không cần thiết nữa nếu template tự lấy từ topic.title
+        'topic_applications.html',
+        topic=topic,
+        pending_apps=pending_apps,
+        approved_apps=approved_apps,
+        rejected_apps=rejected_apps
     )
-
 
 @app.route('/application/<int:application_id>/update_status', methods=['POST'])
 @login_required
 def update_application_status(application_id):
-    # Lấy đơn đăng ký
     application = TopicApplication.query.get_or_404(application_id)
-    post = application.topic  # Lấy post liên quan từ relationship
+    post = application.topic
 
-    # --- Kiểm tra quyền ---
-    # Chỉ tác giả của bài đăng mới được duyệt
-    if post.author != current_user:  # and current_user.role != 'admin':
+    if post.author != current_user:
         abort(403)
 
-    # Lấy trạng thái mới từ form submit
     new_status = request.form.get('status')
 
-    # Kiểm tra giá trị status hợp lệ
     if new_status not in ['accepted', 'rejected']:
         flash('Trạng thái cập nhật không hợp lệ.', 'danger')
         return redirect(url_for('view_topic_applications', post_id=post.id))
 
-    # Cập nhật trạng thái của đơn đăng ký
-    application.status = new_status
 
-    # --- (Tùy chọn) Cập nhật trạng thái của Post ---
-    # Ví dụ: Nếu chấp thuận SV đầu tiên, chuyển Post sang 'working_on'?
-    # Hoặc nếu đủ số lượng SV mong muốn, chuyển sang 'closed'?
-    # Cần logic phức tạp hơn nếu muốn tự động hóa việc này. Ví dụ đơn giản:
-    if new_status == 'accepted':
-        # Có thể thêm logic kiểm tra số lượng đã accept, nếu đủ thì đổi post.status
-        # if post.applications.filter_by(status='accepted').count() >= post.max_students: # Giả sử có max_students
-        #    post.status = 'working_on' # Hoặc 'closed'
-        pass  # Tạm thời chưa đổi status post
+    original_status = application.status  # Lấy trạng thái hiện tại của đơn TRƯỚC KHI thay đổi
 
-    # ------------------------------------------------
+
+    application.status = new_status # Bây giờ mới cập nhật trạng thái mới
+
+    # Điều kiện if giờ sẽ hoạt động đúng
+    if application.status != original_status and (new_status == 'accepted' or new_status == 'rejected'):
+        application.processed_date = datetime.now(timezone.utc)
+        # Tùy chọn:
+        # if not application.processed_date: # Nếu chỉ muốn đặt 1 lần
+        #    application.processed_date = datetime.now(timezone.utc)
 
     # --- Tạo thông báo cho Sinh viên ---
     student_recipient = application.student
@@ -1777,27 +1744,21 @@ def update_application_status(application_id):
 
         new_notification = Notification(
             recipient_id=student_recipient.id,
-            sender_id=current_user.id,  # Người gửi là Giảng viên
+            sender_id=current_user.id,
             content=notif_content,
-            notification_type='application_update',  # Loại thông báo mới
-            # related_post_id=post.id, # <<< Cần thêm trường này vào Notification
-            # related_application_id=application.id, # <<< Hoặc trường này?
+            notification_type='application_update',
             is_read=False
         )
         db.session.add(new_notification)
-    # ---------------------------------
 
     try:
-        db.session.commit()  # Lưu thay đổi status application và notification mới
+        db.session.commit()
         flash(f'Đã cập nhật trạng thái đơn đăng ký thành "{new_status}".', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'Lỗi khi cập nhật trạng thái: {e}', 'danger')
 
-    # Chuyển hướng lại trang danh sách đơn đăng ký của post đó
     return redirect(url_for('view_topic_applications', post_id=post.id))
-
-
 # === START: THÊM CÁC ROUTE CHO TRANG SHOWCASE CÔNG KHAI ===
 
 # --- Route hiển thị danh sách Showcase ---
