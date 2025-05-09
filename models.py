@@ -62,7 +62,7 @@ class User(db.Model, UserMixin):
 
     # Các thông báo mà người dùng nhận được
     notifications = db.relationship('Notification', backref='recipient', lazy='dynamic',
-                                    foreign_keys='Notification.recipient_id',
+                                     foreign_keys='Notification.recipient_id',
                                     order_by='Notification.timestamp.desc()',
                                     cascade='all, delete-orphan')
 
