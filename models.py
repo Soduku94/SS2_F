@@ -196,6 +196,8 @@ class TopicApplication(db.Model):
     # Đảm bảo một sinh viên chỉ đăng ký một đề tài một lần
     __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='uq_user_post_application'),)
 
+    processed_date = db.Column(db.DateTime, nullable=True)
+
     def __repr__(self):
         return f'<TopicApplication User {self.user_id} -> Post {self.post_id} ({self.status})>'
 
