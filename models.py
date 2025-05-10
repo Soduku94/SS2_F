@@ -302,5 +302,3 @@ class PostLike(db.Model):
 
         def __repr__(self):
             return f'<PostLike User {self.user_id} liked Post {self.post_id}>'
-
-

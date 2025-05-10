@@ -5,68 +5,68 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>{{ title }}</h1>
-        {# Nút gửi ý tưởng mới #}
+        <h1>{{ title }}</h1> {# Assuming title is "My Ideas" #}
+        {# Button to submit a new idea #}
         <a href="{{ url_for('submit_idea') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle-fill"></i> Gửi ý tưởng mới
+            <i class="bi bi-plus-circle-fill"></i> Submit New Idea
         </a>
     </div>
 
-    {# --- Phần Tabs --- #}
+    {# --- Tabs Section --- #}
     <ul class="nav nav-tabs" id="myIdeasTab" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pending-my-tab" data-bs-toggle="tab" data-bs-target="#pending-my-tab-pane" type="button" role="tab" aria-controls="pending-my-tab-pane" aria-selected="true">
-                Đang chờ duyệt ({{ pending_ideas|length }})
+                Pending Approval ({{ pending_ideas|length }})
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="responded-my-tab" data-bs-toggle="tab" data-bs-target="#responded-my-tab-pane" type="button" role="tab" aria-controls="responded-my-tab-pane" aria-selected="false">
-                Đã phản hồi ({{ responded_ideas|length }})
+                Responded ({{ responded_ideas|length }}) {# Or "Feedback Received" #}
             </button>
         </li>
     </ul>
-    {# --- Nội dung Tabs --- #}
+    {# --- Tabs Content --- #}
     <div class="tab-content" id="myIdeasTabContent">
-        {# --- Tab Chờ duyệt --- #}
+        {# --- Pending Approval Tab --- #}
         <div class="tab-pane fade show active" id="pending-my-tab-pane" role="tabpanel" aria-labelledby="pending-my-tab" tabindex="0">
             <div class="list-group list-group-flush mt-3">
                 {% if pending_ideas %}
                     {% for idea in pending_ideas %}
-                        <div class="list-group-item"> {# Dùng div thay vì <a> để chứa nút #}
+                        <div class="list-group-item"> {# Using div instead of <a> to contain buttons #}
                             <div class="d-flex w-100 justify-content-between align-items-start">
                                 <div>
                                     <h5 class="mb-1">{{ idea.title }}</h5>
-                                    <p class="mb-1"><small>Gửi ngày: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
-                                     {# Hiển thị người nhận nếu có #}
+                                    <p class="mb-1"><small>Submitted on: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                                     {# Display recipients if any #}
                                      {% if idea.recipients %}
-                                        <p class="mb-1"><small>Gửi đến:
+                                        <p class="mb-1"><small>Sent to:
                                             {% for lecturer in idea.recipients %}
                                                 {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
                                             {% endfor %}
                                         </small></p>
                                      {% endif %}
-                                    <span class="badge bg-warning text-dark">Đang chờ duyệt</span>
+                                    <span class="badge bg-warning text-dark">Pending Approval</span>
                                 </div>
-                                {# Các nút hành động cho Sinh viên #}
+                                {# Action buttons for Student #}
                                 <div class="ms-3 mt-1">
-                                    <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-primary mb-1" title="Xem chi tiết"><i class="bi bi-eye-fill"></i> Xem</a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Xóa ý tưởng"><i class="bi bi-trash-fill"></i> Xóa</button>
+                                    <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-primary mb-1" title="View Details"><i class="bi bi-eye-fill"></i> View</a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Delete Idea"><i class="bi bi-trash-fill"></i> Delete</button>
                                 </div>
                             </div>
                         </div>
-                         {# Modal xác nhận xóa (đặt trong vòng lặp) #}
+                         {# Delete confirmation modal (place inside loop) #}
                          <div class="modal fade" id="deleteMyIdeaModal{{ idea.id }}" tabindex="-1" aria-labelledby="deleteMyIdeaModalLabel{{ idea.id }}" aria-hidden="true">
                              <div class="modal-dialog modal-sm">
                                  <div class="modal-content">
                                      <div class="modal-header">
-                                        <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Xác nhận Xóa</h5>
+                                        <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Confirm Deletion</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                      </div>
-                                     <div class="modal-body">Xóa ý tưởng "{{ idea.title }}"?</div>
+                                     <div class="modal-body">Delete idea "{{ idea.title }}"?</div>
                                      <div class="modal-footer">
-                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                                          <form action="{{ url_for('delete_my_idea', idea_id=idea.id) }}" method="POST" style="display: inline;">
-                                             <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                          </form>
                                      </div>
                                  </div>
@@ -74,13 +74,13 @@
                          </div>
                     {% endfor %}
                 {% else %}
-                    <div class="alert alert-info mt-3">Bạn chưa gửi ý tưởng nào đang chờ duyệt.</div>
+                    <div class="alert alert-info mt-3">You have no ideas pending approval.</div>
                 {% endif %}
-                {# Phân trang cho pending_ideas nếu cần sau #}
+                {# Pagination for pending_ideas if needed later #}
             </div>
         </div>
 
-        {# --- Tab Đã phản hồi --- #}
+        {# --- Responded Tab --- #}
         <div class="tab-pane fade" id="responded-my-tab-pane" role="tabpanel" aria-labelledby="responded-my-tab" tabindex="0">
              <div class="list-group list-group-flush mt-3">
                 {% if responded_ideas %}
@@ -89,51 +89,51 @@
                             <div class="d-flex w-100 justify-content-between align-items-start">
                                 <div>
                                     <h5 class="mb-1">{{ idea.title }}</h5>
-                                    <p class="mb-1"><small>Gửi ngày: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
-                                     {# Hiển thị người nhận nếu có #}
+                                    <p class="mb-1"><small>Submitted on: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                                     {# Display recipients if any #}
                                      {% if idea.recipients %}
-                                        <p class="mb-1"><small>Gửi đến:
+                                        <p class="mb-1"><small>Sent to:
                                             {% for lecturer in idea.recipients %}
                                                 {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
                                             {% endfor %}
                                         </small></p>
                                      {% endif %}
-                                     {# Hiển thị trạng thái đã phản hồi #}
+                                     {# Display responded status #}
                                      {% if idea.status == 'approved' %}
-                                        <span class="badge bg-success">Đã chấp thuận</span>
+                                        <span class="badge bg-success">Approved</span>
                                      {% elif idea.status == 'rejected' %}
-                                        <span class="badge bg-danger">Đã từ chối</span>
-                                     {% elif idea.status == 'reviewed' %}
-                                        <span class="badge bg-secondary">Đã xem xét</span>
+                                        <span class="badge bg-danger">Rejected</span>
+                                     {% elif idea.status == 'reviewed' %} {# Assuming 'reviewed' means feedback might be given, or initial review done #}
+                                        <span class="badge bg-info text-dark">Reviewed</span> {# Changed bg-secondary to bg-info for better visibility if needed #}
                                      {% else %}
-                                        <span class="badge bg-light text-dark">{{ idea.status }}</span>
+                                        <span class="badge bg-light text-dark">{{ idea.status | title }}</span> {# Use |title to capitalize status if it's a simple word #}
                                      {% endif %}
-                                     {# Hiển thị phản hồi nếu có #}
+                                     {# Display feedback if any #}
                                      {% if idea.feedback %}
-                                        <p class="mt-2 mb-0 small text-muted"><em>Phản hồi: {{ idea.feedback | truncate(100) }}</em></p>
+                                        <p class="mt-2 mb-0 small text-muted"><em>Feedback: {{ idea.feedback | truncate(100) }}</em></p>
                                      {% endif %}
                                 </div>
-                                {# Các nút hành động cho Sinh viên #}
+                                {# Action buttons for Student #}
                                 <div class="ms-3 mt-1">
-                                     <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-primary mb-1" title="Xem chi tiết & phản hồi"><i class="bi bi-eye-fill"></i> Xem</a>
-                                     <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Xóa ý tưởng"><i class="bi bi-trash-fill"></i> Xóa</button>
+                                     <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-primary mb-1" title="View Details & Feedback"><i class="bi bi-eye-fill"></i> View</a>
+                                     <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Delete Idea"><i class="bi bi-trash-fill"></i> Delete</button>
                                 </div>
                             </div>
                          </div>
-                          {# Modal xác nhận xóa (cần đặt trong vòng lặp, ID giống ở tab trên) #}
+                          {# Delete confirmation modal (needs to be in the loop, same ID as in pending tab) #}
                          <div class="modal fade" id="deleteMyIdeaModal{{ idea.id }}" tabindex="-1" aria-labelledby="deleteMyIdeaModalLabel{{ idea.id }}" aria-hidden="true">
-                             {# ... Nội dung modal giống hệt như ở tab pending ... #}
+                             {# ... Modal content exactly like in the pending tab ... #}
                              <div class="modal-dialog modal-sm">
                                  <div class="modal-content">
                                      <div class="modal-header">
-                                        <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Xác nhận Xóa</h5>
+                                        <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Confirm Deletion</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                      </div>
-                                     <div class="modal-body">Xóa ý tưởng "{{ idea.title }}"?</div>
+                                     <div class="modal-body">Delete idea "{{ idea.title }}"?</div>
                                      <div class="modal-footer">
-                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                                          <form action="{{ url_for('delete_my_idea', idea_id=idea.id) }}" method="POST" style="display: inline;">
-                                             <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                          </form>
                                      </div>
                                  </div>
@@ -141,12 +141,12 @@
                          </div>
                     {% endfor %}
                 {% else %}
-                    <div class="alert alert-info mt-3">Bạn không có ý tưởng nào đã được phản hồi.</div>
+                    <div class="alert alert-info mt-3">You have no ideas with feedback.</div>
                 {% endif %}
-                {# Phân trang cho responded_ideas nếu cần sau #}
+                {# Pagination for responded_ideas if needed later #}
             </div>
         </div>
-    </div> {# Kết thúc tab-content #}
+    </div> {# End tab-content #}
 
 </div>
 {% endblock %}

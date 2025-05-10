@@ -5,6 +5,7 @@
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">{{ title }}</h1>
+<hr>
 
     {% if applications_pagination and applications_pagination.items %}
         <div class="list-group shadow-sm">
@@ -15,26 +16,26 @@
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">
                             <a href="{{ url_for('view_post', post_id=app.post_id) }}" class="text-decoration-none">
-                                {{ app.topic.title if app.topic else 'Đề tài không tồn tại' }}
+                                {{ app.topic.title if app.topic else 'Topic does not exist' }}
                             </a>
                         </h5>
-                        <small class="text-muted" title="Ngày đăng ký">{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                        <small class="text-muted" title="Submission date">{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</small>
                     </div>
-                    <p class="mb-1"><small class="text-muted">Giảng viên: {{ app.topic.author.full_name if app.topic and app.topic.author else 'N/A' }}</small></p>
+                    <p class="mb-1"><small class="text-muted">Lecturer: {{ app.topic.author.full_name if app.topic and app.topic.author else 'N/A' }}</small></p>
                     <div class="mb-2">
-                        Trạng thái:
+                         Current Status:
                         {% if app.status == 'pending' %}
-                            <span class="badge bg-warning text-dark">Chờ phản hồi</span>
+                            <span class="badge bg-warning text-dark">Pending Review</span>
                         {% elif app.status == 'accepted' %}
-                            <span class="badge bg-success">Đã được chấp thuận</span>
+                            <span class="badge bg-success">Approved</span>
                         {% elif app.status == 'rejected' %}
-                            <span class="badge bg-danger">Đã bị từ chối</span>
+                            <span class="badge bg-danger">Rejected</span>
                         {% else %}
                             <span class="badge bg-secondary">{{ app.status }}</span>
                         {% endif %}
                     </div>
                     {% if app.message %}
-                        <p class="mb-1 fst-italic"><small>Lời nhắn của bạn: "{{ app.message }}"</small></p>
+                        <p class="mb-1 fst-italic"><small>Your messages: "{{ app.message }}"</small></p>
                     {% endif %}
 
 
@@ -47,16 +48,35 @@
         </div> {# Đóng thẻ list-group #}
 
         {# --- Phân trang --- #}
-        {% if applications_pagination.pages > 1 %}
-            <nav aria-label="My Applications navigation" class="mt-4">
-                 {# ... Code phân trang giữ nguyên ... #}
-                 <ul class="pagination justify-content-center"> ... </ul>
-            </nav>
-        {% endif %}
+       {% if applications_pagination and applications_pagination.pages > 1 %}
+        <nav aria-label="Notifications navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {# ... code phân trang ... #}
+                 <li class="page-item {% if not applicationss_pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('applications', page=applications_pagination.prev_num) if applications_pagination.has_prev else '#' }}">&laquo;</a>
+                    </li>
+                    {% for page_num in applications_pagination.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == applications_pagination.page %}active{% endif %}">
+                                <a class="page-link"
+                                   href="{{ url_for('applications', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {% if not applications_pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('applications', page=applications_pagination.next_num) if applications_pagination.has_next else '#' }}">&raquo;</a>
+                    </li>
+            </ul>
+        </nav>
+    {% endif %}
         {# --- Kết thúc Phân Trang --- #}
 
     {% else %}
-        <div class="alert alert-info">Bạn chưa đăng ký đề tài nào.</div>
+        <div class="alert alert-info">You have not registered any topics.</div>
     {% endif %}
 </div> {# Đóng container #}
 {% endblock %} {# Đóng block content #}
