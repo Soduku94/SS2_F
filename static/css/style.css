@@ -5,7 +5,8 @@
 
 body {
     padding-top: 45px;
-     font-family: 'Slab Serif ', 'Times New Roman', serif
+     font-family: 'Slab Serif ', 'Times New Roman', serif;
+     background-color: #f0f2f5;
 
 }
 
@@ -31,6 +32,101 @@ body {
 .navbar-nav .dropdown-menu-end {
     margin-right: 5px;
 }
+
+
+.custom_navbar{
+    background-color : #2E86AB !important;
+}
+.custom-navbar .navbar-brand,
+.custom-navbar .nav-link,
+.custom-navbar .navbar-toggler-icon { /* Màu cho icon của nút toggle */
+    color: rgba(255, 255, 255, 0.9) !important; /* Màu chữ trắng với chút trong suốt */
+}
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link:focus,
+.custom-navbar .navbar-brand:hover {
+    color: #ffffff !important; /* Màu chữ trắng hoàn toàn khi hover/focus */
+}
+
+/* Màu cho link active (nếu cần tùy chỉnh khác với Bootstrap) */
+.custom-navbar .nav-item .nav-link.active {
+    /* color: #your-active-link-color !important; */
+    /* font-weight: bold; */ /* Ví dụ */
+}
+
+/* Màu cho nút tìm kiếm outline (nếu bạn có) */
+.custom-navbar .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+.custom-navbar .btn-outline-light:hover {
+    border-color: #ffffff !important;
+    color: #000000 !important; /* Đổi màu chữ khi hover để dễ đọc trên nền trắng của nút */
+    background-color: #ffffff !important;
+}
+
+
+.custom-footer {
+    background-color: #2E86AB !important; /* Giống màu navbar */
+    color: rgba(255, 255, 255, 0.9) !important; /* Màu chữ tương tự navbar, hoặc dùng text-light của Bootstrap nếu bạn thấy phù hợp */
+}
+
+
+
+
+/*thêm icon kính lúp*/
+
+.search-input-container {
+    position: relative; /* Cần thiết để định vị icon tuyệt đối bên trong nó */
+    flex-grow: 1;       /* Giúp container này chiếm không gian như input cũ */
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 10px;         /* Khoảng cách từ mép trái của container */
+    top: 50%;           /* Căn giữa theo chiều dọc */
+    transform: translateY(-50%); /* Tinh chỉnh vị trí căn giữa dọc */
+    pointer-events: none; /* Quan trọng: Cho phép click "xuyên qua" icon vào input */
+    color: #6c757d;     /* Màu của icon, giống màu placeholder mặc định. Bạn có thể đổi màu này. */
+    /* z-index: 3; */   /* Thường không cần thiết nếu có pointer-events: none */
+}
+
+.search-input-container .form-control {
+    padding-left: 34px; /* Tăng padding trái của input để có không gian cho icon */
+                        /* Giá trị này nên là: left của icon + chiều rộng icon + một chút khoảng đệm */
+                        /* Ví dụ: 10px (left) + ~16px (icon width) + 8px (đệm) = 34px */
+}
+
+/*chỉnh sủa lại icon thông báo */
+.custom-bell-icon {
+    position: relative; /* Cho phép điều chỉnh vị trí tương đối */
+    top: 5px;           /* Di chuyển xuống 5px */
+
+}
+
+
+/*Logo*/
+.navbar-brand img {
+    height: 60px; /* Chiều cao logo */
+
+    margin-left: 114px; /*căn lê trái */
+}
+
+
+
+/* căn chỉnh chữ */
+.navbar-nav .nav-item a.nav-link.active {
+
+
+    /* Tăng kích thước chữ lên một chút: */
+    font-size: 1.3rem;  /* Hoặc thử 105%, 110%. Giá trị '1rem' thường là kích thước mặc định. */
+                       /* Bạn có thể điều chỉnh (ví dụ: 1.05rem, 1.15rem) cho đến khi vừa ý. */
+}
+
+
+
+
+
 
 
 /* Áp dụng hiệu ứng sticky cho cột lọc trên màn hình từ medium trở lên */

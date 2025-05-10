@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import json
 import os
 from datetime import datetime, timezone # Đảm bảo đã import
+from models import Post, PostLike # Đảm bảo đã import Post và PostLike
 
 load_dotenv()
 import secrets
@@ -43,6 +44,7 @@ from forms import (LoginForm, RegistrationForm, PostForm, UpdateAccountForm,
 
 # Import Flask-Login components (Một lần)
 from flask_login import login_user, current_user, logout_user, login_required
+
 
 # --- Khởi tạo App và Extensions ---
 app = Flask(__name__)
@@ -1237,7 +1239,7 @@ def my_ideas():
         .paginate(page=page, per_page=PER_PAGE, error_out=False)  # Corrected query
     # Truyền cả 2 danh sách vào template
     return render_template('my_ideas.html',  # <<< Giữ nguyên tên template này
-                           title='Ý tưởng của tôi',
+                           title='My Ideas',
                            pending_ideas=pending_ideas,
                            responded_ideas=responded_ideas)
 
@@ -1819,7 +1821,7 @@ def showcase():
 
     # --- Render template, truyền cả carousel_items và items_pagination ---
     return render_template('showcase_list.html',
-                           title="Công trình Tiêu biểu",
+                           title="Featured Projects",
                            carousel_items=carousel_items,  # <<< TRUYỀN BIẾN NÀY
                            items_pagination=items_pagination,  # <<< Biến cũ cho lưới
                            distinct_types=[t[0] for t in distinct_types],
@@ -1977,5 +1979,7 @@ def my_applications():
 
     # CẦN TẠO TEMPLATE: 'my_applications.html'
     return render_template('my_applications.html',
-                           title='Đề tài Đã Đăng ký',
+                           title='Registered Topics',
                            applications_pagination=pagination)
+
+

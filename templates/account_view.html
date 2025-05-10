@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Thông tin Tài khoản{% endblock %}
+{% block title %}Account Information{% endblock %}
 
 {% block content %}
-<div class="row mt-4 gy-4"> {# Thêm gy-4 để có khoảng cách dọc giữa các cột trên mobile #}
+<div class="row mt-4 gy-4"> {# Added gy-4 for vertical spacing between columns on mobile #}
 
-    {# --- Cột Thông tin Hiển thị (Trái) --- #}
+    {# --- Information Display Column (Left) --- #}
     <div class="col-lg-4">
         <div class="card shadow-sm mb-4">
             <div class="card-body text-center">
-                {# === LOGIC XÁC ĐỊNH URL VÀ HIỂN THỊ ẢNH ĐẠI DIỆN (ĐÚNG) === #}
-                {# 1. Lấy tên file từ DB, nếu không có thì dùng default.jpg #}
+                {# === LOGIC TO DETERMINE URL AND DISPLAY PROFILE PICTURE (CORRECT) === #}
+                {# 1. Get filename from DB, use default.jpg if none #}
                 {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
-                {# 2. Mặc định thư mục là user_pics #}
+                {# 2. Default folder is user_pics #}
                 {% set image_folder = 'user_pics' %}
-                {# 3. KIỂM TRA: Nếu tên file LÀ default -> Đổi sang thư mục profile_pics #}
+                {# 3. CHECK: If filename IS default -> Change to profile_pics folder #}
                 {% if image_filename.startswith('default') %}
-                    {% set image_folder = 'profile_pics' %} {# Đổi thư mục #}
-                    {# Chọn ảnh default cụ thể theo giới tính #}
+                    {% set image_folder = 'profile_pics' %} {# Change folder #}
+                    {# Select specific default image based on gender #}
                     {% if current_user.gender == 'female' %}
                         {% set image_filename = 'default_female.jpg' %}
                     {% elif current_user.gender == 'male' %}
@@ -24,89 +24,89 @@
                     {% else %}
                          {% set image_filename = 'default.jpg' %} {# Fallback #}
                     {% endif %}
-                {% endif %} {# Kết thúc kiểm tra default #}
-                {# 4. Tạo URL cuối cùng #}
+                {% endif %} {# End default check #}
+                {# 4. Create final URL #}
                 {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
-                {# === KẾT THÚC LOGIC === #}
+                {# === END LOGIC === #}
 
-                {# 5. Hiển thị ảnh #}
-                <img class="rounded-circle img-thumbnail mb-3" src="{{ avatar_url }}" alt="Ảnh đại diện" width="180" height="180" style="object-fit: cover;">
+                {# 5. Display image #}
+                <img class="rounded-circle img-thumbnail mb-3" src="{{ avatar_url }}" alt="Profile Picture" width="180" height="180" style="object-fit: cover;">
 
                 <h4 class="mb-1">{{ current_user.full_name }}</h4>
                 {% if current_user.role == 'student' and current_user.class_name %}
                     <p class="text-muted mb-0">{{ current_user.class_name }}</p>
                 {% elif current_user.role == 'lecturer' %}
-                     <p class="text-muted mb-0">Giảng viên</p>
+                     <p class="text-muted mb-0">Lecturer</p>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    {# --- Cột Thông tin Chi tiết (Phải) --- #}
+    {# --- Detailed Information Column (Right) --- #}
     <div class="col-lg-8">
         <div class="card shadow-sm">
              <div class="card-header">
-                 <h5 class="mb-0">Thông tin Chi tiết</h5>
+                 <h5 class="mb-0">Detailed Information</h5>
              </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-4">Họ và tên:</dt>
+                    <dt class="col-sm-4">Full Name:</dt>
                     <dd class="col-sm-8">{{ current_user.full_name }}</dd>
 
-                    <dt class="col-sm-4">Chức vụ:</dt>
+                    <dt class="col-sm-4">Role:</dt>
                     <dd class="col-sm-8">
-                         {% if current_user.role == 'lecturer' %} <span class="badge bg-primary">Giảng viên</span>
-                         {% elif current_user.role == 'student' %} <span class="badge bg-info">Sinh viên</span>
+                         {% if current_user.role == 'lecturer' %} <span class="badge bg-primary">Lecturer</span>
+                         {% elif current_user.role == 'student' %} <span class="badge bg-info">Student</span>
                          {% else %} <span class="badge bg-danger">Admin</span>
                          {% endif %}
                     </dd>
 
                     {% if current_user.role == 'student' %}
-                        <dt class="col-sm-4">MSSV:</dt>
-                        <dd class="col-sm-8">{{ current_user.student_id or 'Chưa cập nhật' }}</dd>
-                        <dt class="col-sm-4">Lớp:</dt>
-                        <dd class="col-sm-8">{{ current_user.class_name or 'Chưa cập nhật' }}</dd>
-                        <dt class="col-sm-4">Khóa:</dt>
+                        <dt class="col-sm-4">Student ID:</dt>
+                        <dd class="col-sm-8">{{ current_user.student_id or 'Not updated yet' }}</dd>
+                        <dt class="col-sm-4">Class:</dt>
+                        <dd class="col-sm-8">{{ current_user.class_name or 'Not updated yet' }}</dd>
+                        <dt class="col-sm-4">Cohort:</dt> {# "Cohort" or "Academic Year" or "Intake" #}
                         <dd class="col-sm-8">{{ cohort or 'N/A' }}</dd>
                     {% endif %}
 
-                    <dt class="col-sm-4">Email Đăng nhập:</dt>
+                    <dt class="col-sm-4">Login Email:</dt>
                     <dd class="col-sm-8">{{ current_user.email }} </dd>
 
-                    <dt class="col-sm-4">Ngày sinh:</dt>
-                    <dd class="col-sm-8">{{ current_user.date_of_birth.strftime('%d/%m/%Y') if current_user.date_of_birth else 'Chưa cập nhật' }}</dd>
+                    <dt class="col-sm-4">Date of Birth:</dt>
+                    <dd class="col-sm-8">{{ current_user.date_of_birth.strftime('%d/%m/%Y') if current_user.date_of_birth else 'Not updated yet' }}</dd>
 
-                    <dt class="col-sm-4">Giới tính:</dt>
+                    <dt class="col-sm-4">Gender:</dt>
                     <dd class="col-sm-8">
-                        {% if current_user.gender == 'male' %} Nam
-                        {% elif current_user.gender == 'female' %} Nữ
-                        {% else %} Chưa cập nhật
+                        {% if current_user.gender == 'male' %} Male
+                        {% elif current_user.gender == 'female' %} Female
+                        {% else %} Not updated yet
                         {% endif %}
                      </dd>
 
-                     <dt class="col-sm-4">Điện thoại:</dt>
-                     <dd class="col-sm-8">{{ current_user.phone_number or 'Chưa cập nhật' }}</dd>
+                     <dt class="col-sm-4">Phone:</dt>
+                     <dd class="col-sm-8">{{ current_user.phone_number or 'Not updated yet' }}</dd>
 
-                     <dt class="col-sm-4">Email liên hệ khác:</dt>
-                     <dd class="col-sm-8">{{ current_user.contact_email or 'Chưa cập nhật' }}</dd>
+                     <dt class="col-sm-4">Alternative Contact Email:</dt>
+                     <dd class="col-sm-8">{{ current_user.contact_email or 'Not updated yet' }}</dd>
 
                 </dl>
 
-                <h6>Giới thiệu bản thân:</h6>
+                <h6>About Me:</h6>
                 {% if current_user.about_me %}
                      <p class="text-muted small" style="white-space: pre-wrap;">{{ current_user.about_me }}</p>
                 {% else %}
-                     <p class="text-muted small"><i>Chưa cập nhật...</i></p>
+                     <p class="text-muted small"><i>Not updated yet...</i></p>
                 {% endif %}
 
-                 {# --- Nút hành động --- #}
+                 {# --- Action Buttons --- #}
                  <hr>
                  <div class="text-end d-flex justify-content-end align-items-center">
                      <a href="{{ url_for('change_password') }}" class="btn btn-outline-secondary me-2">
-                         <i class="bi bi-key-fill"></i> Đổi mật khẩu
+                         <i class="bi bi-key-fill"></i> Change Password
                      </a>
                      <a href="{{ url_for('account_edit') }}" class="btn btn-primary">
-                         <i class="bi bi-pencil-square"></i> Thay đổi thông tin
+                         <i class="bi bi-pencil-square"></i> Edit Information
                      </a>
                  </div>
             </div> {# End card-body #}

@@ -9,7 +9,7 @@
         <h1 class="mt-0 mb-0">{{ title }}</h1>
 
         {# Tiêu đề phụ - Dùng thẻ <p> với class 'lead' và <small> cho nhỏ lại, bỏ margin bottom #}
-        <p class="lead text-muted mb-0 mt-1 fst-italic"><small>Kỷ yếu Khoa học & Đồ án Xuất sắc</small></p>
+        <p class="lead text-muted mb-0 mt-1 fst-italic"><small>Welcome to the showcase of the Faculty's featured research works and outstanding student projects.</small></p>
 
     </div>
     {# --- END: Thêm Tiêu đề phụ / Nhãn --- #}
@@ -86,54 +86,53 @@
         {# Có thể hiển thị một ảnh tĩnh hoặc thông báo khác nếu không có item nào được featured #}
         <div class="p-5 mb-4 bg-light rounded-3 text-center">
 
-            <p class="lead">Chào mừng đến với trang giới thiệu các công trình nghiên cứu và đồ án tiêu biểu của
-                Khoa.</p>
+            <p class="lead">Welcome to the showcase of the Faculty's featured research works and outstanding student projects.</p>
         </div>
     {% endif %}
     {# --- END: Kết thúc Phần Carousel --- #}
 
 
-    <div class="card mb-4 bg-light">
-        <div class="card-body">
-            <form method="GET" action="{{ url_for('showcase') }}" class="row g-2 align-items-end">
-
-                <div class="col-md-4">
-                    <label for="item_type" class="form-label fw-bold">Lọc theo Loại:</label>
-                    <select class="form-select form-select-sm" id="item_type" name="item_type">
-                        <option value="">Tất cả Loại</option>
-                        {% for type_val in distinct_types %}
-                            <option value="{{ type_val }}" {% if filter_type == type_val %}selected{% endif %}>
-                                {% if type_val == 'thesis' %}Luận văn/Đồ án
-                                {% elif type_val == 'proceeding' %}Bài báo/Kỷ yếu
-                                {% elif type_val == 'project' %}Dự án khác
-                                {% else %}{{ type_val }}{% endif %}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="year" class="form-label fw-bold">Lọc theo Năm:</label>
-                    <select class="form-select form-select-sm" id="year" name="year">
-                        <option value="">Tất cả Năm</option>
-                        {% for year_val in distinct_years %}
-                            <option value="{{ year_val }}"
-                                    {% if filter_year == year_val %}selected{% endif %}>{{ year_val }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Lọc</button>
-                </div>
-                <div class="col-md-3">
-                    <a href="{{ url_for('showcase') }}" class="btn btn-outline-secondary btn-sm w-100">Bỏ lọc</a>
-                </div>
-            </form>
-        </div>
-    </div>
+{#    <div class="card mb-4 bg-light">#}
+{#        <div class="card-body">#}
+{#            <form method="GET" action="{{ url_for('showcase') }}" class="row g-2 align-items-end">#}
+{##}
+{#                <div class="col-md-4">#}
+{#                    <label for="item_type" class="form-label fw-bold">Lọc theo Loại:</label>#}
+{#                    <select class="form-select form-select-sm" id="item_type" name="item_type">#}
+{#                        <option value="">Tất cả Loại</option>#}
+{#                        {% for type_val in distinct_types %}#}
+{#                            <option value="{{ type_val }}" {% if filter_type == type_val %}selected{% endif %}>#}
+{#                                {% if type_val == 'thesis' %}Luận văn/Đồ án#}
+{#                                {% elif type_val == 'proceeding' %}Bài báo/Kỷ yếu#}
+{#                                {% elif type_val == 'project' %}Dự án khác#}
+{#                                {% else %}{{ type_val }}{% endif %}#}
+{#                            </option>#}
+{#                        {% endfor %}#}
+{#                    </select>#}
+{#                </div>#}
+{#                <div class="col-md-3">#}
+{#                    <label for="year" class="form-label fw-bold">Lọc theo Năm:</label>#}
+{#                    <select class="form-select form-select-sm" id="year" name="year">#}
+{#                        <option value="">Tất cả Năm</option>#}
+{#                        {% for year_val in distinct_years %}#}
+{#                            <option value="{{ year_val }}"#}
+{#                                    {% if filter_year == year_val %}selected{% endif %}>{{ year_val }}</option>#}
+{#                        {% endfor %}#}
+{#                    </select>#}
+{#                </div>#}
+{#                <div class="col-md-2">#}
+{#                    <button type="submit" class="btn btn-primary btn-sm w-100">Lọc</button>#}
+{#                </div>#}
+{#                <div class="col-md-3">#}
+{#                    <a href="{{ url_for('showcase') }}" class="btn btn-outline-secondary btn-sm w-100">Bỏ lọc</a>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{#    </div>#}
     {# --- Kết thúc Form Lọc --- #}
 
     <hr>
-    <h2 class="mb-4">Tất cả Công trình</h2>
+    <h2 class="mb-4">All Projects</h2>
 
     {# --- Phần Hiển thị Lưới Công trình (Giữ nguyên như trước) --- #}
     {% if items_pagination and items_pagination.items %}
@@ -216,7 +215,7 @@
         {# --- Kết thúc Phân Trang --- #}
 
     {% else %}
-        <div class="alert alert-info">Chưa có công trình nào được hiển thị.</div>
+        <div class="alert alert-info">No projects have been displayed yet.</div>
     {% endif %}
     {# --- Kết thúc Danh sách --- #}
 

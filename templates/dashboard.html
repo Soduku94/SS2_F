@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %} {# Sử dụng title truyền từ view #}
+{% block title %}{{ title }}{% endblock %} {# Example: "Dashboard" or "Home" #}
 
 {% block content %}
-<div class="container mt-2"> {# Giảm margin top một chút #}
-    {# --- Phần Chào mừng --- #}
+<div class="container mt-2"> {# Reduced top margin a bit #}
+    {# --- Welcome Section --- #}
     {% if current_user.is_authenticated %}
         {% if current_user.role == 'lecturer' %}
-            <h1 class="mb-3">Xin chào Giảng viên, {{ current_user.full_name }}!</h1>
+            <h1 class="mb-3">Welcome Lecturer, {{ current_user.full_name }}!</h1>
         {% elif current_user.role == 'student' %}
-            <h1 class="mb-3">Xin chào bạn, {{ current_user.full_name }}!</h1>
+            <h1 class="mb-3">Welcome, {{ current_user.full_name }}!</h1>
         {% elif current_user.role == 'admin' %}
-            <h1 class="mb-3">Chào mừng Quản trị viên, {{ current_user.full_name }}!</h1>
+            <h1 class="mb-3">Welcome Administrator, {{ current_user.full_name }}!</h1>
         {% else %}
-            <h1 class="mb-3">Chào mừng, {{ current_user.full_name }}!</h1>
+            <h1 class="mb-3">Welcome, {{ current_user.full_name }}!</h1>
         {% endif %}
-        <p>Đây là trang chính của bạn sau khi đăng nhập.</p>
+        <p>This is your main page after logging in.</p>
         <hr class="mb-4">
     {% endif %}
-    {# --- Kết thúc Chào mừng --- #}
+    {# --- End Welcome Section --- #}
 
 
-    {# --- Phần 1: Bài Đăng Nổi Bật --- #}
+    {# --- Section 1: Featured Posts --- #}
     {% if featured_pagination and featured_pagination.items %}
-        <h2><i class="bi bi-pin-angle-fill"></i> Bài Đăng Nổi Bật</h2>
+        <h2><i class="bi bi-pin-angle-fill"></i> Featured Posts</h2>
         <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
             {% for post in featured_pagination.items %}
                 <div class="col">
@@ -31,31 +31,31 @@
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">
                                 {# Badges #}
-                                {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Đề tài</span>
-                                {% elif post.post_type == 'article' %} <span class="badge bg-secondary ms-1">Bài viết</span> {% endif %}
-                                <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span>
+                                {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Topic</span>
+                                {% elif post.post_type == 'article' %} <span class="badge bg-secondary ms-1">Article</span> {% endif %}
+                                <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Featured</span>
                                 {% if post.post_type == 'topic' and post.status %}
-                                     {% if post.status == 'recruiting' %} <span class="badge bg-success ms-1">Tìm sinh viên</span>
-                                     {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark ms-1">Chờ duyệt</span>
-                                     {% elif post.status == 'closed' %} <span class="badge bg-secondary ms-1">Đã đóng</span>
-                                     {% elif post.status == 'working_on' %} <span class="badge bg-info ms-1">Đang thực hiện</span>
-                                     {% elif post.status == 'published' %} <span class="badge bg-light text-dark ms-1">Công khai</span>
+                                     {% if post.status == 'recruiting' %} <span class="badge bg-success ms-1">Recruiting Students</span>
+                                     {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark ms-1">Pending Approval</span>
+                                     {% elif post.status == 'closed' %} <span class="badge bg-secondary ms-1">Closed</span>
+                                     {% elif post.status == 'working_on' %} <span class="badge bg-info ms-1">In Progress</span>
+                                     {% elif post.status == 'published' %} <span class="badge bg-light text-dark ms-1">Published</span>
                                      {% endif %}
                                 {% elif post.post_type == 'article' and post.status == 'published' %}
-                                    <span class="badge bg-light text-dark ms-1">Công khai</span>
+                                    <span class="badge bg-light text-dark ms-1">Published</span>
                                 {% endif %}
                                 {# Title Link #}
                                 <a href="{{ url_for('view_post', post_id=post.id) }}" class="text-decoration-none link-dark fw-bold">{{ post.title }}</a>
                             </h5>
-                            <p class="card-text mb-1"><small class="text-muted">Đăng bởi: {{ post.author.full_name }}</small></p>
-                            <p class="card-text mb-2"><small class="text-muted">Ngày đăng: {{ post.date_posted.strftime('%d/%m/%Y') }}</small></p>
+                            <p class="card-text mb-1"><small class="text-muted">Posted by: {{ post.author.full_name }}</small></p>
+                            <p class="card-text mb-2"><small class="text-muted">Posted on: {{ post.date_posted.strftime('%d/%m/%Y') }}</small></p>
                              {# Content #}
                             <p class="card-text small flex-grow-1">{{ post.content | striptags | truncate(150, True, '...') }}</p>
                             {# Tags #}
                             {% if post.tags.count() > 0 %}
                                 <div class="mb-2 post-tags-summary">
                                     <small class="text-muted">
-                                        Thẻ:
+                                        Tags:
                                         {% for tag in post.tags.limit(3) %}<span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>{% endfor %}
                                         {% if post.tags.count() > 3 %}<span class="badge rounded-pill bg-light text-dark">...</span>{% endif %}
                                     </small>
@@ -73,15 +73,15 @@
                                      {% endfor %}
                                 </div>
                             {% endif %}
-                            {# Action Buttons - Chỉ có Xem chi tiết cho bài nổi bật #}
-                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary mt-auto align-self-start">Xem chi tiết</a>
+                            {# Action Buttons - Only View Details for featured posts #}
+                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary mt-auto align-self-start">View Details</a>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
 
-        {# Phân trang cho Bài Nổi Bật - CẬP NHẬT THÊM tag_id #}
+        {# Pagination for Featured Posts - UPDATE tag_id if needed #}
         {% if featured_pagination.pages > 1 %}
             <nav aria-label="Featured posts navigation">
                 <ul class="pagination pagination-sm justify-content-center mb-4">
@@ -105,45 +105,45 @@
         {% endif %}
         <hr class="mb-4">
     {% endif %}
-    {# --- Kết thúc Phần 1 --- #}
+    {# --- End Section 1 --- #}
 
 
-    {# === Phần Chính: Danh sách bài đăng và Bộ lọc === #}
+    {# === Main Section: Post list and Filters === #}
     <div class="row">
-        {# --- Cột Trái: Danh sách bài đăng thường --- #}
+        {# --- Left Column: Regular post list --- #}
         <div class="col-md-8">
-            <h2><i class="bi bi-journals"></i> Danh sách Bài Đăng Mới Nhất</h2>
+            <h2><i class="bi bi-journals"></i> Latest Posts</h2>
             {% if posts_pagination and posts_pagination.items %}
                 {% for post in posts_pagination.items %}
                     <div class="card mb-3 shadow-sm">
                         <div class="card-body">
                              <h5 class="card-title">
                                 {# Badges #}
-                                {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Đề tài</span>
-                                {% elif post.post_type == 'article' %} <span class="badge bg-secondary ms-1">Bài viết</span> {% endif %}
-                                {% if post.is_featured %} <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span> {% endif %}
+                                {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Topic</span>
+                                {% elif post.post_type == 'article' %} <span class="badge bg-secondary ms-1">Article</span> {% endif %}
+                                {% if post.is_featured %} <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Featured</span> {% endif %}
                                 {% if post.post_type == 'topic' and post.status %}
-                                     {% if post.status == 'recruiting' %} <span class="badge bg-success ms-1">Tìm sinh viên</span>
-                                     {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark ms-1">Chờ duyệt</span>
-                                     {% elif post.status == 'closed' %} <span class="badge bg-secondary ms-1">Đã đóng</span>
-                                     {% elif post.status == 'working_on' %} <span class="badge bg-info ms-1">Đang thực hiện</span>
-                                     {% elif post.status == 'published' %} <span class="badge bg-light text-dark ms-1">Công khai</span>
+                                     {% if post.status == 'recruiting' %} <span class="badge bg-success ms-1">Recruiting Students</span>
+                                     {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark ms-1">Pending Approval</span>
+                                     {% elif post.status == 'closed' %} <span class="badge bg-secondary ms-1">Closed</span>
+                                     {% elif post.status == 'working_on' %} <span class="badge bg-info ms-1">In Progress</span>
+                                     {% elif post.status == 'published' %} <span class="badge bg-light text-dark ms-1">Published</span>
                                      {% endif %}
                                 {% elif post.post_type == 'article' and post.status == 'published' %}
-                                     <span class="badge bg-light text-dark ms-1">Công khai</span>
+                                     <span class="badge bg-light text-dark ms-1">Published</span>
                                 {% endif %}
                                 {# Title Link #}
                                 <a href="{{ url_for('view_post', post_id=post.id) }}" class="text-decoration-none link-dark fw-bold">{{ post.title }}</a>
                              </h5>
-                             <p class="card-text mb-1"><small class="text-muted">Đăng bởi: {{ post.author.full_name }}</small></p>
-                             <p class="card-text mb-2"><small class="text-muted">Ngày đăng: {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                             <p class="card-text mb-1"><small class="text-muted">Posted by: {{ post.author.full_name }}</small></p>
+                             <p class="card-text mb-2"><small class="text-muted">Posted on: {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</small></p>
                              {# Content #}
                             <p class="card-text small">{{ post.content | striptags | truncate(200, True, '...') }}</p>
                             {# Tags #}
                             {% if post.tags.count() > 0 %}
                                 <div class="mb-2 post-tags-summary">
                                     <small class="text-muted">
-                                        Thẻ:
+                                        Tags:
                                         {% for tag in post.tags.limit(3) %}<span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>{% endfor %}
                                         {% if post.tags.count() > 3 %}<span class="badge rounded-pill bg-light text-dark">...</span>{% endif %}
                                     </small>
@@ -162,61 +162,61 @@
                                 </div>
                             {% endif %}
 
-                            {# {# === START: Cụm Nút Hành Động Mới === #}
-                            {# Bọc các nút trong div để dễ quản lý layout #}
+                            {# {# === START: New Action Button Group === #}
+                            {# Wrap buttons in a div for easier layout management #}
                             <div class="mt-2 d-flex align-items-center flex-wrap gap-2">
 
-                                {# 1. Nút Xem chi tiết (Luôn có) #}
-                                <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                {# 1. View Details button (Always present) #}
+                                <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
 
-                                {# 2. Nút Like (AJAX - Luôn có cho người đăng nhập) #}
-                                <div class="d-inline-block post-like-button-container"> {# Container cho nút Like và CSRF #}
+                                {# 2. Like button (AJAX - Always present for logged-in users) #}
+                                <div class="d-inline-block post-like-button-container"> {# Container for Like button and CSRF #}
                                     <button
                                         type="button"
-                                        {# Class để JS bắt sự kiện #}
+                                        {# Class for JS to catch event #}
                                         class="btn btn-sm post-like-toggle-btn {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif post.id in user_liked_posts %}btn-danger{% else %}btn-outline-danger{% endif %}"
-                                        {# Data attributes cho JS lấy thông tin #}
+                                        {# Data attributes for JS to get info #}
                                         data-post-id="{{ post.id }}"
                                         data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
-                                        {# Title thay đổi theo trạng thái #}
-                                        title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif post.id in user_liked_posts %}Bỏ thích{% else %}Thích{% endif %}"
-                                        {# Vô hiệu hóa nếu chưa đăng nhập #}
+                                        {# Title changes with state #}
+                                        title="{% if not current_user.is_authenticated %}Login to like{% elif post.id in user_liked_posts %}Unlike{% else %}Like{% endif %}"
+                                        {# Disable if not logged in #}
                                         {% if not current_user.is_authenticated %}disabled{% endif %}>
-                                        {# Icon thay đổi theo trạng thái #}
+                                        {# Icon changes with state #}
                                         <i class="bi {% if post.id in user_liked_posts %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-                                         Thích {# Thêm chữ Thích #}
-                                        {# Số lượt like lấy từ dict, mặc định 0 #}
+                                         Like {# Added "Like" text #}
+                                        {# Like count from dict, default 0 #}
                                         <span class="like-count">({{ like_counts.get(post.id, 0) }})</span>
                                     </button>
-                                    {# Input CSRF ẩn cho AJAX POST Like #}
+                                    {# Hidden CSRF input for AJAX POST Like #}
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 </div>
 
-                                {# 3. Nút Đăng ký (Có điều kiện: là topic, đang recruiting, user là student, chưa apply) #}
+                                {# 3. Apply button (Conditional: is topic, recruiting, user is student, not yet applied) #}
                                 {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' %}
-                                    {# Lấy trạng thái đơn đăng ký của user từ dict #}
+                                    {# Get user's application status from dict #}
                                     {% set app_status = user_application_status.get(post.id) %}
-                                    {# Nếu chưa có đơn đăng ký (app_status là None) -> hiển thị link đăng ký #}
+                                    {# If no application yet (app_status is None) -> show apply link #}
                                     {% if not app_status %}
-                                         <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-primary" title="Xem chi tiết và đăng ký">
-                                             <i class="bi bi-pencil-square"></i> Đăng ký
+                                         <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-primary" title="View details and apply">
+                                             <i class="bi bi-pencil-square"></i> Apply
                                          </a>
                                     {% else %}
-                                         {# Nếu đã có đơn -> hiển thị nút disabled với trạng thái #}
+                                         {# If already applied -> show disabled button with status #}
                                          <button type="button" class="btn btn-sm btn-secondary" disabled>
-                                             {% if app_status == 'pending' %}Đã ĐK (Chờ){% elif app_status == 'accepted' %}Đã được nhận{% elif app_status == 'rejected' %}Đã từ chối{% else %}Đã ĐK{% endif %}
+                                             {% if app_status == 'pending' %}Applied (Pending){% elif app_status == 'accepted' %}Accepted{% elif app_status == 'rejected' %}Rejected{% else %}Applied{% endif %}
                                          </button>
                                     {% endif %}
                                 {% endif %}
 
                             </div>
-                            {# === END: Cụm Nút Hành Động Mới === #}
+                            {# === END: New Action Button Group === #}
 
                         </div> {# End card-body #}
                     </div> {# End card #}
                 {% endfor %} {# End loop posts_pagination #}
 
-                {# Phân trang cho Bài Thường - CẬP NHẬT THÊM tag_id #}
+                {# Pagination for Regular Posts - UPDATE tag_id if needed #}
                 {% if posts_pagination.pages > 1 %}
                     <nav aria-label="Regular posts navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
@@ -238,87 +238,87 @@
                         </ul>
                     </nav>
                 {% endif %}
-                {# --- Kết thúc Phân Trang Bài Thường --- #}
+                {# --- End Pagination for Regular Posts --- #}
 
             {% else %}
                  {% if search_query or selected_author_id or selected_post_type or selected_status or selected_tag_id %}
-                     <p>Không tìm thấy bài đăng nào phù hợp với tiêu chí lọc/tìm kiếm.</p>
+                     <p>No posts found matching your filter/search criteria.</p>
                  {% else %}
-                    <p>Chưa có bài đăng nào.</p> {# Thông báo gốc #}
+                    <p>No posts yet.</p> {# Original message #}
                  {% endif %}
             {% endif %}
         </div>
-        {# --- Kết thúc Cột Trái --- #}
+        {# --- End Left Column --- #}
 
-        {# --- Cột Phải: Bộ lọc --- #}
+        {# --- Right Column: Filters --- #}
         <div class="col-md-4 sticky-filter-column">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <i class="bi bi-funnel-fill"></i> Lọc & Sắp xếp
+                    <i class="bi bi-funnel-fill"></i> Filter & Sort
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ url_for('dashboard') }}">
-                         {# Sắp xếp #}
+                         {# Sort #}
                          <div class="mb-3">
-                            <label for="sort" class="form-label">Sắp xếp theo:</label>
+                            <label for="sort" class="form-label">Sort by:</label>
                             <select class="form-select form-select-sm" id="sort" name="sort">
-                                <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Ngày đăng (Mới nhất)</option>
-                                <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Ngày đăng (Cũ nhất)</option>
-                                <option value="title_asc" {% if selected_sort == 'title_asc' %}selected{% endif %}>Tiêu đề (A-Z)</option>
-                                <option value="title_desc" {% if selected_sort == 'title_desc' %}selected{% endif %}>Tiêu đề (Z-A)</option>
+                                <option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Date Posted (Newest)</option>
+                                <option value="date_asc" {% if selected_sort == 'date_asc' %}selected{% endif %}>Date Posted (Oldest)</option>
+                                <option value="title_asc" {% if selected_sort == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
+                                <option value="title_desc" {% if selected_sort == 'title_desc' %}selected{% endif %}>Title (Z-A)</option>
                             </select>
                         </div>
                         <hr>
-                        {# Tác giả #}
+                        {# Author #}
                         <div class="mb-3">
-                            <label for="filterAuthor" class="form-label">Tác giả (Giảng viên):</label>
+                            <label for="filterAuthor" class="form-label">Author (Lecturer):</label>
                             <select class="form-select form-select-sm" id="filterAuthor" name="author_id">
-                                <option value="">Tất cả Giảng viên</option>
+                                <option value="">All Lecturers</option>
                                 {% for lecturer in lecturers %}
                                     <option value="{{ lecturer.id }}" {% if selected_author_id == lecturer.id|string %}selected{% endif %}>{{ lecturer.full_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        {# Lọc Tag #}
+                        {# Filter Tag #}
                         <div class="mb-3">
-                             <label for="filterTag" class="form-label">Lọc theo Thẻ:</label>
+                             <label for="filterTag" class="form-label">Filter by Tag:</label>
                              <select class="form-select form-select-sm" id="filterTag" name="tag_id">
-                                 <option value="">Tất cả Thẻ</option>
+                                 <option value="">All Tags</option>
                                  {% for tag in all_tags %}
                                      <option value="{{ tag.id }}" {% if selected_tag_id == tag.id|string %}selected{% endif %}>{{ tag.name }}</option>
                                  {% endfor %}
                              </select>
                          </div>
-                         {# Loại bài đăng #}
+                         {# Post Type #}
                          <div class="mb-3">
-                            <label for="filterType" class="form-label">Loại bài đăng:</label>
+                            <label for="filterType" class="form-label">Post Type:</label>
                            <select class="form-select form-select-sm" id="filterType" name="post_type">
-                                <option value="">Tất cả</option>
-                                <option value="topic" {% if selected_post_type == 'topic' %}selected{% endif %}>Đề tài</option>
-                                <option value="article" {% if selected_post_type == 'article' %}selected{% endif %}>Bài viết/Thông báo</option>
+                                <option value="">All</option>
+                                <option value="topic" {% if selected_post_type == 'topic' %}selected{% endif %}>Topic</option>
+                                <option value="article" {% if selected_post_type == 'article' %}selected{% endif %}>Article/Announcement</option>
                             </select>
                          </div>
-                         {# Trạng thái #}
+                         {# Status #}
                           <div class="mb-3">
-                            <label for="filterStatus" class="form-label">Trạng thái:</label> {# Đổi label chung hơn #}
+                            <label for="filterStatus" class="form-label">Status:</label> {# Changed label to be more general #}
                            <select class="form-select form-select-sm" id="filterStatus" name="status">
-                                <option value="">Tất cả</option>
-                                {# Choices mới đã thêm ở PostForm #}
-                                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Chờ duyệt</option>
-                                <option value="published" {% if selected_status == 'published' %}selected{% endif %}>Công khai</option>
-                                <option value="recruiting" {% if selected_status == 'recruiting' %}selected{% endif %}>Tìm sinh viên</option>
-                                <option value="working_on" {% if selected_status == 'working_on' %}selected{% endif %}>Đang thực hiện</option>
-                                <option value="closed" {% if selected_status == 'closed' %}selected{% endif %}>Đã đóng/Kết thúc</option>
+                                <option value="">All</option>
+                                {# New choices added in PostForm #}
+                                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending Approval</option>
+                                <option value="published" {% if selected_status == 'published' %}selected{% endif %}>Published</option>
+                                <option value="recruiting" {% if selected_status == 'recruiting' %}selected{% endif %}>Recruiting Students</option>
+                                <option value="working_on" {% if selected_status == 'working_on' %}selected{% endif %}>In Progress</option>
+                                <option value="closed" {% if selected_status == 'closed' %}selected{% endif %}>Closed/Finished</option>
                             </select>
-                             {# <small class="form-text text-muted">Áp dụng chủ yếu cho 'Đề tài'.</small> #} {# Bỏ note này đi #}
+                             {# <small class="form-text text-muted">Primarily applies to 'Topics'.</small> #} {# Removed this note #}
                          </div>
-                        <button type="submit" class="btn btn-primary btn-sm w-100">Áp dụng</button>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Bỏ lọc</a>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Apply</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Clear Filters</a>
                     </form>
                 </div>
             </div>
         </div>
-        {# --- Kết thúc Cột Phải --- #}
+        {# --- End Right Column --- #}
     </div> {# End row #}
 </div> {# End container #}
 {% endblock content %}

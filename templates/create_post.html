@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %} {# Example: "Create Post" or "Edit Post" #}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-sm">
-                <div class="card-header"><h2>{{ legend }}</h2></div>
+                <div class="card-header"><h2>{{ legend }}</h2></div> {# Example: "Post Information" or "Create/Edit Post" #}
                 <div class="card-body">
-                    {# Action để trống submit về URL hiện tại, enctype cần cho upload file #}
+                    {# Action is empty to submit to the current URL, enctype needed for file upload #}
                     <form method="POST" action="" novalidate enctype="multipart/form-data">
                         {{ form.hidden_tag() }} {# CSRF token #}
                         <fieldset>
 
-                            {# tile bai viết #}
+                            {# Post title #}
                             <div class="mb-3">
-                                {{ form.title.label(class="form-label") }}
+                                {{ form.title.label(class="form-label") }} {# Label: "Title" (Set in Python Form) #}
                                 {% if form.title.errors %}
                                     {{ form.title(class="form-control is-invalid") }}
                                     <div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
@@ -25,9 +25,9 @@
                                 {% endif %}
                             </div>
 
-                                {#loại baì đăng #}
+                                {# Post type #}
                             <div class="mb-3">
-                                {{ form.post_type.label(class="form-label") }}
+                                {{ form.post_type.label(class="form-label") }} {# Label: "Post Type" (Set in Python Form) #}
                                 {% if form.post_type.errors %}
                                     {{ form.post_type(class="form-select is-invalid") }}
                                     <div class="invalid-feedback">{% for error in form.post_type.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
@@ -36,43 +36,43 @@
                                 {% endif %}
                             </div>
 
-                  {#trạng thái của đề tài #}
+                  {# Topic status #}
                             <div class="mb-3">
-                                {{ form.status.label(class="form-label") }}
+                                {{ form.status.label(class="form-label") }} {# Label: "Status" (Set in Python Form) #}
                                 {% if form.status.errors %}
                                     {{ form.status(class="form-select is-invalid") }}
                                     <div class="invalid-feedback">{% for error in form.status.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
                                 {% else %}
                                     {{ form.status(class="form-select") }}
                                 {% endif %}
-                                 <small class="form-text text-muted">Chỉ áp dụng cho 'Đề tài Nghiên cứu'.</small>
+                                 <small class="form-text text-muted">Only applicable for 'Research Topics'.</small>
                             </div>
-                            {#tag của bài viết #}
+                            {# Post tags #}
                             <div class="mb-3">
-                                {{ form.tags.label(class="form-label") }} {# Label đơn giản 'Thẻ' #}
-                                {# Render input cơ bản, Tagify JS sẽ biến đổi nó #}
-                                {# Cần có id='tags-input' để JS chọn được #}
-                                {# value được lấy từ form.tags.data (khi validation fail) hoặc current_tags_string (khi edit GET) #}
+                                {{ form.tags.label(class="form-label") }} {# Label: "Tags" (Set in Python Form) #}
+                                {# Basic input, Tagify JS will transform it #}
+                                {# Needs id='tags-input' for JS to select it #}
+                                {# Value is taken from form.tags.data (on validation fail) or current_tags_string (on edit GET) #}
                                 {{ form.tags(id='tags-input', class='form-control' + (' is-invalid' if form.tags.errors else ''), value=current_tags_string or form.tags.data or '') }}
                                 {% if form.tags.errors %}
                                     <div class="invalid-feedback">
                                         {% for error in form.tags.errors %}<span>{{ error }}</span>{% endfor %}
                                     </div>
                                 {% endif %}
-                                {# Hướng dẫn có thể đặt ở đây hoặc trong placeholder của Tagify nếu muốn #}
-                                <div class="form-text">Nhập thẻ mới hoặc chọn từ gợi ý. Nhấn Enter hoặc dấu phẩy để thêm.</div>
+                                {# Instructions can be placed here or in Tagify's placeholder if desired #}
+                                <div class="form-text">Enter new tags or select from suggestions. Press Enter or comma to add.</div>
                             </div>
 
 
 
-                            {# Trường content với Trix Editor #}
+                            {# Content field with Trix Editor #}
                             <div class="mb-3">
-                                {{ form.content.label(class="form-label") }}
-                                {# Đảm bảo giá trị value xử lý trường hợp None/rỗng #}
+                                {{ form.content.label(class="form-label") }} {# Label: "Content" (Set in Python Form) #}
+                                {# Ensure value handles None/empty cases #}
                                 <input type="hidden" name="content" id="content_hidden_input" value="{{ form.content.data or (post.content if post else '') }}">
                                 <trix-editor input="content_hidden_input" class="form-control trix-content {% if form.content.errors %} is-invalid {% endif %}" style="min-height: 150px;"></trix-editor>
                                 {% if form.content.errors %}
-                                    <div class="invalid-feedback d-block"> {# Dùng d-block cho textarea/trix #}
+                                    <div class="invalid-feedback d-block"> {# Use d-block for textarea/trix #}
                                         {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
                                     </div>
                                 {% endif %}
@@ -80,13 +80,13 @@
 
 
 
-                            {# --- Phần Attachments với Krajee File Input --- #}
+                            {# --- Attachments Section with Krajee File Input --- #}
                             <div class="mb-3">
-                                {{ form.attachments.label(class="form-label") }}
-                                {# Hiển thị file hiện tại khi chỉnh sửa #}
+                                {{ form.attachments.label(class="form-label") }} {# Label: "Attachments" (Set in Python Form) #}
+                                {# Display current files when editing #}
                                 {% if post and post.attachments %}
                                     <div class="current-attachments mb-2">
-                                        <p class="mb-1"><small>File hiện tại:</small></p>
+                                        <p class="mb-1"><small>Current files:</small></p>
                                         <ul class="list-unstyled list-group list-group-flush mb-2 small">
                                             {% for attachment in post.attachments %}
                                                 <li class="list-group-item ps-0">
@@ -102,10 +102,10 @@
                                                 </li>
                                             {% endfor %}
                                         </ul>
-                                        <p class="form-text text-danger">Lưu ý: Chọn file mới sẽ xóa và thay thế tất cả các file đính kèm hiện tại.</p>
+                                        <p class="form-text text-danger">Note: Selecting new files will replace all current attachments.</p>
                                     </div>
                                 {% endif %}
-                                {# Input chọn file Krajee #}
+                                {# Krajee file input #}
                                 <div class="file-loading">
                                     {{ form.attachments(class="file", multiple=True, id="fileUploadInputKrajee", **{"data-browse-on-zone-click":"true"}) }}
                                     {% if form.attachments.errors %}
@@ -115,90 +115,88 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            {# --- Kết thúc Attachments --- #}
+                            {# --- End Attachments --- #}
 
-                            {# Trường status #}
-
-
-                            {# Trường is_featured #}
+                            {# is_featured field #}
                             <div class="mb-3 form-check">
                                 {{ form.is_featured(class="form-check-input") }}
-                                {{ form.is_featured.label(class="form-check-label") }}
-                                <small class="form-text text-muted">Đánh dấu nếu muốn bài đăng này xuất hiện ở khu vực nổi bật.</small>
+                                {{ form.is_featured.label(class="form-check-label") }} {# Label: "Featured" or "Mark as Featured" (Set in Python Form) #}
+                                <small class="form-text text-muted">Check this if you want this post to appear in the featured section.</small>
                             </div>
 
                         </fieldset>
                         <div class="d-grid mt-3">
-                            {# Dùng label từ form để nhất quán #}
-                            {{ form.submit(class="btn btn-primary") }}
+                            {# Use label from form for consistency #}
+                            {{ form.submit(class="btn btn-primary") }} {# Submit button text: e.g., "Create Post", "Save Changes" (Set in Python Form) #}
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock content %}
 
-{# --- Block Scripts --- #}
+{# --- Scripts Block --- #}
 {% block scripts %}
-    {# {{ super() }} #} {# Gọi super nếu base.html có block scripts #}
+    {{ super() }} {# Call super if base.html has a scripts block; uncomment if needed #}
 
-    {# Script khởi tạo Krajee File Input (Giữ nguyên) #}
+    {# Krajee File Input initialization script (Kept as is, but language changed) #}
     <script>
         $(document).ready(function () {
             $("#fileUploadInputKrajee").fileinput({
-                language: "vi",
+                language: "en", // Changed from "vi" to "en"
                 theme: "bs5",
                 showUpload: false,
                 showCaption: true,
                 showPreview: true,
-                allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'], // Phải khớp FileAllowed trong form
+                allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'], // Must match FileAllowed in form
                 browseOnZoneClick: true,
-                overwriteInitial: false, // Nên là false để không ghi đè preview khi edit
-                maxFileSize: 10240, // Ví dụ 10MB
-                maxFileCount: 10, // Ví dụ 10 files
-                // Thêm initialPreview nếu muốn hiển thị file cũ trong Krajee khi Edit
+                overwriteInitial: false, // Should be false to not override preview on edit
+                maxFileSize: 10240, // Example 10MB
+                maxFileCount: 10, // Example 10 files
+                // Add initialPreview if you want to display old files in Krajee when Editing
                 // initialPreview: ... ,
                 // initialPreviewConfig: ... ,
             });
         });
     </script>
 
-    {# --- SCRIPT KHỞI TẠO TAGIFY --- #}
+    {# --- TAGIFY INITIALIZATION SCRIPT --- #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Chọn input gốc bằng ID
+            // Select the original input by ID
             var input = document.querySelector('#tags-input');
 
             if (input) {
-                // Lấy danh sách tag có sẵn từ biến Jinja (đã được backend truyền vào)
-                // Sử dụng default([]) để tránh lỗi nếu biến không tồn tại hoặc None
+                // Get the list of available tags from the Jinja variable (passed from backend)
+                // Use default([]) to avoid errors if the variable doesn't exist or is None
                 var tagWhitelist = {{ all_tag_names | default([]) | tojson | safe }};
 
-                // Khởi tạo Tagify trên input đó
+                // Initialize Tagify on that input
                 var tagify = new Tagify(input, {
-                    // Danh sách các tag đã có để gợi ý và kiểm tra (nếu enforceWhitelist=true)
+                    // List of existing tags for suggestions and validation (if enforceWhitelist=true)
                     whitelist: tagWhitelist,
-                    // Không bắt buộc phải chọn từ whitelist, cho phép thêm tag mới
+                    // Not required to select from whitelist, allows adding new tags
                     enforceWhitelist: false,
-                    // Cấu hình dropdown gợi ý
+                    // Configure suggestion dropdown
                     dropdown: {
-                        maxItems: 15,           // Số gợi ý tối đa
-                        enabled: 0,             // Hiện gợi ý ngay khi focus hoặc gõ
-                        closeOnSelect: false,   // Không đóng dropdown sau khi chọn để có thể chọn nhiều
-                        highlightFirst: true    // Tự động highlight gợi ý đầu tiên
+                        maxItems: 15,           // Max number of suggestions
+                        enabled: 0,             // Show suggestions on focus or typing
+                        closeOnSelect: false,   // Don't close dropdown after selection to allow multiple selections
+                        highlightFirst: true    // Automatically highlight the first suggestion
                     },
-                    // (Tùy chọn) Các thiết lập khác:
-                     delimiters: ",|\r?\n", // Cho phép thêm tag bằng dấu phẩy hoặc Enter
+                    // (Optional) Other settings:
+                     delimiters: ",|\r?\n", // Allow adding tags with comma or Enter
                      editTags: {
-                         clicks: 1,              // Nhấn 1 lần để sửa tag
-                         keepInvalid: false      // Xóa tag nếu sửa thành rỗng/không hợp lệ
+                         clicks: 1,              // Single click to edit tag
+                         keepInvalid: false      // Remove tag if edited to empty/invalid
                      },
-                     // addTagOnBlur: true,     // Tự động thêm tag khi mất focus khỏi input (cân nhắc)
-                     // ... xem thêm docs của Tagify ...
+                     // addTagOnBlur: true,     // Automatically add tag when input loses focus (consider)
+                     // ... see more Tagify docs ...
                 });
 
-                // In giá trị khởi tạo để debug (Tagify đọc giá trị này từ input)
+                // Log initial value for debugging (Tagify reads this value from the input)
                 // console.log("Tagify initial value read from input:", input.value);
 
             } else {
@@ -206,6 +204,6 @@
             }
         });
     </script>
-    {# --- KẾT THÚC TAGIFY SCRIPT --- #}
+    {# --- END TAGIFY SCRIPT --- #}
 </div>
 {% endblock scripts %}

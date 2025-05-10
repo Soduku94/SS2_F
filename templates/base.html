@@ -10,17 +10,18 @@
     <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
 
 
-
-
     <title>{% block title %}FIT Research Connect{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top custom_navbar">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('home') }}">FIT Research Connect</a>
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+
+            <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo" height="30">
+          </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -30,32 +31,32 @@
                 {# --- Navbar KHI ĐÃ ĐĂNG NHẬP --- #}
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Trang chủ</a>
+                        <a class="nav-link active fw-bold" aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
                     <li class="nav-item">
                         {# Thêm class 'active' nếu đang ở trang showcase list hoặc detail #}
-                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
+                        <a class="nav-link active fw-bold {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
                            ...
-                           href="{{ url_for('showcase') }}">Công trình Tiêu biểu</a>
-                        {# Bạn có thể đổi text thành "Đồ án/Kỷ yếu" nếu muốn #}
+                           href="{{ url_for('showcase') }}">Featured Works</a>
+
                     </li>
                     </li>
                     {% if current_user.role == 'lecturer' %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('create_post') }}">Đăng bài</a>
+                            <a class="nav-link active fw-bold " href="{{ url_for('create_post') }}">New Research/Post</a>
                         </li>
                         <li class="nav-item"> {# Sửa lỗi thiếu thẻ li ở đây #}
-                            <a class="nav-link" href="{{ url_for('view_pending_ideas') }}">Ý tưởng Sinh viên</a>
+                            <a class="nav-link active fw-bold " href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
                         </li>
                     {% endif %}
                     {% if current_user.role == 'student' %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'my_applications' %}active{% endif %}"
-                               href="{{ url_for('my_applications') }}">Đề tài đã đăng ký</a>
+                            <a class="nav-link active fw-bold {% if request.endpoint == 'my_applications' %}active{% endif %}"
+                               href="{{ url_for('my_applications') }}">Registered Topics</a>
                         </li>
 
 
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('my_ideas') }}">Ý tưởng của tôi</a>
+                            <a class="nav-link active fw-bold" href="{{ url_for('my_ideas') }}">My Ideas</a>
                         </li>
 
                         {# --- START: THÊM LINK SHOWCASE VÀO ĐÂY --- #}
@@ -66,10 +67,15 @@
                 {# Thêm flex-grow-1 để nó chiếm không gian thừa, dùng mx-lg-2 để có chút margin ngang trên màn lớn #}
                 <div class="flex-grow-1 mx-lg-2 position-relative">
                     <form class="d-flex" role="search" method="GET" action="{{ url_for('search_results') }}">
-                        <input class="form-control me-2" type="search" placeholder="Tìm kiếm..."
-                               aria-label="Search" name="q" id="navbarSearchInput" autocomplete="off"
-                               value="{{ request.args.get('q', '') }}">
-                        <button class="btn btn-outline-light" type="submit">Tìm</button>
+                        {# --- BẮT ĐẦU THAY ĐỔI TẠI ĐÂY --- #}
+                        <div class="search-input-container me-2">
+                            <i class="bi bi-search search-input-icon"></i>
+                            <input class="form-control" type="search" placeholder="Search topics..."
+                                   aria-label="Search" name="q" id="navbarSearchInput" autocomplete="off"
+                                   value="{{ request.args.get('q', '') }}">
+                        </div>
+                        {# --- KẾT THÚC THAY ĐỔI --- #}
+                        <button class="btn btn-outline-light" type="submit">Search</button>
                     </form>
                     {# Div hiển thị gợi ý (giữ nguyên) #}
                     <div class="dropdown-menu" id="searchResultsDropdown"
@@ -80,15 +86,15 @@
 
                 {# Cụm icon/user bên phải, thêm ms-lg-auto để đẩy sang phải trên màn lớn #}
                 <ul class="navbar-nav ms-lg-auto">
-                    <li class="nav-item position-relative"> {# <<< Thêm position-relative vào li #}
-                        {# Link đến trang thông báo (sẽ tạo sau) #}
-                        {# TODO: Tạo route 'notifications' #}
-                        <a class="nav-link" href="{{ url_for('notifications') }}" title="Thông báo">
-                            <i class="bi bi-bell-fill"></i>
+                    <li class="nav-item position-relative">
+
+                        <a class="nav-link d-flex align-items-center" href="{{ url_for('notifications') }}"
+                           title="Notifications">
+                            <i class="bi bi-bell-fill  custom-bell-icon"></i>
                             {# <<< THÊM KHỐI IF HIỂN THỊ CHẤM ĐỎ >>> #}
                             {% if current_user.is_authenticated and unread_count > 0 %}
                                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                    <span class="visually-hidden">Thông báo mới</span> {# Cho accessibility #}
+                                    <span class="visually-hidden">Notifications</span> {# Cho accessibility #}
                                 </span>
                             {% endif %}
                             {# <<< KẾT THÚC KHỐI IF >>> #}
@@ -129,8 +135,8 @@
                             {{ current_user.full_name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUserLink">
-                            <li><a class="dropdown-item" href="{{ url_for('account') }}">Hồ sơ</a></li>
-                            <li><a class="dropdown-item" href="#">Cài đặt</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile </a></li>
+                            <li><a class="dropdown-item" href="#">Setting</a></li>
 
                             {# Khối chỉ hiển thị cho Admin #}
                             {% if current_user.is_authenticated and current_user.role == 'admin' %}
@@ -138,7 +144,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 {# Link đến trang Admin Dashboard #}
-                                <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Trang Admin</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a></li>
 
                             {% endif %}
                             {% if current_user.is_authenticated and current_user.role == 'lecturer' %}
@@ -146,14 +152,14 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 {# <<< THÊM DÒNG NÀY >>> #}
-                                <li><a class="dropdown-item" href="{{ url_for('my_posts') }}">Bài đã đăng</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('my_posts') }}">My Posts</a></li>
                             {% endif %}
 
 
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Đăng xuất</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -512,11 +518,11 @@
 <script src="/static/js/jsAll.js" defer></script>
 
 
-<footer class="bg-dark text-light text-center py-3 mt-auto">
+<footer class="bg-dark text-light text-center py-3 mt-auto custom-footer">
     {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
     <div class="container">
         {# Thay 2025 bằng năm hiện tại nếu muốn hoặc giữ nguyên #}
-        <p class="mb-0 small">&copy; 2025 Khoa Công nghệ Thông tin - Đại học Hà Nội</p>
+        <p class="mb-0 small">&copy; 2025 Faculty of Information Technology - Hanoi University</p>
         {# Thêm các link khác nếu muốn #}
         {# <p class="mb-0 small"><a href="#" class="text-light">Liên hệ</a> | <a href="#" class="text-light">Giới thiệu</a></p> #}
     </div>
