@@ -3,207 +3,179 @@
 {% block title %}{{ title }}{% endblock %} {# Example: "Create Post" or "Edit Post" #}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header"><h2>{{ legend }}</h2></div> {# Example: "Post Information" or "Create/Edit Post" #}
-                <div class="card-body">
-                    {# Action is empty to submit to the current URL, enctype needed for file upload #}
-                    <form method="POST" action="" novalidate enctype="multipart/form-data">
-                        {{ form.hidden_tag() }} {# CSRF token #}
-                        <fieldset>
-
-                            {# Post title #}
-                            <div class="mb-3">
-                                {{ form.title.label(class="form-label") }} {# Label: "Title" (Set in Python Form) #}
-                                {% if form.title.errors %}
-                                    {{ form.title(class="form-control is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                                {% else %}
-                                    {{ form.title(class="form-control") }}
-                                {% endif %}
-                            </div>
-
-                                {# Post type #}
-                            <div class="mb-3">
-                                {{ form.post_type.label(class="form-label") }} {# Label: "Post Type" (Set in Python Form) #}
-                                {% if form.post_type.errors %}
-                                    {{ form.post_type(class="form-select is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.post_type.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                                {% else %}
-                                    {{ form.post_type(class="form-select") }}
-                                {% endif %}
-                            </div>
-
-                  {# Topic status #}
-                            <div class="mb-3">
-                                {{ form.status.label(class="form-label") }} {# Label: "Status" (Set in Python Form) #}
-                                {% if form.status.errors %}
-                                    {{ form.status(class="form-select is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.status.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                                {% else %}
-                                    {{ form.status(class="form-select") }}
-                                {% endif %}
-                                 <small class="form-text text-muted">Only applicable for 'Research Topics'.</small>
-                            </div>
-                            {# Post tags #}
-                            <div class="mb-3">
-                                {{ form.tags.label(class="form-label") }} {# Label: "Tags" (Set in Python Form) #}
-                                {# Basic input, Tagify JS will transform it #}
-                                {# Needs id='tags-input' for JS to select it #}
-                                {# Value is taken from form.tags.data (on validation fail) or current_tags_string (on edit GET) #}
-                                {{ form.tags(id='tags-input', class='form-control' + (' is-invalid' if form.tags.errors else ''), value=current_tags_string or form.tags.data or '') }}
-                                {% if form.tags.errors %}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.tags.errors %}<span>{{ error }}</span>{% endfor %}
-                                    </div>
-                                {% endif %}
-                                {# Instructions can be placed here or in Tagify's placeholder if desired #}
-                                <div class="form-text">Enter new tags or select from suggestions. Press Enter or comma to add.</div>
-                            </div>
-
-
-
-                            {# Content field with Trix Editor #}
-                            <div class="mb-3">
-                                {{ form.content.label(class="form-label") }} {# Label: "Content" (Set in Python Form) #}
-                                {# Ensure value handles None/empty cases #}
-                                <input type="hidden" name="content" id="content_hidden_input" value="{{ form.content.data or (post.content if post else '') }}">
-                                <trix-editor input="content_hidden_input" class="form-control trix-content {% if form.content.errors %} is-invalid {% endif %}" style="min-height: 150px;"></trix-editor>
-                                {% if form.content.errors %}
-                                    <div class="invalid-feedback d-block"> {# Use d-block for textarea/trix #}
-                                        {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-
-
-                            {# --- Attachments Section with Krajee File Input --- #}
-                            <div class="mb-3">
-                                {{ form.attachments.label(class="form-label") }} {# Label: "Attachments" (Set in Python Form) #}
-                                {# Display current files when editing #}
-                                {% if post and post.attachments %}
-                                    <div class="current-attachments mb-2">
-                                        <p class="mb-1"><small>Current files:</small></p>
-                                        <ul class="list-unstyled list-group list-group-flush mb-2 small">
-                                            {% for attachment in post.attachments %}
-                                                <li class="list-group-item ps-0">
-                                                    <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}" target="_blank" class="text-decoration-none">
-                                                        {# ... icon logic ... #}
-                                                         {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
-                                                         {% if extension == 'pdf' %} <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
-                                                         {% elif extension in ['doc', 'docx'] %} <i class="bi bi-file-earmark-word text-primary me-1"></i>
-                                                         {% elif extension in ['xls', 'xlsx'] %} <i class="bi bi-file-earmark-excel text-success me-1"></i>
-                                                         {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
-                                                        {{ attachment.original_filename }}
-                                                    </a>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                        <p class="form-text text-danger">Note: Selecting new files will replace all current attachments.</p>
-                                    </div>
-                                {% endif %}
-                                {# Krajee file input #}
-                                <div class="file-loading">
-                                    {{ form.attachments(class="file", multiple=True, id="fileUploadInputKrajee", **{"data-browse-on-zone-click":"true"}) }}
-                                    {% if form.attachments.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.attachments.errors %}<span>{{ error }}</span><br>{% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {# --- End Attachments --- #}
-
-                            {# is_featured field #}
-                            <div class="mb-3 form-check">
-                                {{ form.is_featured(class="form-check-input") }}
-                                {{ form.is_featured.label(class="form-check-label") }} {# Label: "Featured" or "Mark as Featured" (Set in Python Form) #}
-                                <small class="form-text text-muted">Check this if you want this post to appear in the featured section.</small>
-                            </div>
-
-                        </fieldset>
-                        <div class="d-grid mt-3">
-                            {# Use label from form for consistency #}
-                            {{ form.submit(class="btn btn-primary") }} {# Submit button text: e.g., "Create Post", "Save Changes" (Set in Python Form) #}
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+{# Sử dụng container-fluid để chiếm toàn bộ chiều rộng, hoặc container-lg/xl nếu muốn giới hạn hơn một chút #}
+<div class="container-fluid mt-4 px-lg-4">
+    <div class="page-header mb-3 border-bottom">
+        {# Tiêu đề trang lớn ở trên cùng #}
+        <h1 class="h2">{{ legend }}</h1> {# {{ legend }} từ backend, ví dụ "Create New Post" #}
     </div>
-</div>
+
+    <form method="POST" action="" novalidate enctype="multipart/form-data">
+        {{ form.hidden_tag() }} {# CSRF token #}
+        <div class="row g-4"> {# g-4 để có khoảng cách giữa các cột #}
+
+            {# --- CỘT TRÁI: NHẬP LIỆU CHÍNH (7-8 phần chiều rộng) --- #}
+            <div class="col-lg-8">
+                <fieldset>
+                    {# Card cho Tiêu đề #}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Post Title</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if form.title.errors %}
+                                {{ form.title(class="form-control form-control-lg is-invalid", placeholder="Enter the main title for your post") }}
+                                <div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                            {% else %}
+                                {{ form.title(class="form-control form-control-lg", placeholder="Enter the main title for your post") }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Card cho Nội dung (Trix Editor) #}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Content</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form.content.label(class="form-label visually-hidden") }} {# Ẩn label nếu tiêu đề card đã rõ #}
+                            <input type="hidden" name="content" id="content_hidden_input" value="{{ form.content.data or (post.content if post else '') }}">
+                            <trix-editor input="content_hidden_input" class="form-control trix-content {% if form.content.errors %} is-invalid {% endif %}" style="min-height: 350px;"></trix-editor>
+                            {% if form.content.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.content.errors %}<span>{{ error }}</span><br>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Card cho File Đính Kèm #}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Attachments</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if post and post.attachments %}
+                                <div class="current-attachments mb-3">
+                                    <p class="mb-1"><small>Current files:</small></p>
+                                    <ul class="list-unstyled list-group list-group-flush mb-2 small">
+                                        {% for attachment in post.attachments %}
+                                            <li class="list-group-item ps-0">
+                                                <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}" target="_blank" class="text-decoration-none">
+                                                     {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
+                                                     {% if extension == 'pdf' %} <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+                                                     {% elif extension in ['doc', 'docx'] %} <i class="bi bi-file-earmark-word text-primary me-1"></i>
+                                                     {% elif extension in ['xls', 'xlsx'] %} <i class="bi bi-file-earmark-excel text-success me-1"></i>
+                                                     {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
+                                                    {{ attachment.original_filename }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    <p class="form-text text-danger small">Note: Selecting new files will replace all current attachments.</p>
+                                </div>
+                            {% endif %}
+                            <div class="file-loading">
+                                {{ form.attachments(class="file", multiple=True, id="fileUploadInputKrajee", **{"data-browse-on-zone-click":"true"}) }}
+                                {% if form.attachments.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.attachments.errors %}<span>{{ error }}</span><br>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            {# --- CỘT PHẢI: CÀI ĐẶT & HÀNH ĐỘNG (4-5 phần chiều rộng) --- #}
+            <div class="col-lg-4">
+                {# Card cho Hành động (Submit, Cancel) - Sticky #}
+                <div class="card shadow-sm mb-4 position-sticky" style="top: 20px;"> {# top: 20px là ví dụ, điều chỉnh theo chiều cao navbar #}
+                    <div class="card-header"><h2 class="mb-0">Publishing Actions</h2></div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('my_posts') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+
+                {# Card cho Thông tin & Cài đặt bài đăng #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header"><h5 class="mb-0">Details & Options</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.post_type.label(class="form-label") }}
+                            {% if form.post_type.errors %}
+                                {{ form.post_type(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">{% for error in form.post_type.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                            {% else %}
+                                {{ form.post_type(class="form-select") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {% if form.status.errors %}
+                                {{ form.status(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">{% for error in form.status.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                            {% else %}
+                                {{ form.status(class="form-select") }}
+                            {% endif %}
+                             <small class="form-text text-muted">Only applicable for 'Research Topics'.</small>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            {{ form.tags.label(class="form-label") }}
+                            {{ form.tags(id='tags-input', class='form-control' + (' is-invalid' if form.tags.errors else ''), value=current_tags_string or form.tags.data or '') }}
+                            {% if form.tags.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.tags.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter new tags or select from suggestions. Press Enter or comma to add.</div>
+                        </div>
+                        <hr>
+                        <div class="form-check mb-3">
+                            {{ form.is_featured(class="form-check-input") }}
+                            {{ form.is_featured.label(class="form-check-label") }}
+                            <small class="form-text text-muted d-block">Check this if you want this post to appear in the featured section.</small>
+                        </div>
+                    </div>
+                </div>
+            </div> {# End Right Column #}
+        </div> {# End Main Row #}
+    </form> {# End Form #}
+</div> {# End Container #}
 {% endblock content %}
 
-{# --- Scripts Block --- #}
+{# --- Scripts Block (Giữ nguyên) --- #}
 {% block scripts %}
-    {{ super() }} {# Call super if base.html has a scripts block; uncomment if needed #}
-
-    {# Krajee File Input initialization script (Kept as is, but language changed) #}
+    {{ super() }}
+    {# Krajee File Input & Tagify Scripts (giữ nguyên như bạn đã có) #}
     <script>
         $(document).ready(function () {
             $("#fileUploadInputKrajee").fileinput({
-                language: "en", // Changed from "vi" to "en"
-                theme: "bs5",
-                showUpload: false,
-                showCaption: true,
-                showPreview: true,
-                allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'], // Must match FileAllowed in form
-                browseOnZoneClick: true,
-                overwriteInitial: false, // Should be false to not override preview on edit
-                maxFileSize: 10240, // Example 10MB
-                maxFileCount: 10, // Example 10 files
-                // Add initialPreview if you want to display old files in Krajee when Editing
-                // initialPreview: ... ,
-                // initialPreviewConfig: ... ,
+                language: "en", theme: "bs5", showUpload: false, showCaption: true,
+                showPreview: true, browseOnZoneClick: true, overwriteInitial: false,
+                allowedFileExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'],
+                maxFileSize: 10240, maxFileCount: 10,
             });
         });
     </script>
-
-    {# --- TAGIFY INITIALIZATION SCRIPT --- #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Select the original input by ID
             var input = document.querySelector('#tags-input');
-
             if (input) {
-                // Get the list of available tags from the Jinja variable (passed from backend)
-                // Use default([]) to avoid errors if the variable doesn't exist or is None
                 var tagWhitelist = {{ all_tag_names | default([]) | tojson | safe }};
-
-                // Initialize Tagify on that input
-                var tagify = new Tagify(input, {
-                    // List of existing tags for suggestions and validation (if enforceWhitelist=true)
-                    whitelist: tagWhitelist,
-                    // Not required to select from whitelist, allows adding new tags
-                    enforceWhitelist: false,
-                    // Configure suggestion dropdown
-                    dropdown: {
-                        maxItems: 15,           // Max number of suggestions
-                        enabled: 0,             // Show suggestions on focus or typing
-                        closeOnSelect: false,   // Don't close dropdown after selection to allow multiple selections
-                        highlightFirst: true    // Automatically highlight the first suggestion
-                    },
-                    // (Optional) Other settings:
-                     delimiters: ",|\r?\n", // Allow adding tags with comma or Enter
-                     editTags: {
-                         clicks: 1,              // Single click to edit tag
-                         keepInvalid: false      // Remove tag if edited to empty/invalid
-                     },
-                     // addTagOnBlur: true,     // Automatically add tag when input loses focus (consider)
-                     // ... see more Tagify docs ...
+                new Tagify(input, {
+                    whitelist: tagWhitelist, enforceWhitelist: false,
+                    dropdown: { maxItems: 15, enabled: 0, closeOnSelect: false, highlightFirst: true },
+                    delimiters: ",|\r?\n", editTags: { clicks: 1, keepInvalid: false },
                 });
-
-                // Log initial value for debugging (Tagify reads this value from the input)
-                // console.log("Tagify initial value read from input:", input.value);
-
-            } else {
-                console.error('Tagify: Input element #tags-input not found.');
-            }
+            } else { console.error('Tagify: Input element #tags-input not found.'); }
         });
     </script>
-    {# --- END TAGIFY SCRIPT --- #}
-</div>
+    {# Chú ý: thẻ </div> ở cuối block scripts trong file bạn gửi có vẻ thừa, tôi đã bỏ nó đi #}
 {% endblock scripts %}

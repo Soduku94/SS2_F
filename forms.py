@@ -1,372 +1,304 @@
 # forms.py
 from flask_wtf import FlaskForm
-# Import các trường liên quan đến file từ flask_wtf.file
-from flask_wtf.file import (FileField,
-                            FileAllowed,
-                            MultipleFileField)
-
-from wtforms import (StringField,
-                     PasswordField,
-                     SubmitField, BooleanField,
-                     TextAreaField, SelectField, DateField, IntegerField)
-
-from wtforms.validators import (DataRequired,
-                                Length, Email, EqualTo,
-                                ValidationError, Optional, URL)
+from flask_wtf.file import FileField, FileAllowed, MultipleFileField
+from wtforms import (StringField, PasswordField, SubmitField, BooleanField,
+                     TextAreaField, SelectField, DateField, IntegerField,
+                     SelectMultipleField)
+from wtforms.validators import (DataRequired, Length, Email, EqualTo,
+                                ValidationError, Optional, URL, Regexp, NumberRange)
 from flask_login import current_user
-# <<< THÊM SelectMultipleField VÀO IMPORT WTFORMS >>>
-from wtforms import (StringField, TextAreaField, SubmitField,
-                     SelectField, MultipleFileField, SelectMultipleField)
-from wtforms.validators import DataRequired, Length, ValidationError, Optional, Email ,NumberRange # Giữ các validators cần thiết
-
-try:
-    from models import User
-except ImportError:
-    raise ImportError("Cannot import User model in forms.py.")
-
-# Import model User (giữ nguyên try...except)
-try:
-    from models import User
-except ImportError:
-    raise ImportError("Không thể import model User. Kiểm tra cấu trúc file models.py và app.py.")
+from models import User  # Assuming User model is correctly placed and importable
 
 
 class LoginForm(FlaskForm):
-    """Form dùng cho người dùng đăng nhập."""
+    """Form for user login."""
     email = StringField('Email',
-                        validators=[DataRequired(message="Vui lòng nhập email."),
-                                    Email(message="Email không hợp lệ.")])
-    password = PasswordField('Mật khẩu',
-                             validators=[DataRequired(message="Vui lòng nhập mật khẩu.")])
-    remember = BooleanField('Ghi nhớ đăng nhập')  # Đảm bảo đã bỏ comment ở login_user nếu dùng
-    submit = SubmitField('Đăng nhập')
+                        validators=[DataRequired(message="Please enter your email."),
+                                    Email(message="Invalid email address.")])
+    password = PasswordField('Password',
+                             validators=[DataRequired(message="Please enter your password.")])
+    remember = BooleanField('Remember Me')
+    submit = SubmitField('Login')
 
 
-# forms.py
-# Đảm bảo import đủ:
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, DateField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional, Regexp
-from models import User
-
-
-# ... các form khác ...
-
-# --- THAY THẾ HOÀN TOÀN CLASS NÀY ---
 class RegistrationForm(FlaskForm):
-    """Form chỉ dùng cho sinh viên tự đăng ký."""
-    # Thứ tự: 1
-    full_name = StringField('Họ và tên đầy đủ',
-                            validators=[DataRequired(message="Vui lòng nhập họ tên.")])
-    # Thứ tự: 2
-    student_id = StringField('Mã số sinh viên',
-                             validators=[DataRequired(message="Vui lòng nhập MSSV."),
-                                         Length(min=7, max=10, message="MSSV phải từ 7 đến 10 ký tự."),
-                                         # Optional: Thêm Regexp nếu muốn chỉ nhập số
-                                         # Regexp('^[0-9]*$', message='MSSV chỉ được chứa chữ số.')
+    """Form for student self-registration."""
+    full_name = StringField('Full Name',
+                            validators=[DataRequired(message="Please enter your full name.")])
+    student_id = StringField('Student ID',
+                             validators=[DataRequired(message="Please enter your Student ID."),
+                                         Length(min=7, max=10,
+                                                message="Student ID must be between 7 and 10 characters."),
+                                         # Optional: Add Regexp if you want numbers only
+                                         # Regexp('^[0-9]*$', message='Student ID must contain only digits.')
                                          ])
-    # Thứ tự: 3
-    email = StringField('Địa chỉ Email (dùng để đăng nhập)',
-                        validators=[DataRequired(message="Vui lòng nhập email."),
-                                    Email(message="Email không hợp lệ.")])
-    # Thứ tự: 4
-    class_name = StringField('Lớp học',
-                             validators=[DataRequired(message="Vui lòng nhập lớp học."), Length(max=50)])
-    # Thứ tự: 5
-    date_of_birth = DateField('Ngày sinh',
-                              validators=[DataRequired(message="Vui lòng nhập ngày sinh.")])
-    # Lưu ý: DateField yêu cầu định dạng YYYY-MM-DD khi nhập hoặc dùng widget
-    # Thứ tự: 6
-    gender = SelectField('Giới tính', choices=[
-        ('', '--- Chọn giới tính ---'),
-        ('male', 'Nam'),
-        ('female', 'Nữ')
-        # Chỉ 2 lựa chọn theo yêu cầu
-    ], validators=[DataRequired(message="Vui lòng chọn giới tính.")])
-    # Thứ tự: 7
-    phone_number = StringField('Số điện thoại',
-                               validators=[DataRequired(message="Vui lòng nhập số điện thoại."),
-                                           Length(min=9, max=15, message="Số điện thoại không hợp lệ.")])
-    # Optional: Thêm Regexp kiểm tra định dạng SĐT Việt Nam
-    # Thứ tự: 8
-    password = PasswordField('Mật khẩu',
-                             validators=[DataRequired(message="Vui lòng nhập mật khẩu."),
-                                         Length(min=6, message="Mật khẩu cần ít nhất 6 ký tự.")])
-    # Thứ tự: 9
-    confirm_password = PasswordField('Xác nhận mật khẩu',
-                                     validators=[DataRequired(message="Vui lòng xác nhận mật khẩu."),
-                                                 EqualTo('password', message='Mật khẩu xác nhận không khớp.')])
-    submit = SubmitField('Đăng ký tài khoản')
+    email = StringField('Email Address (for login)',
+                        validators=[DataRequired(message="Please enter your email address."),
+                                    Email(message="Invalid email address.")])
+    class_name = StringField('Class Name',
+                             validators=[DataRequired(message="Please enter your class name."), Length(max=50)])
+    date_of_birth = DateField('Date of Birth',
+                              validators=[DataRequired(message="Please enter your date of birth.")])
+    # Note: DateField requires YYYY-MM-DD format or a datepicker widget
+    gender = SelectField('Gender', choices=[
+        ('', '--- Select Gender ---'),
+        ('male', 'Male'),
+        ('female', 'Female')
+    ], validators=[DataRequired(message="Please select your gender.")])
+    phone_number = StringField('Phone Number',
+                               validators=[DataRequired(message="Please enter your phone number."),
+                                           Length(min=9, max=15, message="Invalid phone number length.")])
+    # Optional: Add Regexp for specific phone number formats
+    password = PasswordField('Password',
+                             validators=[DataRequired(message="Please enter a password."),
+                                         Length(min=6, message="Password must be at least 6 characters long.")])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(message="Please confirm your password."),
+                                                 EqualTo('password', message='Passwords must match.')])
+    submit = SubmitField('Register Account')
 
-    # Validator kiểm tra trùng lặp MSSV (giữ nguyên)
     def validate_student_id(self, student_id):
         user = User.query.filter_by(student_id=student_id.data).first()
         if user:
-            raise ValidationError('MSSV này đã tồn tại.')
+            raise ValidationError('This Student ID is already registered.')
 
-    # Validator kiểm tra trùng lặp Email (giữ nguyên)
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
-            raise ValidationError('Email này đã được sử dụng.')
+            raise ValidationError('This email address is already in use.')
 
 
 class PostForm(FlaskForm):
-    """Form dùng cho Giảng viên tạo hoặc cập nhật Bài đăng/Đề tài."""  # Cập nhật mô tả
-    title = StringField('Tiêu đề',
-                        validators=[DataRequired(message="Vui lòng nhập tiêu đề.")])
-    content = TextAreaField('Nội dung',
-                            validators=[DataRequired(message="Vui lòng nhập nội dung.")])
-    post_type = SelectField('Loại bài đăng',
-                            choices=[('article', 'Bài viết / Thông báo'), ('topic', 'Đề tài Nghiên cứu')],
-                            validators=[DataRequired(message="Vui lòng chọn loại bài đăng.")])
+    """Form for Lecturers to create or update Posts/Topics."""
+    title = StringField('Title',
+                        validators=[DataRequired(message="Please enter a title.")])
+    content = TextAreaField('Content',
+                            validators=[DataRequired(message="Please enter the content.")])
+    post_type = SelectField('Post Type',
+                            choices=[('article', 'Article / Announcement'), ('topic', 'Research Topic')],
+                            validators=[DataRequired(message="Please select a post type.")])
 
-    # Thêm Optional() vì file đính kèm có thể không bắt buộc
-    attachments = MultipleFileField('Tệp đính kèm (Có thể chọn nhiều file)',
-                                    validators=[Optional(),  # <<< Thêm Optional
+    attachments = MultipleFileField('Attachments (You can select multiple files)',
+                                    validators=[Optional(),
                                                 FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx'],
-                                                            'Chỉ chấp nhận PDF, Word, Excel và PowerPoint!')])
+                                                            'Only PDF, Word, Excel, and PowerPoint files are allowed!')])
+    tags = StringField('Tags',
+                       validators=[Optional()])
 
-    # Rút gọn label, chuẩn bị cho Tagify
-    tags = StringField('Thẻ',  # <<< Label gọn hơn
-                       validators=[Optional()])  # Thẻ vẫn là tùy chọn
-
-    # Cập nhật label và các lựa chọn trạng thái cho rõ ràng
-    status = SelectField('Trạng thái',  # <<< Label gọn hơn
+    status = SelectField('Status',
                          choices=[
-                             ('pending', 'Chờ duyệt'),  # Đang chờ (Admin/Review?)
-                             ('published', 'Công khai'),  # Đã đăng, chỉ xem
-                             ('recruiting', 'Tìm sinh viên'),  # Đã đăng, đang tìm SV
-                             ('working_on', 'Đang thực hiện'),  # Đã có SV làm
-                             ('closed', 'Đã đóng/Kết thúc')  # Không còn hoạt động
+                             ('pending', 'Pending Approval'),
+                             ('published', 'Published'),
+                             ('recruiting', 'Recruiting Students'),
+                             ('working_on', 'In Progress'),
+                             ('closed', 'Closed/Finished')
                          ],
-                         default='pending')  # Mặc định khi tạo mới là chờ duyệt
+                         default='pending')
 
-    is_featured = BooleanField('Ghim / Đặt làm nổi bật')
-    submit = SubmitField('Lưu Bài đăng / Đề tài')  # <<< Label chung hơn
+    is_featured = BooleanField('Pin / Mark as Featured')
+    submit = SubmitField('Save Post / Topic')
 
 
 class UpdateAccountForm(FlaskForm):
-    # <<< THÊM CÁC TRƯỜNG MỚI >>>
-    date_of_birth = DateField('Ngày sinh', validators=[Optional()])
-    gender = SelectField('Giới tính', choices=[
-        ('', '--- Chọn giới tính ---'),  # Lựa chọn trống
-        ('male', 'Nam'),
-        ('female', 'Nữ'),
-
+    date_of_birth = DateField('Date of Birth', validators=[Optional()])
+    gender = SelectField('Gender', choices=[
+        ('', '--- Select Gender ---'),
+        ('male', 'Male'),
+        ('female', 'Female'),
     ], validators=[Optional()])
-    picture = FileField('Cập nhật Ảnh đại diện (jpg, png, jpeg, gif)',
-                        validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Chỉ chấp nhận file ảnh!')])
-    phone_number = StringField('Số điện thoại',
-                               validators=[Optional(), Length(min=9, max=15)])  # Optional, giới hạn độ dài
-    contact_email = StringField('Email Liên hệ (khác)', validators=[Optional(), Email(
-        message="Email liên hệ không hợp lệ.")])  # Optional, kiểm tra định dạng
-    about_me = TextAreaField('Giới thiệu bản thân',
-                             validators=[Optional(), Length(max=500)])  # Optional, giới hạn 500 ký tự
-    class_name = StringField('Lớp', validators=[Optional(), Length(max=50)])
-
-    # <<< KẾT THÚC THÊM TRƯỜNG >>>
+    picture = FileField('Update Profile Picture (jpg, png, jpeg, gif)',
+                        validators=[Optional(),
+                                    FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Only image files are allowed!')])
+    phone_number = StringField('Phone Number',
+                               validators=[Optional(), Length(min=9, max=15, message="Invalid phone number length.")])
+    contact_email = StringField('Alternative Contact Email',
+                                validators=[Optional(), Email(message="Invalid contact email address.")])
+    about_me = TextAreaField('About Me',
+                             validators=[Optional(), Length(max=500, message="About me cannot exceed 500 characters.")])
+    class_name = StringField('Class', validators=[Optional(), Length(max=50)])
+    delete_picture = BooleanField('Remove current profile picture and use default')
 
     def validate_contact_email(self, contact_email):
-        # ... (logic kiểm tra contact_email như trước) ...
-        if contact_email.data and contact_email.data != current_user.contact_email:
-            if contact_email.data == current_user.email:
-                raise ValidationError('Email liên hệ không được trùng với email đăng nhập.')
-            user_by_contact = User.query.filter_by(contact_email=contact_email.data).first()
-            user_by_main = User.query.filter_by(email=contact_email.data).first()
+        if contact_email.data and contact_email.data.strip():  # Check if data exists and is not just whitespace
+            if current_user.is_authenticated and contact_email.data == current_user.contact_email:
+                return  # No change, no validation needed
+            if current_user.is_authenticated and contact_email.data == current_user.email:
+                raise ValidationError('Alternative contact email cannot be the same as your login email.')
+            # Check if this contact email is used as a main email or contact email by another user
+            user_by_contact = User.query.filter(User.id != current_user.id,
+                                                User.contact_email == contact_email.data).first()
+            user_by_main = User.query.filter(User.id != current_user.id, User.email == contact_email.data).first()
             if user_by_contact or user_by_main:
-                raise ValidationError('Email liên hệ này đã được sử dụng.')
+                raise ValidationError('This contact email is already in use.')
 
     # def validate_phone_number(self, phone_number):
-    #     # ... (logic kiểm tra phone_number như trước) ...
-    #     if phone_number.data and phone_number.data != current_user.phone_number:
-    #         user = User.query.filter_by(phone_number=phone_number.data).first()
+    #     if phone_number.data and phone_number.data.strip():
+    #         if current_user.is_authenticated and phone_number.data == current_user.phone_number:
+    #             return
+    #         user = User.query.filter(User.id != current_user.id, User.phone_number == phone_number.data).first()
     #         if user:
-    #             raise ValidationError('Số điện thoại này đã được sử dụng.')
+    #             raise ValidationError('This phone number is already in use.')
 
-    submit = SubmitField('Cập nhật thông tin')
+    submit = SubmitField('Update Information')
 
 
 class ChangePasswordForm(FlaskForm):
-    """Form cho người dùng thay đổi mật khẩu."""
-    current_password = PasswordField('Mật khẩu hiện tại',
-                                     validators=[DataRequired(message="Vui lòng nhập mật khẩu hiện tại.")])
-    new_password = PasswordField('Mật khẩu mới',
-                                 validators=[DataRequired(message="Vui lòng nhập mật khẩu mới."),
-                                             Length(min=6, message="Mật khẩu mới cần ít nhất 6 ký tự.")])
-    confirm_new_password = PasswordField('Xác nhận mật khẩu mới',
-                                         validators=[DataRequired(message="Vui lòng xác nhận mật khẩu mới."),
-                                                     EqualTo('new_password', message='Mật khẩu mới không khớp.')])
-    submit = SubmitField('Đổi mật khẩu')
+    """Form for users to change their password."""
+    current_password = PasswordField('Current Password',
+                                     validators=[DataRequired(message="Please enter your current password.")])
+    new_password = PasswordField('New Password',
+                                 validators=[DataRequired(message="Please enter a new password."),
+                                             Length(min=6, message="New password must be at least 6 characters long.")])
+    confirm_new_password = PasswordField('Confirm New Password',
+                                         validators=[DataRequired(message="Please confirm your new password."),
+                                                     EqualTo('new_password', message='New passwords must match.')])
+    submit = SubmitField('Change Password')
 
-    # Custom validator để kiểm tra mật khẩu hiện tại có đúng không
     def validate_current_password(self, current_password):
         if not current_user.check_password(current_password.data):
-            raise ValidationError('Mật khẩu hiện tại không đúng.')
+            raise ValidationError('Incorrect current password.')
 
 
-# --- KẾT THÚC THÊM CLASS ---
-
-
-# --- THÊM FORM MỚI CHO GỬI Ý TƯỞNG ---
 class IdeaSubmissionForm(FlaskForm):
-    """Form cho Sinh viên gửi ý tưởng mới."""
-    title = StringField('Tiêu đề Ý tưởng',
-                        validators=[DataRequired(message="Vui lòng nhập tiêu đề."), Length(max=150)])
-    description = TextAreaField('Mô tả chi tiết Ý tưởng',
-                                validators=[DataRequired(message="Vui lòng mô tả ý tưởng của bạn.")])
+    """Form for Students to submit new ideas."""
+    title = StringField('Idea Title',
+                        validators=[DataRequired(message="Please enter a title for your idea."), Length(max=150)])
+    description = TextAreaField('Detailed Description of Idea',
+                                validators=[DataRequired(message="Please describe your idea.")])
+    recipients = SelectMultipleField('Send to Lecturers (Select one or more)', coerce=int, validators=[Optional()])
+    # choices will be added from the route
 
-    # <<< THÊM TRƯỜNG CHỌN NGƯỜI NHẬN >>>
-    # coerce=int để đảm bảo giá trị submit là list các số nguyên (User IDs)
-    recipients = SelectMultipleField('Gửi đến Giảng viên (Chọn một hoặc nhiều)', coerce=int, validators=[Optional()])
-    # choices sẽ được thêm vào từ route
-    # <<< KẾT THÚC THÊM >>>
-
-    # <<< THÊM TRƯỜNG NÀY >>>
-    attachments = MultipleFileField('Tệp đính kèm (Tùy chọn)',
-                                    validators=[
-                                        FileAllowed(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx', 'png', 'jpg', 'jpeg'],
-                                                    'Chỉ chấp nhận tệp văn bản, bảng tính, trình chiếu hoặc ảnh!')])
-    submit = SubmitField('Gửi Ý tưởng')
+    attachments = MultipleFileField('Attachments (Optional)',
+                                    validators=[Optional(),
+                                                FileAllowed(
+                                                    ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'pptx', 'png', 'jpg', 'jpeg'],
+                                                    'Only text, spreadsheet, presentation or image files are allowed!')])
+    submit = SubmitField('Submit Idea')
 
 
-# --- KẾT THÚC THÊM FORM ---
-
-
-# --- THÊM FORM MỚI CHO REVIEW Ý TƯỞNG ---
 class IdeaReviewForm(FlaskForm):
-    """Form cho Giảng viên phản hồi và cập nhật trạng thái ý tưởng."""
-    feedback = TextAreaField('Nội dung Phản hồi', validators=[Optional()])  # Phản hồi có thể có hoặc không
-    status = SelectField('Cập nhật Trạng thái',
+    """Form for Lecturers to provide feedback and update idea status."""
+    feedback = TextAreaField('Feedback Content', validators=[Optional()])
+    status = SelectField('Update Status',
                          choices=[
-                             # Giữ lại các trạng thái có thể có
-                             ('pending', 'Đang chờ duyệt'),
-                             ('reviewed', 'Đã xem xét (Reviewed)'),  # Thêm trạng thái này?
-                             ('approved', 'Chấp thuận (Approved)'),
-                             ('rejected', 'Từ chối (Rejected)')
+                             ('pending', 'Pending Approval'),
+                             ('reviewed', 'Reviewed'),
+                             ('approved', 'Approved'),
+                             ('rejected', 'Rejected')
                          ],
-                         validators=[DataRequired(message="Vui lòng chọn trạng thái.")])  # Bắt buộc chọn trạng thái
-    submit = SubmitField('Lưu Phản hồi & Trạng thái')
+                         validators=[DataRequired(message="Please select a status.")])
+    submit = SubmitField('Save Feedback & Status')
 
 
-# --- KẾT THÚC THÊM FORM ---
-
-
-# === THÊM CLASS FORM MỚI CHO ADMIN TẠO USER ===
 class AdminUserCreateForm(FlaskForm):
-    """Form cho Admin tạo người dùng mới (GV hoặc SV)."""
-    full_name = StringField('Họ và tên đầy đủ',
-                            validators=[DataRequired(message="Vui lòng nhập họ tên.")])
-    email = StringField('Email (Dùng để đăng nhập)',
-                        validators=[DataRequired(message="Vui lòng nhập email."),
-                                    Email(message="Email không hợp lệ.")])
-    password = PasswordField('Mật khẩu',
-                             validators=[DataRequired(message="Vui lòng nhập mật khẩu."),
-                                         Length(min=6, message="Mật khẩu cần ít nhất 6 ký tự.")])
-    confirm_password = PasswordField('Xác nhận mật khẩu',
-                                     validators=[DataRequired(message="Vui lòng xác nhận mật khẩu."),
-                                                 EqualTo('password', message='Mật khẩu xác nhận không khớp.')])
-    role = SelectField('Vai trò', choices=[
-        ('lecturer', 'Giảng viên'),
-        ('student', 'Sinh viên'),
-        ('admin', 'Admin')
-    ], validators=[DataRequired(message="Vui lòng chọn vai trò.")])
-    # Có thể thêm các trường student_id, class_name ở đây nếu muốn Admin nhập luôn khi tạo SV
-    # student_id = StringField('Mã số sinh viên (Nếu là SV)', validators=[Optional(), Length(...)])
-    # class_name = StringField('Lớp (Nếu là SV)', validators=[Optional(), Length(...)])
+    """Form for Admin to create new users (Lecturer or Student)."""
+    full_name = StringField('Full Name',
+                            validators=[DataRequired(message="Please enter the full name.")])
+    email = StringField('Email (Used for login)',
+                        validators=[DataRequired(message="Please enter an email address."),
+                                    Email(message="Invalid email address.")])
+    password = PasswordField('Password',
+                             validators=[DataRequired(message="Please enter a password."),
+                                         Length(min=6, message="Password must be at least 6 characters long.")])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(message="Please confirm the password."),
+                                                 EqualTo('password', message='Passwords must match.')])
+    role = SelectField('Role', choices=[
+        ('lecturer', 'Lecturer'),
+        ('student', 'Student'),
+        ('admin', 'Admin')  # Be cautious when assigning Admin role
+    ], validators=[DataRequired(message="Please select a role.")])
+    student_id = StringField('Student ID (If Student)', validators=[Optional(), Length(min=7, max=10,
+                                                                                       message="Student ID must be 7-10 characters if provided.")])
+    class_name = StringField('Class (If Student)', validators=[Optional(), Length(max=50)])
+    submit = SubmitField('Create User')
 
-    submit = SubmitField('Tạo người dùng')
-
-    # Vẫn cần kiểm tra email duy nhất
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
-            raise ValidationError('Email này đã tồn tại. Vui lòng chọn email khác.')
+            raise ValidationError('This email address already exists. Please choose a different one.')
+
+    def validate_student_id(self, student_id):
+        if student_id.data:  # Only validate if student_id is provided
+            user = User.query.filter_by(student_id=student_id.data).first()
+            if user:
+                raise ValidationError('This Student ID already exists. Please choose a different one.')
 
 
-# --- THÊM CLASS FORM MỚI CHO ADMIN SỬA USER ---
 class AdminUserUpdateForm(FlaskForm):
-    """Form cho Admin cập nhật thông tin người dùng."""
-    # Các trường có thể sửa
-    full_name = StringField('Họ và tên đầy đủ',
-                            validators=[DataRequired(message="Vui lòng nhập họ tên.")])
-    email = StringField('Email (Dùng để đăng nhập)',
-                        validators=[DataRequired(message="Vui lòng nhập email."),
-                                    Email(message="Email không hợp lệ.")])
-    role = SelectField('Vai trò', choices=[
-        ('lecturer', 'Giảng viên'),
-        ('student', 'Sinh viên'),
-        ('admin', 'Admin')  # Cho phép đổi thành Admin? (Cẩn thận)
-    ], validators=[DataRequired(message="Vui lòng chọn vai trò.")])
-    # Các trường thông tin thêm (tùy chọn)
-    student_id = StringField('Mã số sinh viên',
-                             validators=[Optional(), Length(min=7, max=10, message="MSSV không hợp lệ (nếu có).")])
-    class_name = StringField('Lớp', validators=[Optional(), Length(max=50)])
+    """Form for Admin to update user information."""
+    full_name = StringField('Full Name',
+                            validators=[DataRequired(message="Please enter the full name.")])
+    email = StringField('Email (Used for login)',
+                        validators=[DataRequired(message="Please enter an email address."),
+                                    Email(message="Invalid email address.")])
+    role = SelectField('Role', choices=[
+        ('lecturer', 'Lecturer'),
+        ('student', 'Student'),
+        ('admin', 'Admin')  # Be cautious when changing roles, especially to Admin
+    ], validators=[DataRequired(message="Please select a role.")])
+    student_id = StringField('Student ID',
+                             validators=[Optional(), Length(min=7, max=10,
+                                                            message="Student ID must be 7-10 characters if provided.")])
+    class_name = StringField('Class', validators=[Optional(), Length(max=50)])
+    # Admin might also want to update other fields like phone, DOB, gender, etc. Add them as needed.
 
-    submit = SubmitField('Lưu thay đổi')
+    submit = SubmitField('Save Changes')
 
-    # --- Validator tùy chỉnh ---
-    # Cần truyền user gốc vào form để validator hoạt động đúng
     def __init__(self, original_user, *args, **kwargs):
         super(AdminUserUpdateForm, self).__init__(*args, **kwargs)
-        self.original_user = original_user  # Lưu user gốc
+        self.original_user = original_user
 
-    # Kiểm tra email mới có trùng với người khác (TRỪ user hiện tại) không
     def validate_email(self, email):
-        if email.data != self.original_user.email:  # Chỉ kiểm tra nếu email bị thay đổi
+        if email.data != self.original_user.email:
             user = User.query.filter_by(email=email.data).first()
             if user:
-                raise ValidationError('Email này đã được sử dụng bởi một tài khoản khác.')
+                raise ValidationError('This email address is already in use by another account.')
 
-    # Kiểm tra MSSV mới có trùng với người khác (TRỪ user hiện tại) không
     def validate_student_id(self, student_id):
-        # Chỉ kiểm tra nếu có nhập MSSV VÀ nó khác với MSSV gốc (nếu có)
         if student_id.data and student_id.data != self.original_user.student_id:
             user = User.query.filter_by(student_id=student_id.data).first()
             if user:
-                raise ValidationError('MSSV này đã được sử dụng bởi một tài khoản khác.')
-
-# --- KẾT THÚC FORM UPDATE ---
+                raise ValidationError('This Student ID is already in use by another account.')
 
 
 class AcademicWorkForm(FlaskForm):
-    """Form cho Admin/Dean thêm hoặc sửa AcademicWork (Công trình Showcase)."""
-    title = StringField('Tiêu đề Công trình',
-                        validators=[DataRequired(message="Vui lòng nhập tiêu đề."),
-                                    Length(max=200, message="Tiêu đề tối đa 200 ký tự.")])
+    """Form for Admin/Dean to add or edit AcademicWork (Showcase Items)."""
+    title = StringField('Work Title',
+                        validators=[DataRequired(message="Please enter a title."),
+                                    Length(max=200, message="Title cannot exceed 200 characters.")])
 
-    is_featured = BooleanField('Hiển thị trên Carousel đầu trang Showcase?')  # <<< Thêm dòng này
+    is_featured = BooleanField('Display on Showcase Carousel (Top Section)?')
 
-    item_type = SelectField('Loại Công trình',
+    item_type = SelectField('Type of Work',
                             choices=[
-                                ('thesis', 'Luận văn / Đồ án Tốt nghiệp'),
-                                ('proceeding', 'Bài báo / Kỷ yếu NCKH'),
-                                ('project', 'Dự án Nghiên cứu Khác')
-                                # Bạn có thể thêm các lựa chọn khác nếu cần
+                                ('thesis', 'Thesis / Capstone Project'),
+                                ('proceeding', 'Research Paper / Conference Proceeding'),
+                                ('project', 'Other Research Project')
                             ],
-                            validators=[DataRequired(message="Vui lòng chọn loại công trình.")])
+                            validators=[DataRequired(message="Please select the type of work.")])
 
-    authors_text = StringField('Tên Tác giả / Nhóm thực hiện',
-                               validators=[DataRequired(message="Vui lòng nhập tên tác giả/nhóm."),
+    authors_text = StringField('Author(s) / Team Name',
+                               validators=[DataRequired(message="Please enter the author(s)/team name."),
                                            Length(max=300)])
 
-    year = IntegerField('Năm hoàn thành / Công bố',
-                        validators=[Optional(), # Cho phép bỏ trống
-                                    NumberRange(min=1990, max=2100, message="Năm không hợp lệ.")]) # Giới hạn năm hợp lý
+    year = IntegerField('Year of Completion / Publication',
+                        validators=[Optional(),
+                                    NumberRange(min=1990, max=2100, message="Invalid year.")])
 
-    abstract = TextAreaField('Tóm tắt / Giới thiệu ngắn',
-                             validators=[Optional()]) # Tùy chọn
+    abstract = TextAreaField('Abstract / Short Introduction',
+                             validators=[Optional()])
 
-    full_content = TextAreaField('Nội dung chi tiết',
-                                 validators=[Optional()]) # Tùy chọn. Template có thể dùng Trix/CKEditor cho trường này.
+    full_content = TextAreaField('Detailed Content',
+                                 validators=[Optional()])  # Trix/CKEditor can be used for this in template
 
-    image_file = FileField('Ảnh minh họa (Tùy chọn)',
-                           validators=[Optional(), # Ảnh là tùy chọn
-                                       FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Chỉ chấp nhận file ảnh (jpg, png, jpeg, gif)!')])
+    image_file = FileField('Cover Image (Optional)',
+                           validators=[Optional(),
+                                       FileAllowed(['jpg', 'png', 'jpeg', 'gif'],
+                                                   'Only image files (jpg, png, jpeg, gif) are allowed!')])
 
-    external_link = StringField('Link liên kết ngoài (PDF, Github,... Tùy chọn)',
-                                validators=[Optional(), URL(require_tld=True, message="Địa chỉ link không hợp lệ.")]) # Kiểm tra định dạng URL
+    external_link = StringField('External Link (PDF, Github, etc. - Optional)',
+                                validators=[Optional(), URL(require_tld=True, message="Invalid URL format.")])
 
-    is_published = BooleanField('Hiển thị công khai trên trang Showcase?') # Checkbox để chọn publish
-
-    submit = SubmitField('Lưu Công trình')
+    is_published = BooleanField('Make this work publicly visible on the Showcase page?')
+    submit = SubmitField('Save Work')

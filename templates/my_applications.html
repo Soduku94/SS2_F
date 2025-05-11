@@ -1,82 +1,142 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %} {# Example: "Registered Topics" #}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4">{{ title }}</h1>
-<hr>
+    <div class="container mt-4">
+        <h1 class="mb-4">{{ title }}</h1>
+        <hr class="mb-4">
 
-    {% if applications_pagination and applications_pagination.items %}
-        <div class="list-group shadow-sm">
-            {% for app in applications_pagination.items %} {# Bắt đầu vòng lặp #}
-                {# Item cho mỗi đơn đăng ký #}
-                <div class="list-group-item list-group-item-action flex-column align-items-start">
-                    {# Phần hiển thị thông tin đơn (Title, GV, Ngày ĐK, Trạng thái, Lời nhắn) #}
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">
-                            <a href="{{ url_for('view_post', post_id=app.post_id) }}" class="text-decoration-none">
+        {# --- Hàng Tiêu đề Cột (Visual Header Row) --- #}
+        <div class="d-none d-md-flex text-muted small fw-semibold align-items-center px-2 py-1 mb-2 border-bottom">
+            <div style="width: 50px; flex-shrink: 0;">#</div>
+            <div class="flex-grow-1">Topic Title</div>
+            {# Điều chỉnh chiều rộng cột Status ở header cho phù hợp với vị trí mong muốn của badge #}
+            <div style="width: 180px; flex-shrink: 0;" class="text-center">Status</div>
+            <div style="width: 40px; flex-shrink: 0;"></div>
+            {# Khoảng trống cho icon mũi tên của accordion #}
+        </div>
+
+        {% if applications_pagination and applications_pagination.items %}
+            <div class="accordion shadow-sm" id="registeredTopicsAccordion">
+                {% for app in applications_pagination.items %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ app.id }}">
+                            <button class="accordion-button collapsed d-flex align-items-center" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ app.id }}"
+                                    aria-expanded="false" aria-controls="collapse{{ app.id }}">
+
+                            <span class="accordion-item-number me-2" style="width: 35px; flex-shrink: 0;">
+                                {{ loop.index + applications_pagination.per_page * (applications_pagination.page - 1) }}.
+                            </span>
+
+                                <span class="accordion-item-title flex-grow-1 me-2 fw-semibold multi-line-truncate-2">
                                 {{ app.topic.title if app.topic else 'Topic does not exist' }}
-                            </a>
-                        </h5>
-                        <small class="text-muted" title="Submission date">{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </span>
+
+                                {# --- KHỐI STATUS ĐƯỢC ĐIỀU CHỈNH --- #}
+                                {# Bỏ ms-auto, đặt width cố định hoặc min-width/max-width để nó chiếm vị trí "ở giữa" #}
+                                <span class="accordion-item-status me-2"
+                                      style="width: 170px; flex-shrink: 0; text-align: center;">
+                                    {% if app.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark"><i
+                                                class="bi bi-hourglass-split me-1"></i>Pending Review</span>
+                                    {% elif app.status == 'accepted' %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Approved</span>
+                                    {% elif app.status == 'rejected' %}
+                                        <span class="badge bg-danger"><i
+                                                class="bi bi-x-circle-fill me-1"></i>Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ app.status | title }}</span>
+                                    {% endif %}
+                            </span>
+                                {# Icon mũi tên của Bootstrap accordion sẽ tự động chiếm phần còn lại ở cuối #}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ app.id }}" class="accordion-collapse collapse"
+                             aria-labelledby="heading{{ app.id }}" data-bs-parent="#registeredTopicsAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        {% if app.topic and app.topic.author %}
+                                            <p class="mb-1">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-person-video3 me-1"></i><strong>Lecturer:</strong>
+                                                    {{ app.topic.author.full_name }}
+                                                </small>
+                                            </p>
+                                        {% endif %}
+                                        <p class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar-check me-1"></i><strong>Applied on:</strong>
+                                                {{ app.application_date.strftime('%d/%m/%Y %H:%M') }}
+                                            </small>
+                                        </p>
+                                        {% if app.message %}
+                                            <div class="mb-0">
+                                                <p class="mb-1"><small><strong>Your message:</strong></small></p>
+                                                <blockquote
+                                                        class="blockquote blockquote-sm bg-light p-2 rounded border-start border-primary border-3 fst-italic mb-2">
+                                                    <small>"{{ app.message }}"</small>
+                                                </blockquote>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                                        {# Bỏ align-self-start nếu không cần thiết nữa #}
+                                        <div class="d-grid d-md-inline-flex gap-2">
+                                            {# Sử dụng d-grid trên mobile và d-inline-flex với gap trên desktop #}
+                                            <a href="{{ url_for('view_post', post_id=app.post_id) }}"
+                                               class="btn btn-sm btn-outline-primary" title="View Topic Details">
+                                                <i class="bi bi-eye-fill"></i> View Topic
+                                            </a>
+                                            {% if app.status == 'pending' %}
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger withdraw-application-btn"
+                                                        data-application-id="{{ app.id }}"
+                                                        data-withdraw-url="{{ url_for('withdraw_application', application_id=app.id) }}"
+                                                        title="Withdraw this application">
+                                                    <i class="bi bi-trash3 me-1"></i>Withdraw
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mb-1"><small class="text-muted">Lecturer: {{ app.topic.author.full_name if app.topic and app.topic.author else 'N/A' }}</small></p>
-                    <div class="mb-2">
-                         Current Status:
-                        {% if app.status == 'pending' %}
-                            <span class="badge bg-warning text-dark">Pending Review</span>
-                        {% elif app.status == 'accepted' %}
-                            <span class="badge bg-success">Approved</span>
-                        {% elif app.status == 'rejected' %}
-                            <span class="badge bg-danger">Rejected</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ app.status }}</span>
-                        {% endif %}
-                    </div>
-                    {% if app.message %}
-                        <p class="mb-1 fst-italic"><small>Your messages: "{{ app.message }}"</small></p>
-                    {% endif %}
+                {% endfor %}
+            </div>
 
+            {# --- Phân trang --- #}
+            {% if applications_pagination and applications_pagination.pages > 1 %}
+                <nav aria-label="My Applications navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not applications_pagination.has_prev %}disabled{% endif %}">
+                            <a class="page-link"
+                               href="{{ url_for('my_applications', page=applications_pagination.prev_num) if applications_pagination.has_prev else '#' }}">&laquo;</a>
+                        </li>
+                        {% for page_num in applications_pagination.iter_pages() %}
+                            {% if page_num %}
+                                <li class="page-item {% if page_num == applications_pagination.page %}active{% endif %}">
+                                    <a class="page-link"
+                                       href="{{ url_for('my_applications', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if not applications_pagination.has_next %}disabled{% endif %}">
+                            <a class="page-link"
+                               href="{{ url_for('my_applications', page=applications_pagination.next_num) if applications_pagination.has_next else '#' }}">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+            {# --- Kết thúc Phân Trang --- #}
 
-
-                </div> {# Đóng thẻ list-group-item #}
-            {% endfor %} {# Đóng vòng lặp for #}
-
-
-
-        </div> {# Đóng thẻ list-group #}
-
-        {# --- Phân trang --- #}
-       {% if applications_pagination and applications_pagination.pages > 1 %}
-        <nav aria-label="Notifications navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {# ... code phân trang ... #}
-                 <li class="page-item {% if not applicationss_pagination.has_prev %}disabled{% endif %}">
-                        <a class="page-link"
-                           href="{{ url_for('applications', page=applications_pagination.prev_num) if applications_pagination.has_prev else '#' }}">&laquo;</a>
-                    </li>
-                    {% for page_num in applications_pagination.iter_pages() %}
-                        {% if page_num %}
-                            <li class="page-item {% if page_num == applications_pagination.page %}active{% endif %}">
-                                <a class="page-link"
-                                   href="{{ url_for('applications', page=page_num) }}">{{ page_num }}</a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                        {% endif %}
-                    {% endfor %}
-                    <li class="page-item {% if not applications_pagination.has_next %}disabled{% endif %}">
-                        <a class="page-link"
-                           href="{{ url_for('applications', page=applications_pagination.next_num) if applications_pagination.has_next else '#' }}">&raquo;</a>
-                    </li>
-            </ul>
-        </nav>
-    {% endif %}
-        {# --- Kết thúc Phân Trang --- #}
-
-    {% else %}
-        <div class="alert alert-info">You have not registered any topics.</div>
-    {% endif %}
-</div> {# Đóng container #}
-{% endblock %} {# Đóng block content #}
+        {% else %}
+            <div class="alert alert-info mt-3">You have not registered for any topics yet.</div>
+        {% endif %}
+    </div>
+{% endblock %}

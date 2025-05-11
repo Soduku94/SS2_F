@@ -1,93 +1,107 @@
 {% extends "base.html" %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %} {# Example: "Student Ideas" #}
 
 {% block content %}
     <div class="container mt-4">
-        <h1 class="mb-4">{{ list_title }}</h1>
-        {# Có thể thêm link/tab để chuyển qua lại giữa Pending và Responded ở đây sau #}
+        <h1 class="mb-4">{{ list_title }}</h1> {# Example: "Pending Ideas" or "Responded Ideas" #}
+        {# Tabs to switch between Pending and Responded can be added here later #}
         <div class="nav nav-tabs mb-3">
             <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}"
-               href="{{ url_for('view_pending_ideas') }}">Chờ duyệt</a>
+               href="{{ url_for('view_pending_ideas') }}">Pending Review</a>
             <a class="nav-link {% if request.endpoint == 'view_responded_ideas' %}active{% endif %}"
-               href="{{ url_for('view_responded_ideas') }}">Đã phản hồi</a>
-            {# Có thể thêm các bộ lọc khác ở đây #}
+               href="{{ url_for('view_responded_ideas') }}">Responded</a>
+            {# Other filters can be added here #}
         </div>
 
         {% if ideas_pagination and ideas_pagination.items %}
             <div class="table-responsive shadow-sm rounded">
                 <table class="table table-hover table-striped align-middle mb-0">
-                    {# === PHẦN HEADER CỦA BẢNG === #}
-                    <thead class="table-dark">
+                    {# === TABLE HEADER === #}
+                    <thead class="table-white">
                     <tr>
-                        <th scope="col" style="width: 5%;">STT</th>
-                        <th scope="col" style="width: 20%;">Tiêu đề Ý tưởng</th>
-                        <th scope="col" style="width: 20%;">Người gửi</th>
-                        {# Thêm cột Trạng thái, điều chỉnh width #}
-                        <th scope="col" style="width: 20%;">Trạng thái</th>
-                        <th scope="col" style="width: 20%;">Thời gian gửi</th>
-                        <th scope="col" style="width: 20%;">Hành động</th>
+                        <th scope="col" style="width: 5%;">No.</th>
+                        <th scope="col" style="width: 20%;">Idea Title</th>
+                        <th scope="col" style="width: 20%;">Submitted by</th>
+                        {# Added Status column, adjust width #}
+                        <th scope="col" style="width: 20%;">Status</th>
+                        <th scope="col" style="width: 20%;">Submission Time</th>
+                        <th scope="col" style="width: 15%;">Actions</th> {# Adjusted width to make total 100% with others #}
                     </tr>
                     </thead>
-                    {# === KẾT THÚC HEADER === #}
+                    {# === END HEADER === #}
 
-                    {# === PHẦN BODY CỦA BẢNG === #}
+                    {# === TABLE BODY === #}
                     <tbody>
                     {% for idea in ideas_pagination.items %}
                         <tr>
-                            {# STT #}
+                            {# No. #}
                             <td>{{ ideas_pagination.per_page * (ideas_pagination.page - 1) + loop.index }}</td>
-                            {# Tiêu đề (Link) #}
+                            {# Title (Link) #}
                             <td>
                                 <a href="{{ url_for('review_idea', idea_id=idea.id) }}"
                                    class="fw-bold text-decoration-none"
                                    title="{{ idea.title }}">{{ idea.title | truncate(60, True, '...') }}</a>
                             </td>
-                            {# Người gửi #}
+                            {# Submitted by #}
                             <td>{{ idea.student.full_name }}</td>
-                            {# Trạng thái (DÙNG LẠI BADGE) #}
+                            {# Status (USING BADGES AGAIN) #}
                             <td>
-                                {% if idea.status == 'approved' %} <span class="badge bg-success">Đã duyệt</span>
-                                {% elif idea.status == 'rejected' %} <span class="badge bg-danger">Đã từ chối</span>
-                                {% elif idea.status == 'reviewed' %} <span class="badge bg-info">Đã xem xét</span>
-                                {% else %} <span class="badge bg-warning text-dark">Đang chờ duyệt</span> {% endif %}
+                                {% if idea.status == 'approved' %} <span class="badge bg-success">Approved</span>
+                                {% elif idea.status == 'rejected' %} <span class="badge bg-danger">Rejected</span>
+                                {% elif idea.status == 'reviewed' %} <span class="badge bg-info">Reviewed</span>
+                                {% else %} <span class="badge bg-warning text-dark">Pending Approval</span> {% endif %}
                             </td>
-                            {# Thời gian gửi #}
+                            {# Submission Time #}
                             <td>{{ idea.submission_date.strftime('%d/%m/%Y') }}<br><small
                                     class="text-muted">{{ idea.submission_date.strftime('%H:%M') }}</small></td>
-                            {# Hành động #}
+                            {# Actions #}
                             <td>
-                                {# Nút Xem/Review (DÙNG TEXT) #}
+                                {# View/Review Button (USING TEXT) #}
                                 <a href="{{ url_for('review_idea', idea_id=idea.id) }}"
-                                   class="btn btn-sm btn-outline-primary me-1" title="Xem/Review">
-                                    Xem/Review {# Thay icon bằng text #}
+                                   class="btn btn-sm btn-outline-primary me-1" title="Review">
+                                    Review {# Text instead of icon #}
                                 </a>
-                                {# Nút Xóa (Giữ nguyên) #}
+                                {# Delete Button (Kept as is) #}
                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                        data-bs-target="#deleteIdeaModal{{ idea.id }}" title="Xóa Ý tưởng">
+                                        data-bs-target="#deleteIdeaModal{{ idea.id }}" title="Delete Idea">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </td>
                         </tr>
 
-                        {# Modal xác nhận xóa cho từng idea (giữ nguyên) #}
-                        <div class="modal fade" id="deleteIdeaModal{{ idea.id }}" ...>
-                            ...
-                        </div>
+                        {# Delete confirmation modal for each idea (kept as is) #}
+                        <div class="modal fade" id="deleteIdeaModal{{ idea.id }}" tabindex="-1" aria-labelledby="deleteIdeaModalLabel{{ idea.id }}" aria-hidden="true">
+                             <div class="modal-dialog modal-sm">
+                                 <div class="modal-content">
+                                     <div class="modal-header">
+                                        <h5 class="modal-title fs-6" id="deleteIdeaModalLabel{{ idea.id }}">Confirm Deletion</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                     </div>
+                                     <div class="modal-body">Delete idea "{{ idea.title }}"?</div>
+                                     <div class="modal-footer">
+                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                         <form action="{{ url_for('delete_idea_by_lecturer', idea_id=idea.id) }}" method="POST" style="display: inline;"> {# Assuming a route like 'delete_idea_by_lecturer' #}
+                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                         </form>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
 
-                    {% endfor %} {# Kết thúc vòng lặp for idea #}
+                    {% endfor %} {# End for idea loop #}
                     </tbody>
-                    {# === KẾT THÚC BODY === #}
+                    {# === END BODY === #}
                 </table>
             </div>
         {% else %}
             <div class="alert alert-info" role="alert">
-                Hiện tại không có ý tưởng nào phù hợp với bộ lọc này.
+                Currently, there are no ideas matching this filter/view.
             </div>
         {% endif %}
 
-        {# --- Phân Trang (Đảm bảo url_for đúng endpoint hiện tại) --- #}
+        {# --- Pagination (Ensure url_for uses the correct current endpoint) --- #}
         {% if ideas_pagination and ideas_pagination.pages > 1 %}
-            {# Sử dụng request.endpoint để link phân trang tự động đúng với route hiện tại #}
+            {# Using request.endpoint so pagination links automatically to the current route #}
             <nav aria-label="Ideas navigation" class="mt-4">
                 <ul class="pagination justify-content-center">
                     <li class="page-item {% if not ideas_pagination.has_prev %}disabled{% endif %}">
@@ -111,7 +125,7 @@
                 </ul>
             </nav>
         {% endif %}
-        {# --- Kết thúc Phân Trang --- #}
+        {# --- End Pagination --- #}
 
     </div>
 {% endblock %}

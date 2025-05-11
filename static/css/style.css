@@ -146,7 +146,26 @@ body {
         align-self: flex-start;}
 }
 
+/* Trong static/css/style.css */
+#searchResultsDropdown {
+    /* Giữ lại các style cũ của bạn */
+    width: auto; /* Cho phép nó co giãn theo nội dung */
+    min-width: 300px; /* Đặt chiều rộng tối thiểu nếu muốn */
+    max-width: 100%; /* Quan trọng: Giới hạn chiều rộng tối đa bằng 100% của thẻ cha trực tiếp của nó (thường là form hoặc search-input-container nếu bạn điều chỉnh HTML) */
+                               /* Hoặc bạn có thể đặt một giá trị cụ thể nếu biết trước, ví dụ: max-width: 400px; */
 
+    /* Các thuộc tính để xử lý text dài */
+    overflow-x: hidden; /* Ẩn thanh cuộn ngang nếu nội dung vẫn cố tràn */
+    white-space: normal; /* Cho phép text tự xuống dòng */
+}
+
+#searchResultsDropdown .dropdown-item { /* Áp dụng cho các item gợi ý */
+    white-space: normal; /* Đảm bảo text trong từng item cũng xuống dòng */
+    word-wrap: break-word; /* Ngắt từ nếu cần để tránh tràn */
+    /* Hoặc overflow-wrap: break-word; */
+    text-overflow: ellipsis; /* (Tùy chọn) Hiển thị ... nếu vẫn quá dài và bạn muốn ẩn bớt */
+    /* overflow: hidden; */ /* (Tùy chọn) Kết hợp với text-overflow */
+}
 
 
 
@@ -305,3 +324,25 @@ body.register-page nav.navbar.fixed-top,
 body.register-page footer.bg-dark {
     display: none !important;
 }
+
+.accordion-item-title.multi-line-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Giới hạn hiển thị 2 dòng */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4; /* Điều chỉnh line-height cho phù hợp với font chữ của bạn */
+    /* max-height cần tính toán dựa trên line-height và số dòng,
+       ví dụ: line-height * số dòng.
+       Tuy nhiên, -webkit-line-clamp thường đủ cho các trình duyệt hiện đại.
+       max-height: calc(1.4em * 2); /* Ví dụ: line-height nhân 2 dòng */
+
+}
+
+/* CSS bổ sung để đảm bảo nút accordion có đủ chiều cao tối thiểu khi tiêu đề là 1 dòng */
+.accordion-button {
+    min-height: 50px; /* Hoặc một giá trị phù hợp để badge trạng thái không bị quá sát */
+}
+
+
+
