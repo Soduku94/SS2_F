@@ -2,137 +2,178 @@
 {% block title %}{{ title }}{% endblock %} {# Example: "Update Account Information" #}
 
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header"><h2>{{ title }}</h2></div> {# Example: "Update Account Information" #}
-            <div class="card-body">
-                 {# === Add enctype TO FORM === #}
-                 <form method="POST" action="" id="updateAccountForm" novalidate enctype="multipart/form-data">
-                    {{ form.hidden_tag() }}
-                    <fieldset>
+    <div class="row justify-content-center mt-4">
+        {# Bạn có thể thử tăng chiều rộng cột này nếu muốn có thêm không gian, ví dụ: col-md-10 hoặc col-lg-9 #}
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header"><h2>{{ title }}</h2></div>
+                {# Example: "Update Account Information" #}
+                <div class="card-body">
+                    <form method="POST" action="" id="updateAccountForm" novalidate enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        <fieldset>
 
-                        <div class="mb-3">
-                             {{ form.class_name.label(class="form-label") }} {# Label: "Class Name" (Set in Python Form) #}
-                             {% if form.class_name.errors %}
-                                {{ form.class_name(class="form-control is-invalid", placeholder="Example: 22CTT1") }}
-                                <div class="invalid-feedback">{% for error in form.class_name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                             {% else %}
-                                {{ form.class_name(class="form-control", placeholder="Example: 22CTT1") }}
-                             {% endif %}
-                         </div>
+                            {# --- Hàng 1: Ngày sinh và Giới tính --- #}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.date_of_birth.label(class="form-label") }} {# Label: "Date of Birth" #}
+                                        {% if form.date_of_birth.errors %}
+                                            {{ form.date_of_birth(class="form-control is-invalid") }}
+                                            <div class="invalid-feedback">{% for error in form.date_of_birth.errors %}
+                                                <span>{{ error }}</span><br>{% endfor %}</div>
+                                        {% else %}
+                                            {{ form.date_of_birth(class="form-control") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.gender.label(class="form-label") }} {# Label: "Gender" #}
+                                        {% if form.gender.errors %}
+                                            {{ form.gender(class="form-select is-invalid") }}
+                                            <div class="invalid-feedback">{% for error in form.gender.errors %}
+                                                <span>{{ error }}</span><br>{% endfor %}</div>
+                                        {% else %}
+                                            {{ form.gender(class="form-select") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
 
-                        {# Render editable fields: DOB, Gender, Phone, Contact Email, About Me, Class Name #}
-                         <div class="mb-3">
-                             {{ form.date_of_birth.label(class="form-label") }} {# Label: "Date of Birth" (Set in Python Form) #}
-                             {% if form.date_of_birth.errors %}
-                                {{ form.date_of_birth(class="form-control is-invalid") }}
-                                <div class="invalid-feedback">{% for error in form.date_of_birth.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                             {% else %}
-                                {{ form.date_of_birth(class="form-control") }}
-                             {% endif %}
-                         </div>
-                         <div class="mb-3">
-                             {{ form.gender.label(class="form-label") }} {# Label: "Gender" (Set in Python Form) #}
-                             {% if form.gender.errors %}
-                                {{ form.gender(class="form-select is-invalid") }}
-                                <div class="invalid-feedback">{% for error in form.gender.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                             {% else %}
-                                {{ form.gender(class="form-select") }}
-                             {% endif %}
-                         </div>
-                          <div class="mb-3">
-                             {{ form.phone_number.label(class="form-label") }} {# Label: "Phone Number" (Set in Python Form) #}
-                             {% if form.phone_number.errors %}
-                                {{ form.phone_number(class="form-control is-invalid", placeholder="Phone Number") }}
-                                <div class="invalid-feedback">{% for error in form.phone_number.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                             {% else %}
-                                {{ form.phone_number(class="form-control", placeholder="Phone Number") }}
-                             {% endif %}
-                         </div>
-                          <div class="mb-3">
-                             {{ form.contact_email.label(class="form-label") }} {# Label: "Contact Email" (Set in Python Form) #}
-                             {% if form.contact_email.errors %}
-                                {{ form.contact_email(class="form-control is-invalid", placeholder="Alternative contact email (optional)") }}
-                                <div class="invalid-feedback">{% for error in form.contact_email.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                             {% else %}
-                                {{ form.contact_email(class="form-control", placeholder="Alternative contact email (optional)") }}
-                             {% endif %}
-                         </div>
-                          <div class="mb-3">
-                             {{ form.about_me.label(class="form-label") }} {# Label: "About Me" (Set in Python Form) #}
-                             {% if form.about_me.errors %}
-                                {{ form.about_me(class="form-control is-invalid", rows="4") }}
-                                <div class="invalid-feedback">{% for error in form.about_me.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                             {% else %}
-                                {{ form.about_me(class="form-control", rows="4") }}
-                             {% endif %}
-                         </div>
+                            {# --- Hàng 2: Lớp học và Số điện thoại --- #}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.class_name.label(class="form-label") }} {# Label: "Class Name" #}
+                                        {% if form.class_name.errors %}
+                                            {{ form.class_name(class="form-control is-invalid", placeholder="Example: 22CTT1") }}
+                                            <div class="invalid-feedback">{% for error in form.class_name.errors %}
+                                                <span>{{ error }}</span><br>{% endfor %}</div>
+                                        {% else %}
+                                            {{ form.class_name(class="form-control", placeholder="Example: 22CTT1") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.phone_number.label(class="form-label") }} {# Label: "Phone Number" #}
+                                        {% if form.phone_number.errors %}
+                                            {{ form.phone_number(class="form-control is-invalid", placeholder="Phone Number") }}
+                                            <div class="invalid-feedback">{% for error in form.phone_number.errors %}
+                                                <span>{{ error }}</span><br>{% endfor %}</div>
+                                        {% else %}
+                                            {{ form.phone_number(class="form-control", placeholder="Phone Number") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# --- Email liên hệ (Toàn chiều rộng) --- #}
+                            <div class="mb-3">
+                                {{ form.contact_email.label(class="form-label") }} {# Label: "Contact Email" #}
+                                {% if form.contact_email.errors %}
+                                    {{ form.contact_email(class="form-control is-invalid", placeholder="Others contact email (optional)") }}
+                                    <div class="invalid-feedback">{% for error in form.contact_email.errors %}
+                                        <span>{{ error }}</span><br>{% endfor %}</div>
+                                {% else %}
+                                    {{ form.contact_email(class="form-control", placeholder="Others contact email (optional)") }}
+                                {% endif %}
+                            </div>
+
+                            {# --- Giới thiệu bản thân (Toàn chiều rộng) --- #}
+                            <div class="mb-3">
+                                {{ form.about_me.label(class="form-label") }} {# Label: "About Me" #}
+                                {% if form.about_me.errors %}
+                                    {{ form.about_me(class="form-control is-invalid", rows="4") }}
+                                    <div class="invalid-feedback">{% for error in form.about_me.errors %}
+                                        <span>{{ error }}</span><br>{% endfor %}</div>
+                                {% else %}
+                                    {{ form.about_me(class="form-control", rows="4") }}
+                                {% endif %}
+                            </div>
+
+                            {# --- Ảnh đại diện (Toàn chiều rộng) --- #}
+                            <hr>
+                            <div class="mb-3">
+                                {{ form.picture.label(class="form-label") }} {# Label: "Profile Picture" #}
+                                {{ form.picture(class="form-control") }}
+                                {% if form.picture.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.picture.errors %}<span>{{ error }}</span><br>{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Select a new image file (jpg, png, jpeg, gif) to
+                                    update your profile picture.</small>
+                            </div>
+                            {# === KHỐI DIV CHO TRƯỜNG PICTURE === #}
+                            <hr>
 
 
-
-                        {# === DIV BLOCK FOR PICTURE FIELD === #}
-                        <hr>
-                        <div class="mb-3">
-                            {{ form.picture.label(class="form-label") }} {# Label: "Profile Picture" (Set in Python Form) #}
-                            {# Image file input #}
-                            {{ form.picture(class="form-control") }}
-                            {# Display validation errors if any #}
-                            {% if form.picture.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.picture.errors %}<span>{{ error }}</span><br>{% endfor %}
+                            {# --- THÊM CHECKBOX XÓA ẢNH --- #}
+                            {# Chỉ hiển thị nếu người dùng có ảnh tùy chỉnh (không phải default) #}
+                            {% if current_user.image_file and not current_user.image_file.startswith('default') %}
+                                <div class="mb-3 form-check">
+                                    {{ form.delete_picture(class="form-check-input") }}
+                                    {{ form.delete_picture.label(class="form-check-label") }}
+                                    {# Label: "Remove current profile picture and use default" #}
                                 </div>
                             {% endif %}
-                             <small class="form-text text-muted">Select a new image file (jpg, png, jpeg, gif) to update your profile picture.</small>
+                            {# --- KẾT THÚC CHECKBOX XÓA ẢNH --- #}
+
+                        </fieldset>
+                        <div class="d-grid mt-3">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#confirmUpdateModal">
+                                Save Changes
+                            </button>
                         </div>
-                        {# === END PICTURE BLOCK === #}
-
-                    </fieldset>
-                    <div class="d-grid mt-3">
-                         {# Button to open confirmation Modal #}
-                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmUpdateModal">
-                             Save Changes
-                         </button>
+                    </form>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('account') }}">Cancel</a>
                     </div>
-                </form>
-                 <div class="mt-3 text-center">
-                       <a href="{{ url_for('account') }}">Cancel</a>
-                  </div>
-            </div> {# End card-body #}
-        </div> {# End card #}
-    </div> {# End col #}
-</div> {# End row #}
+                </div>
+                {# End card-body #}
+            </div>
+            {# End card #}
+        </div>
+        {# End col #}
+    </div> {# End row #}
 
-{# --- Update Confirmation Modal --- #}
-<div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="confirmUpdateModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmUpdateModalLabel">Confirm Update</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to save these changes?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="submitUpdateBtn">Confirm</button> {# JS will submit form #}
-      </div>
+    {# --- Update Confirmation Modal --- #}
+    <div class="modal fade" id="confirmUpdateModal" tabindex="-1" aria-labelledby="confirmUpdateModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmUpdateModalLabel">Confirm Update</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to save these changes?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitUpdateBtn">Confirm</button>
+                    {# JS will submit form #}
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
-{{ super() }}
-{# Script to handle modal submit #}
-<script>
-    const confirmButton = document.getElementById('submitUpdateBtn');
-    const updateForm = document.getElementById('updateAccountForm');
-    if (confirmButton && updateForm) {
-        confirmButton.addEventListener('click', function () { updateForm.submit(); });
-    } else {
-        // console.error("Confirm button or update form not found for modal submission.");
-    }
-</script>
+    {{ super() }}
+    {# Script to handle modal submit #}
+    <script>
+        const confirmButton = document.getElementById('submitUpdateBtn');
+        const updateForm = document.getElementById('updateAccountForm');
+        if (confirmButton && updateForm) {
+            confirmButton.addEventListener('click', function () {
+                updateForm.submit();
+            });
+        } else {
+            // console.error("Confirm button or update form not found for modal submission.");
+        }
+    </script>
 {% endblock %}

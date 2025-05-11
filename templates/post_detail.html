@@ -3,186 +3,233 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-5 "> {# Giảm margin top #}
-        <div class="row justify-content-center">
-            <div class="col-lg-9"> {# Cột nội dung chính #}
-                <article class="showcase-article card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h2 class="mb-0">{{ post.title }}</h2>
-                    </div>
-                    <div class="card-body">
-                        {# --- Metadata của bài đăng --- #}
-                        <div class="d-flex flex-wrap align-items-center mb-3 text-muted small border-bottom pb-2">
-                            <div class="me-3"><i class="bi bi-person-fill"></i> Đăng bởi: <a href="#"
-                                                                                             class="text-decoration-none">{{ post.author.full_name }}</a>
+    <div class="container mt-4"> {# Giảm margin top một chút so với mt-5 #}
+        <div class="row justify-content-center gy-4"> {# gy-4 cho khoảng cách giữa các cột khi responsive #}
+
+            {# --- CỘT NỘI DUNG CHÍNH (TRÁI HOẶC GIỮA) --- #}
+            <div class="col-lg-8">
+                <article class="post-detailed-content card shadow-sm">
+                    {# Nếu có ảnh bìa cho bài đăng, bạn có thể thêm ở đây #}
+                    {# Ví dụ:
+                {% if post.cover_image %}
+                    <img src="{{ url_for('static', filename='covers/' + post.cover_image) }}" class="card-img-top" alt="Cover image for {{ post.title }}">
+                {% endif %}
+                #}
+                    <div class="card-body p-4"> {# Tăng padding cho card-body #}
+                        <h1 class="card-title mb-3 display-6">{{ post.title }}</h1>
+
+                        {# --- Thông tin Meta của bài đăng (Tác giả, Ngày) --- #}
+                        <div class="d-flex align-items-center text-muted small mb-3 pb-3 border-bottom">
+                            {# Giả sử bạn có logic để lấy avatar của tác giả bài đăng #}
+                            {# {% set author_avatar_url = ... logic tương tự current_user ... %} #}
+                            {# <img src="{{ author_avatar_url }}" alt="{{ post.author.full_name }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;"> #}
+                            <div>
+                                <i class="bi bi-person-fill me-1"></i>Posted by
+                                <a href="#" class="text-decoration-none fw-semibold">{{ post.author.full_name }}</a>
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-calendar3 me-1"></i>Posted
+                                on {{ post.date_posted.strftime('%B %d, %Y at %H:%M') }} {# Định dạng ngày dễ đọc hơn #}
                             </div>
-                            <div class="me-3"><i class="bi bi-calendar3"></i> Ngày
-                                đăng: {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</div>
-                            <div class="me-3">{% if post.post_type == 'topic' %}<span class="badge bg-primary"><i
-                                    class="bi bi-lightbulb-fill"></i> Đề tài</span>{% elif post.post_type == 'article' %}
-                                <span class="badge bg-secondary"><i
-                                        class="bi bi-file-text-fill"></i> Bài viết</span>{% endif %}</div>
-                            {% if post.status %}
-                                <div class="me-3">Trạng thái: {% if post.status == 'recruiting' %}
-                                    <span class="badge bg-success">Tìm sinh viên</span>{% elif post.status == 'pending' %}
-                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>{% elif post.status == 'closed' %}
-                                    <span class="badge bg-secondary">Đã đóng</span>{% elif post.status == 'working_on' %}
-                                    <span class="badge bg-info">Đang thực hiện</span>{% elif post.status == 'published' %}
-                                    <span class="badge bg-light text-dark">Công khai</span>{% else %}
-                                    <span class="badge bg-dark">{{ post.status }}</span>{% endif %}</div>{% endif %}
-                            {% if post.is_featured %}
-                                <div class="me-3"><span class="badge bg-warning text-dark"><i
-                                        class="bi bi-pin-angle-fill"></i> Nổi bật</span></div>{% endif %}
                         </div>
 
-                        {# --- Hiển thị Tags --- #}
+                        {# --- Nội dung chính --- #}
+                        <div class="post-full-content mb-4" style="font-size: 1.1rem; line-height: 1.7;">
+                            {{ post.content | safe if post.content else '<p><em>(No content available)</em></p>' }}
+                        </div>
+
+                        {# --- Tags --- #}
                         {% if post.tags.count() > 0 %}
-                            <div class="mb-3">
-                                <strong>Thẻ:</strong>
-                                {% for tag in post.tags %}
-                                    <span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>{% endfor %}
-                            </div>
                             <hr>
+                            <div class="mb-3">
+                                <h5 class="mb-2 small text-uppercase text-muted">Tags</h5>
+                                {% for tag in post.tags %}
+                                    <a href="{{ url_for('dashboard', tag_id=tag.id) }}"
+                                       class="badge bg-light text-dark text-decoration-none me-1 p-2">{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
                         {% endif %}
 
-                        {# --- Nội dung bài đăng --- #}
-                        <div class="post-content mb-4">
-                            <h5>Nội dung chi tiết:</h5>
-                            <div>{{ post.content | safe if post.content else '<p><em>(Không có nội dung)</em></p>' }}</div>
-                        </div>
-
-                        {# --- File đính kèm --- #}
+                        {# --- Tệp đính kèm --- #}
                         {% if post.attachments %}
                             <hr>
                             <div class="attachments-section mb-4">
-                                <h5><i class="bi bi-paperclip"></i> Tệp đính kèm:</h5>
-                                <ul class="list-unstyled">
+                                <h5 class="mb-2 small text-uppercase text-muted"><i class="bi bi-paperclip"></i>
+                                    Attachments</h5>
+                                <ul class="list-group list-group-flush">
                                     {% for attachment in post.attachments %}
-                                        <li class="mb-1">
+                                        <li class="list-group-item px-0 py-2">
                                             <a href="{{ url_for('download_file', filename=attachment.saved_filename) }}"
-                                               target="_blank" class="text-decoration-none">
+                                               target="_blank" class="text-decoration-none d-flex align-items-center">
                                                 {% set extension = attachment.original_filename.split('.')[-1].lower() if attachment.original_filename else '' %}
-                                                {% if extension == 'pdf' %}
-                                                    <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
-                                                {% elif extension in ['doc', 'docx'] %}
-                                                    <i class="bi bi-file-earmark-word text-primary me-1"></i>
-                                                {% elif extension in ['xls', 'xlsx'] %}
-                                                    <i class="bi bi-file-earmark-excel text-success me-1"></i>
-                                                {% else %} <i class="bi bi-file-earmark-text me-1"></i> {% endif %}
-                                                {{ attachment.original_filename }}
+                                                <span style="font-size: 1.5rem; width: 30px;">
+                                            {% if extension == 'pdf' %}
+                                                <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                            {% elif extension in ['doc', 'docx'] %}
+                                                <i class="bi bi-file-earmark-word text-primary"></i>
+                                            {% elif extension in ['xls', 'xlsx'] %}
+                                                <i class="bi bi-file-earmark-excel text-success"></i>
+                                            {% else %} <i class="bi bi-file-earmark-text"></i> {% endif %}
+                                            </span>
+                                                <span class="ms-2">{{ attachment.original_filename }}</span>
                                             </a>
                                         </li>
                                     {% endfor %}
                                 </ul>
                             </div>
                         {% endif %}
-                        {# --- Kết thúc File đính kèm --- #}
 
-                        <hr>
 
-                        {# --- KHỐI NÚT HÀNH ĐỘNG TỔNG HỢP --- #}
-                        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            {# --- NHÓM NÚT BÊN TRÁI (Chung & Sinh viên) --- #}
-                            <div class="d-flex align-items-center flex-wrap gap-2">
-                                {# Nút Quay lại Dashboard #}
-                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm"><i
-                                        class="bi bi-arrow-left-circle"></i> Dashboard</a>
 
-                                {# Nút Like (AJAX) #}
-                                <div class="d-inline-block post-like-button-container">
-                                    <button type="button" id="post-like-button"
-                                            class="btn btn-sm post-like-toggle-btn {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif user_has_liked %}btn-danger{% else %}btn-outline-danger{% endif %}"
-                                            data-post-id="{{ post.id }}"
-                                            data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
-                                            title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif user_has_liked %}Bỏ thích{% else %}Thích{% endif %}"
-                                            {% if not current_user.is_authenticated %}disabled{% endif %}>
-                                        <i id="post-like-icon"
-                                           class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-                                        Thích <span id="post-like-count" class="like-count">({{ like_count }})</span>
-                                    </button>
-                                    {# CSRF token nên lấy từ meta tag trong base.html #}
-                                </div>
 
-                                {# Nút Đăng ký / Hủy / Trạng thái (Cho Sinh viên) #}
-                                {% if current_user.is_authenticated and current_user.role == 'student' and post.post_type == 'topic' %}
-                                    <div class="d-inline-block application-action-container"
-                                         data-post-id="{{ post.id }}"> {# Thêm data-post-id vào container #}
-                                        {% set current_app_status = application.status if application else None %}
-                                        {% set application_id = application.id if application else None %}
-                                        {# 1. Chưa đăng ký VÀ đang tuyển #}
-                                        {% if not application and post.status == 'recruiting' %}
-                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#applyConfirmModal" data-post-id="{{ post.id }}">
-                                                <i class="bi bi-check-circle-fill"></i> Đăng ký đề tài này
-                                            </button>
-                                            {# 2. Đã đăng ký VÀ đang chờ duyệt -> Hiện nút Hủy trigger modal #}
-                                        {% elif application and current_app_status == 'pending' %}
-                                            <button type="button" class="btn btn-warning btn-sm withdraw-trigger-btn"
-                                                    data-bs-toggle="modal" data-bs-target="#withdrawConfirmModal"
-                                                    data-application-id="{{ application_id }}">
-                                                <i class="bi bi-x-circle"></i> Hủy đăng ký (Chờ duyệt)
-                                            </button>
-                                            {# 3. Đã đăng ký và có kết quả #}
-                                        {% elif application and current_app_status == 'accepted' %}
-                                            <button type="button" class="btn btn-info btn-sm" disabled><i
-                                                    class="bi bi-check-lg"></i> Đã được chấp thuận
-                                            </button>
-                                        {% elif application and current_app_status == 'rejected' %}
-                                            <button type="button" class="btn btn-secondary btn-sm" disabled><i
-                                                    class="bi bi-x-lg"></i> Đã bị từ chối
-                                            </button>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            {# --- KẾT THÚC NHÓM NÚT BÊN TRÁI --- #}
-
-                            {# --- NHÓM NÚT BÊN PHẢI (SỬA/XÓA - chỉ cho tác giả) --- #}
-                            {% if post.author == current_user %}
-                                <div class="d-flex align-items-center flex-wrap gap-2">
-                                    <a href="{{ url_for('update_post', post_id=post.id) }}"
-                                       class="btn btn-secondary btn-sm"><i class="bi bi-pencil-fill"></i> Sửa</a>
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#deletePostModal{{ post.id }}"><i
-                                            class="bi bi-trash-fill"></i> Xóa
-                                    </button>
-                                </div>
-                            {% endif %}
-                            {# --- KẾT THÚC NHÓM NÚT BÊN PHẢI --- #}
-                        </div>
-                        {# --- Kết thúc Khối nút hành động --- #}
                     </div>
                     {# End card-body #}
                 </article>
                 {# End article #}
             </div>
-            {# End col-lg-9 #}
+
+            {# --- CỘT SIDEBAR (PHẢI) --- #}
+            <div class="col-lg-4">
+                {# Card 1: Thông tin chung của Bài đăng/Đề tài (Giữ nguyên) #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header"><h6 class="mb-0 fw-semibold">Post Overview</h6></div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <strong>Type:</strong>
+                            {% if post.post_type == 'topic' %}<span class="badge bg-primary ms-1">Topic</span>
+                            {% elif post.post_type == 'article' %}<span class="badge bg-secondary ms-1">Article</span>
+                            {% endif %}
+                        </p>
+                        {% if post.status %}
+                            <p class="mb-2">
+                                <strong>Status:</strong>
+                                {% if post.status == 'recruiting' %}
+                                    <span class="badge bg-success">Recruiting Students</span>
+                                {% elif post.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">Pending Approval</span>
+                                {% elif post.status == 'closed' %} <span class="badge bg-secondary">Closed</span>
+                                {% elif post.status == 'working_on' %} <span class="badge bg-info">In Progress</span>
+                                {% elif post.status == 'published' %}
+                                    <span class="badge bg-light text-dark border">Published</span>
+                                {% else %} <span class="badge bg-dark">{{ post.status | title }}</span>
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                        {% if post.is_featured %}
+                            <p class="mb-0"><strong><i class="bi bi-pin-angle-fill text-warning me-1"></i>This is a
+                                Featured Post</strong></p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Card 2: Actions - ĐƯỢC CẤU TRÚC LẠI #}
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 80px;">
+                    <div class="card-header"><h6 class="mb-0 fw-semibold">Actions</h6></div>
+                    <div class="card-body">
+                        {# Nhóm 1: Like, Share, Back (Nằm ngang) #}
+                        <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 mb-3">
+                            {# Nút Like #}
+                            <div class="post-like-button-container"> {# Giữ lại container nếu JS cần #}
+                                <button type="button" id="post-like-button"
+                                        class="btn btn-sm {% if not current_user.is_authenticated %}btn-outline-secondary disabled{% elif user_has_liked %}btn-danger{% else %}btn-outline-danger{% endif %} post-like-toggle-btn"
+                                        data-post-id="{{ post.id }}"
+                                        data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
+                                        title="{% if not current_user.is_authenticated %}Login to like{% elif user_has_liked %}Unlike{% else %}Like{% endif %}"
+                                        {% if not current_user.is_authenticated %}disabled{% endif %}>
+                                    <i id="post-like-icon"
+                                       class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                    Like <span id="post-like-count" class="like-count">({{ like_count }})</span>
+                                </button>
+                                {# CSRF token thường lấy từ meta tag trong base.html bởi JS #}
+                            </div>
+
+                            {# Nút Share - Cần ID "share-button" nếu JS của bạn dùng nó #}
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="share-button">
+                                <i class="bi bi-share-fill"></i> Share
+                            </button>
+
+                            {# Nút Quay lại Dashboard #}
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-left-circle"></i> Back
+                            </a>
+                        </div>
+
+                        {# Đường kẻ ngăn cách nếu có các nhóm nút khác #}
+                        {% if (current_user.is_authenticated and current_user.role == 'student' and post.post_type == 'topic') or (post.author == current_user) %}
+                            <hr class="my-3">
+                        {% endif %}
+
+                        {# Nhóm 2: Đăng ký / Hủy (Cho Sinh viên - dạng khối, chiếm cả hàng) #}
+                        {% if current_user.is_authenticated and current_user.role == 'student' and post.post_type == 'topic' %}
+                            <div class="application-action-container mb-3 d-grid" data-post-id="{{ post.id }}">
+                                {% set current_app_status = application.status if application else None %}
+                                {% set application_id = application.id if application else None %}
+                                {% if not application and post.status == 'recruiting' %}
+                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#applyConfirmModal" data-post-id="{{ post.id }}">
+                                        <i class="bi bi-check-circle-fill"></i> Apply for this Topic
+                                    </button>
+                                {% elif application and current_app_status == 'pending' %}
+                                    <button type="button" class="btn btn-warning btn-sm withdraw-trigger-btn"
+                                            data-bs-toggle="modal" data-bs-target="#withdrawConfirmModal"
+                                            data-application-id="{{ application_id }}">
+                                        <i class="bi bi-x-circle"></i> Withdraw Application (Pending)
+                                    </button>
+                                {% elif application and current_app_status == 'accepted' %}
+                                    <button type="button" class="btn btn-info btn-sm" disabled><i
+                                            class="bi bi-check-lg"></i> Application Approved
+                                    </button>
+                                {% elif application and current_app_status == 'rejected' %}
+                                    <button type="button" class="btn btn-secondary btn-sm" disabled><i
+                                            class="bi bi-x-lg"></i> Application Rejected
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        {# Nhóm 3: Sửa / Xóa (Cho Tác giả - dạng khối, chiếm cả hàng) #}
+                        {% if post.author == current_user %}
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('update_post', post_id=post.id) }}"
+                                   class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil-fill"></i> Edit Post</a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#deletePostModal{{ post.id }}"><i
+                                        class="bi bi-trash-fill"></i> Delete Post
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {# End card-body #}
+                </div>
+                {# End Actions card #}
+                {# ... Các card khác trong sidebar nếu có ... #}
+            </div>
+            {# --- Kết thúc Cột Sidebar --- #}
         </div>
         {# End row #}
 
-        {# --- Các Modal --- #}
-        {# Modal Xóa Post (Cho tác giả) #}
+        {# --- Các Modal (Giữ nguyên logic, chỉ dịch text nếu cần) --- #}
+        {# Modal Xóa Post #}
         {% if post.author == current_user %}
             <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1"
                  aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title fs-6" id="deletePostModalLabel{{ post.id }}">Xác nhận Xóa Bài
-                                Đăng</h5>
+                            <h5 class="modal-title fs-6" id="deletePostModalLabel{{ post.id }}">Confirm Post
+                                Deletion</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            Bạn có chắc chắn muốn xóa bài đăng "{{ post.title }}" không? Hành động này không thể hoàn
-                            tác. File đính kèm (nếu có) cũng sẽ bị xóa.
+                            Are you sure you want to delete the post "{{ post.title }}"? This action cannot be undone.
+                            Attached files (if any) will also be deleted.
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel
+                            </button>
                             <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST"
                                   style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                {# CSRF cho form xóa #}
-                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
                         </div>
                     </div>
@@ -190,58 +237,61 @@
             </div>
         {% endif %}
 
-        {# Modal Xác nhận Đăng ký (Cho Sinh viên) #}
+        {# Modal Xác nhận Đăng ký #}
         {% if post.post_type == 'topic' and post.status == 'recruiting' and current_user.is_authenticated and current_user.role == 'student' and not application %}
             <div class="modal fade" id="applyConfirmModal" tabindex="-1" aria-labelledby="applyConfirmModalLabel"
                  aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg"> {# Giữ centered và large #}
+                <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="applyConfirmModalLabel">Xác nhận Đăng ký Đề tài</h1>
+                            <h1 class="modal-title fs-5" id="applyConfirmModalLabel">Confirm Topic Application</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <p>Đăng ký vào đề tài: <strong>{{ post.title }}</strong></p>
+                            <p>Apply for topic: <strong>{{ post.title }}</strong></p>
                             <div class="mb-3">
-                                <label for="applicationMessage" class="form-label">Lời nhắn cho Giảng viên (tùy
-                                    chọn):</label>
+                                <label for="applicationMessage" class="form-label">Message to Lecturer
+                                    (optional):</label>
                                 <textarea class="form-control" id="applicationMessage" rows="3"
-                                          placeholder="Ví dụ: Em rất quan tâm đến hướng nghiên cứu này..."></textarea>
+                                          placeholder="Example: I am very interested in this research direction..."></textarea>
                             </div>
-                            {# Input ẩn để lưu post_id #}
                             <input type="hidden" id="applyPostId" value="{{ post.id }}">
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                            <button type="button" class="btn btn-primary" id="confirmApplyBtn">Xác nhận Đăng ký</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="confirmApplyBtn">Confirm Application
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         {% endif %}
 
-        {# Modal Xác nhận HỦY Đăng ký (Cho Sinh viên) #}
+        {# Modal Xác nhận HỦY Đăng ký #}
         {% if application and application.status == 'pending' and current_user.is_authenticated and current_user.role == 'student' %}
             <div class="modal fade" id="withdrawConfirmModal" tabindex="-1" aria-labelledby="withdrawConfirmModalLabel"
                  aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg"> {# Giữ centered #}
+                <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="withdrawConfirmModalLabel">Xác nhận Hủy Đăng ký</h1>
+                            <h1 class="modal-title fs-5" id="withdrawConfirmModalLabel">Confirm Application
+                                Withdrawal</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <p>Bạn có chắc chắn muốn hủy đăng ký khỏi đề tài: <strong>{{ post.title }}</strong>?</p>
+                            <p>Are you sure you want to withdraw your application for the topic:
+                                <strong>{{ post.title }}</strong>?</p>
                             <div class="mb-3">
-                                <label for="withdrawReason" class="form-label">Lý do hủy (tùy chọn):</label>
+                                <label for="withdrawReason" class="form-label">Reason for withdrawal (optional):</label>
                                 <textarea class="form-control" id="withdrawReason" rows="3"></textarea>
                             </div>
-                            {# Input ẩn lưu application ID #}
                             <input type="hidden" id="withdrawAppId" value="{{ application.id }}">
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không hủy</button>
-                            <button type="button" class="btn btn-danger" id="confirmWithdrawBtn">Xác nhận Hủy</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Do Not Withdraw
+                            </button>
+                            <button type="button" class="btn btn-danger" id="confirmWithdrawBtn">Confirm Withdrawal
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -253,19 +303,20 @@
 {% endblock content %}
 
 
-{# --- Block Scripts --- #}
 {% block scripts %}
-     {{ super() }}  {# Gọi script từ base nếu base có block scripts và bạn muốn kế thừa #}
-
-    {# --- START: TOÀN BỘ JAVASCRIPT CHO post_detail.html --- #}
+    {{ super() }}
+    {# --- TOÀN BỘ JAVASCRIPT CHO post_detail.html (giữ nguyên, chỉ dịch các chuỗi text nếu có) --- #}
     <script>
         // --- START: Hàm Helper Hiển thị Bootstrap Toast ---
-        // (Bạn có thể chuyển hàm này ra file JS chung nếu muốn)
         function showBootstrapToast(message, category = 'info', delay = 5000) {
-            const toastContainer = document.querySelector('.toast-container'); // Tìm container trong base.html
-            if (!toastContainer) { console.error('Toast container not found!'); alert(message); return; }
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                console.error('Toast container not found!');
+                alert(message);
+                return;
+            }
             const toastId = 'dynamic-toast-' + Date.now();
-            const bgClass = `text-bg-${category}`;
+            const bgClass = `text-bg-${category}`; // Bootstrap 5 text-bg-* classes
             const toastHTML = `
             <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
               <div class="d-flex"><div class="toast-body">${message}</div>
@@ -274,50 +325,80 @@
             toastContainer.insertAdjacentHTML('beforeend', toastHTML);
             const toastElement = document.getElementById(toastId);
             if (toastElement) {
-                const toast = new bootstrap.Toast(toastElement, { delay: delay });
+                const toast = new bootstrap.Toast(toastElement, {delay: delay});
                 toast.show();
-                toastElement.addEventListener('hidden.bs.toast', function () { toastElement.remove(); });
+                toastElement.addEventListener('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
             }
         }
+
         // --- END: Hàm Helper ---
 
+        document.addEventListener('DOMContentLoaded', function () {
+            // console.log("post_detail.html scripts loading...");
 
-        // --- Chạy code sau khi DOM đã tải xong ---
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("post_detail.html scripts loading...");
+            function getCsrfToken() {
+                return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            }
 
-            // --- CSRF Token Helper ---
-            function getCsrfToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'); }
             const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
-            //--------------------------
 
             // --- 1. Logic Nút Like ---
             const likeButton = document.getElementById('post-like-button');
             if (likeButton) {
                 const likeIcon = document.getElementById('post-like-icon');
                 const likeCountSpan = document.getElementById('post-like-count');
-                likeButton.addEventListener('click', function() {
+                likeButton.addEventListener('click', function () {
                     if (this.disabled) return;
-                    const postId = this.dataset.postId;
+                    // const postId = this.dataset.postId; //Đã có sẵn trong post object ở template
                     const url = this.dataset.url;
                     const csrfToken = getCsrfToken();
-                    if (isCsrfEnabled && !csrfToken) { console.error('Post Like: CSRF Token missing!'); showBootstrapToast('Lỗi bảo mật (CSRF). Vui lòng F5 trang.', 'danger'); return; }
+                    if (isCsrfEnabled && !csrfToken) {
+                        showBootstrapToast('Security error (CSRF). Please refresh the page.', 'danger');
+                        return;
+                    }
                     likeButton.disabled = true;
-                    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({}) })
-                    .then(response => {
-                        if (!response.ok) { return response.json().catch(()=>{}).then(errData=>{throw new Error(errData?.message||`Lỗi HTTP ${response.status}`)}) }
-                        return response.json();
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+                        body: JSON.stringify({})
                     })
-                    .then(data => {
-                        if (data.status === 'success') {
-                            if(likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`;
-                            if (data.liked) { likeButton.classList.replace('btn-outline-danger','btn-danger'); if(likeIcon) likeIcon.classList.replace('bi-heart','bi-heart-fill'); likeButton.title = 'Bỏ thích'; }
-                            else { likeButton.classList.replace('btn-danger','btn-outline-danger'); if(likeIcon) likeIcon.classList.replace('bi-heart-fill','bi-heart'); likeButton.title = 'Thích'; }
-                        } else { showBootstrapToast(data.message || 'Có lỗi xảy ra khi thích.', 'warning'); }
-                    }).catch(error => { console.error('Post Like Fetch error:', error); showBootstrapToast(error.message || 'Lỗi kết nối.', 'danger'); })
-                    .finally(() => { if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true'){ likeButton.disabled = false; } });
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().catch(() => {
+                                }).then(errData => {
+                                    throw new Error(errData?.message || `HTTP Error ${response.status}`)
+                                })
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                if (likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`;
+                                if (data.liked) {
+                                    likeButton.classList.replace('btn-outline-danger', 'btn-danger');
+                                    if (likeIcon) likeIcon.classList.replace('bi-heart', 'bi-heart-fill');
+                                    likeButton.title = 'Unlike';
+                                } else {
+                                    likeButton.classList.replace('btn-danger', 'btn-outline-danger');
+                                    if (likeIcon) likeIcon.classList.replace('bi-heart-fill', 'bi-heart');
+                                    likeButton.title = 'Like';
+                                }
+                            } else {
+                                showBootstrapToast(data.message || 'Error liking post.', 'warning');
+                            }
+                        }).catch(error => {
+                        console.error('Post Like Fetch error:', error);
+                        showBootstrapToast(error.message || 'Connection error.', 'danger');
+                    })
+                        .finally(() => {
+                            if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true') {
+                                likeButton.disabled = false;
+                            }
+                        });
                 });
-            } else { console.log("Like button not found."); } // End Like logic
+            } // End Like logic
 
             // --- 2. Logic Modal Đăng ký (Apply Modal) ---
             const applyModalElement = document.getElementById('applyConfirmModal');
@@ -325,33 +406,67 @@
             if (applyModalElement && confirmApplyButton) {
                 const applyModal = new bootstrap.Modal(applyModalElement);
                 const messageTextarea = document.getElementById('applicationMessage');
-                const postIdInput = document.getElementById('applyPostId');
-                // console.log("Apply Modal found, adding listener.");
+                const postIdInput = document.getElementById('applyPostId'); // Lấy post ID từ input ẩn
+
                 confirmApplyButton.addEventListener('click', function () {
                     const postId = postIdInput ? postIdInput.value : null;
                     const message = messageTextarea ? messageTextarea.value.trim() : '';
-                    const url = postId ? `/apply-topic/${postId}` : null;
+                    const url = postId ? `/apply-topic/${postId}` : null; // URL đã được hardcode trong template, đây chỉ để tham khảo
                     const csrfToken = getCsrfToken();
-                    if (!url) { alert("Lỗi: Không tìm thấy ID đề tài."); return; }
-                    if (isCsrfEnabled && !csrfToken) { console.error('Apply Modal: CSRF Token not found!'); alert('Lỗi bảo mật (CSRF), vui lòng F5.'); return; }
-                    // console.log("Apply Modal: Fetching...");
-                    confirmApplyButton.disabled = true; confirmApplyButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang gửi...';
-                    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({message: message}) })
-                    .then(response => { if (!response.ok) { return response.json().catch(()=>{}).then(errData=>{throw new Error(errData?.message||`Lỗi ${response.status}`)}) } return response.json(); })
-                    .then(data => {
-                        if (data.status === 'success') {
-                            applyModal.hide();
-                            showBootstrapToast(data.message || 'Đăng ký thành công! Đang tải lại trang...', 'success');
-                            setTimeout(() => { window.location.reload(); }, 3000); // Tải lại để cập nhật UI
-                        } else {
-                            showBootstrapToast(data.message || 'Có lỗi khi đăng ký.', 'danger');
-                            confirmApplyButton.disabled = false; confirmApplyButton.textContent = 'Xác nhận Đăng ký';
-                        }
+
+                    if (!url) {
+                        showBootstrapToast("Error: Topic ID not found.", 'danger');
+                        return;
+                    }
+                    if (isCsrfEnabled && !csrfToken) {
+                        showBootstrapToast('Security error (CSRF), please refresh.', 'danger');
+                        return;
+                    }
+
+                    confirmApplyButton.disabled = true;
+                    confirmApplyButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+                        body: JSON.stringify({message: message})
                     })
-                    .catch(error => { console.error('Apply Fetch error:', error); showBootstrapToast(error.message || 'Lỗi kết nối.', 'danger'); confirmApplyButton.disabled = false; confirmApplyButton.textContent = 'Xác nhận Đăng ký'; });
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().catch(() => {
+                                }).then(errData => {
+                                    throw new Error(errData?.message || `Error ${response.status}`)
+                                })
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                applyModal.hide();
+                                showBootstrapToast(data.message || 'Application successful! Reloading page...', 'success');
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2500);
+                            } else {
+                                showBootstrapToast(data.message || 'Error submitting application.', 'danger');
+                                confirmApplyButton.disabled = false;
+                                confirmApplyButton.textContent = 'Confirm Application';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Apply Fetch error:', error);
+                            showBootstrapToast(error.message || 'Connection error.', 'danger');
+                            confirmApplyButton.disabled = false;
+                            confirmApplyButton.textContent = 'Confirm Application';
+                        });
                 });
-                applyModalElement.addEventListener('hidden.bs.modal', event => { if (messageTextarea) messageTextarea.value = ''; confirmApplyButton.disabled = false; confirmApplyButton.textContent = 'Xác nhận Đăng ký'; });
-            } else { console.log("Apply Modal elements not found."); } // End Apply modal logic
+                applyModalElement.addEventListener('hidden.bs.modal', event => {
+                    if (messageTextarea) messageTextarea.value = '';
+                    if (confirmApplyButton) {
+                        confirmApplyButton.disabled = false;
+                        confirmApplyButton.textContent = 'Confirm Application';
+                    }
+                });
+            } // End Apply modal logic
 
             // --- 3. Logic Modal Hủy Đăng ký (Withdraw Modal) ---
             const withdrawModalElement = document.getElementById('withdrawConfirmModal');
@@ -359,53 +474,78 @@
             if (withdrawModalElement && confirmWithdrawButton) {
                 const withdrawModal = new bootstrap.Modal(withdrawModalElement);
                 const withdrawAppIdInput = document.getElementById('withdrawAppId');
-                const withdrawReasonTextarea = document.getElementById('withdrawReason');
-                // console.log("Withdraw Modal found, adding listener.");
-                confirmWithdrawButton.addEventListener('click', function() {
-                     const applicationId = withdrawAppIdInput ? withdrawAppIdInput.value : null;
-                     const reason = withdrawReasonTextarea ? withdrawReasonTextarea.value.trim() : '';
-                     const url = applicationId ? `/application/${applicationId}/withdraw` : null;
-                     const csrfToken = getCsrfToken();
-                     if (!url) { alert('Lỗi: Không tìm thấy ID đơn đăng ký.'); return; }
-                     if (isCsrfEnabled && !csrfToken) { console.error('Withdraw Modal: CSRF Token not found!'); alert('Lỗi bảo mật (CSRF), vui lòng F5.'); return; }
-                     // console.log("Withdraw Modal: Fetching...");
-                     confirmWithdrawButton.disabled = true; confirmWithdrawButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang hủy...';
-                     fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }, body: JSON.stringify({ reason: reason }) })
-                     .then(response => { if (!response.ok) { return response.json().catch(()=>{}).then(errData=>{throw new Error(errData?.message||`Lỗi ${response.status}`)}) } return response.json(); })
-                     .then(data => {
-                         if (data.status === 'success') {
-                            withdrawModal.hide();
-                            showBootstrapToast(data.message || 'Đã hủy đăng ký thành công! Đang tải lại trang...', 'info');
-                            setTimeout(() => { window.location.reload(); }, 3000); // Tải lại để cập nhật UI
-                         } else {
-                             showBootstrapToast(data.message || 'Có lỗi khi hủy đăng ký.', 'danger');
-                             confirmWithdrawButton.disabled = false; confirmWithdrawButton.textContent = 'Xác nhận Hủy';
-                         }
-                     })
-                     .catch(error => { console.error('Withdraw Fetch error:', error); showBootstrapToast(error.message || 'Lỗi kết nối.', 'danger'); confirmWithdrawButton.disabled = false; confirmWithdrawButton.textContent = 'Xác nhận Hủy'; });
-                }); // End confirmWithdrawButton listener
-                if(withdrawModalElement && withdrawReasonTextarea) { withdrawModalElement.addEventListener('hidden.bs.modal', event => { withdrawReasonTextarea.value = ''; if(confirmWithdrawButton){ confirmWithdrawButton.disabled = false; confirmWithdrawButton.textContent = 'Xác nhận Hủy'; } }); }
-            } else { console.log("Withdraw Modal elements not found."); } // End Withdraw modal logic
+                const withdrawReasonTextarea = document.getElementById('withdrawReason'); // Nếu bạn muốn gửi lý do
 
-            // --- 4. Logic Nút Share ---
-            const shareButton = document.getElementById('share-button'); // <<< Cần có nút với ID này trong HTML
-            const fallbackLinks = document.getElementById('fallback-share-links'); // <<< Cần div này trong HTML
-            if (shareButton) {
-                 // console.log("Share button found, adding listener.");
-                 shareButton.addEventListener('click', async () => {e
-                     const shareData = {
-                        title: {{ post.title | tojson | safe }}, // Dùng post
-                        text: {{ (post.abstract or post.title) | truncate(100) | tojson | safe }}, // Dùng post
-                        url: {{ url_for("view_post", post_id=post.id, _external=True) | tojson | safe }} // Dùng view_post
-                     };
-                     // console.log("Share data:", shareData);
-                     if (navigator.share) {
-                         try { await navigator.share(shareData); console.log('Shared successfully via Web Share API'); }
-                         catch (err) { console.error('Web Share API failed:', err); /* if (fallbackLinks) fallbackLinks.classList.remove('d-none'); */ }
-                     } else { console.log('Web Share API not supported, showing fallback.'); if (fallbackLinks) fallbackLinks.classList.remove('d-none'); }
-                 });
-             } else { console.log("Share button not found."); } // End Share logic
+                confirmWithdrawButton.addEventListener('click', function () {
+                    const applicationId = withdrawAppIdInput ? withdrawAppIdInput.value : null;
+                    const reason = withdrawReasonTextarea ? withdrawReasonTextarea.value.trim() : ''; // Tùy chọn
+                    const url = applicationId ? `/application/${applicationId}/withdraw` : null; // URL đã có trong data attribute của nút trigger
+                    const csrfToken = getCsrfToken();
 
-        }); // End DOMContentLoaded listener chung
-        </script>
+                    if (!url) {
+                        showBootstrapToast('Error: Application ID not found.', 'danger');
+                        return;
+                    }
+                    if (isCsrfEnabled && !csrfToken) {
+                        showBootstrapToast('Security error (CSRF), please refresh.', 'danger');
+                        return;
+                    }
+
+                    confirmWithdrawButton.disabled = true;
+                    confirmWithdrawButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Withdrawing...';
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+                        body: JSON.stringify({reason: reason})
+                    }) // Gửi reason nếu có
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().catch(() => {
+                                }).then(errData => {
+                                    throw new Error(errData?.message || `Error ${response.status}`)
+                                })
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                withdrawModal.hide();
+                                showBootstrapToast(data.message || 'Application withdrawn successfully! Reloading page...', 'info');
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2500);
+                            } else {
+                                showBootstrapToast(data.message || 'Error withdrawing application.', 'danger');
+                                confirmWithdrawButton.disabled = false;
+                                confirmWithdrawButton.textContent = 'Confirm Withdrawal';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Withdraw Fetch error:', error);
+                            showBootstrapToast(error.message || 'Connection error.', 'danger');
+                            confirmWithdrawButton.disabled = false;
+                            confirmWithdrawButton.textContent = 'Confirm Withdrawal';
+                        });
+                });
+                if (withdrawModalElement && withdrawReasonTextarea) {
+                    withdrawModalElement.addEventListener('hidden.bs.modal', event => {
+                        withdrawReasonTextarea.value = '';
+                        if (confirmWithdrawButton) {
+                            confirmWithdrawButton.disabled = false;
+                            confirmWithdrawButton.textContent = 'Confirm Withdrawal';
+                        }
+                    });
+                }
+            } // End Withdraw modal logic
+            {##}
+            {#// --- 4. Logic Nút Share (Nếu bạn có) ---#}
+            {#// const shareButton = document.getElementById('share-button');#}
+            {#// if (shareButton) {#}
+            {#//     // ... Share logic ...#}
+            {#// }#}
+
+        }); // End DOMContentLoaded
+
+    </script>
+
 {% endblock scripts %}
