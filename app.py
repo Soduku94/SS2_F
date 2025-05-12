@@ -1072,7 +1072,7 @@ def register():  # Original name
 
             flash(f'Lỗi khi tạo tài khoản: {e}', 'danger')
 
-    return render_template('register.html', title='Đăng ký Sinh viên', form=form)
+    return render_template('register/register.html', title='Đăng ký Sinh viên', form=form)
 
 
 @app.route('/responded-ideas')
