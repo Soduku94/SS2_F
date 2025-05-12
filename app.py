@@ -839,7 +839,7 @@ def notifications():  # Original name
         .order_by(Notification.timestamp.desc()) \
         .paginate(page=page, per_page=NOTIFICATIONS_PER_PAGE, error_out=False)
 
-    return render_template('notifications.html', title='Thông báo của bạn', notifications_pagination=pagination)
+    return render_template('notifications.html', title='Your notifications', notifications_pagination=pagination)
 
 
 @app.route('/pending-ideas')
