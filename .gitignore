@@ -33,7 +33,7 @@ static/academic_work_images/ # <<< Thêm thư mục ảnh Showcase
 # Sensitivity
 .env
 config.env
-config.py # <<< Thêm cả file config.py nếu bạn dùng cách 2 để lưu SECRET_KEY
+config.py
 
 # OS generated files
 .DS_Store
