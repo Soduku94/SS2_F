@@ -57,6 +57,9 @@ SHOWCASE_CAROUSEL_LIMIT = 5
 # --- Flask App Initialization ---
 app = Flask(__name__)
 
+
+
+
 # --- Configuration ---
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', SECRET_KEY_FALLBACK)
 if app.config['SECRET_KEY'] == SECRET_KEY_FALLBACK:
