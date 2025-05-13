@@ -1,167 +1,156 @@
-{% extends "base.html" %} {# Hoặc "admin/admin_base.html" nếu bạn có layout riêng cho admin #}
+{% extends "base.html" %} {# Hoặc "admin/admin_base.html" #}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title or "Academic Works Management" }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>{{ title }}</h1>
-            <a href="{{ url_for('admin.create_academic_work') }}" class="btn btn-success">
-                <i class="bi bi-plus-circle-fill"></i> Thêm Công trình mới
+<div class="container-fluid mt-3 px-lg-4"> {# Sử dụng container-fluid cho không gian rộng hơn #}
+
+    {# --- Header Trang --- #}
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ title or "Academic Works Management" }}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ url_for('admin.create_academic_work') }}" class="btn btn-success btn-sm">
+                <i class="bi bi-plus-circle-fill me-1"></i> Add New Academic Work
             </a>
         </div>
+    </div>
 
-        {# --- Phần Form Lọc & Tìm kiếm --- #}
-        <div class="card mb-4">
-            <div class="card-body bg-light">
-                <form method="GET" action="{{ url_for('admin.list_academic_works') }}" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label for="q" class="form-label">Tìm kiếm (Tiêu đề, Tác giả,...)</label>
-                        <input type="search" class="form-control form-control-sm" id="q" name="q"
-                               value="{{ search_query or '' }}">
+    {# --- Khu vực Bộ lọc trong Card --- #}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-filter-circle me-1"></i> Filters & Search</h5>
+        </div>
+        <div class="card-body bg-light-subtle">
+            <form method="GET" action="{{ url_for('admin.list_academic_works') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-xl-4 col-lg-6">
+                        <label for="q" class="form-label small">Search (Title, Author, Abstract)</label>
+                        <input type="search" class="form-control form-control-sm" id="q" name="q" value="{{ search_query or '' }}">
                     </div>
-                    <div class="col-md-2">
-                        <label for="item_type" class="form-label">Loại</label>
+                    <div class="col-xl-2 col-lg-3 col-md-4">
+                        <label for="item_type" class="form-label small">Type</label>
                         <select class="form-select form-select-sm" id="item_type" name="item_type">
-                            <option value="">Tất cả</option>
+                            <option value="">All Types</option>
                             {% for type_val in distinct_types %}
                                 <option value="{{ type_val }}" {% if filter_type == type_val %}selected{% endif %}>
-                                    {# Hiển thị tên dễ đọc hơn nếu cần #}
-                                    {% if type_val == 'thesis' %}Luận văn/Đồ án{% elif type_val == 'proceeding' %}Bài
-                                        báo/Kỷ yếu{% elif type_val == 'project' %}Dự án khác{% else %}
-                                        {{ type_val }}{% endif %}
+                                    {% if type_val == 'thesis' %}Thesis/Project{% elif type_val == 'proceeding' %}Proceeding/Paper{% elif type_val == 'project' %}Other Project{% else %}{{ type_val|title }}{% endif %}
                                 </option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label for="year" class="form-label">Năm</label>
+                    <div class="col-xl-1 col-lg-3 col-md-4">
+                        <label for="year" class="form-label small">Year</label>
                         <select class="form-select form-select-sm" id="year" name="year">
-                            <option value="">Tất cả</option>
+                            <option value="">All Years</option>
                             {% for year_val in distinct_years %}
-                                <option value="{{ year_val }}"
-                                        {% if filter_year == year_val %}selected{% endif %}>{{ year_val }}</option>
+                                <option value="{{ year_val }}" {% if filter_year == year_val|int %}selected{% endif %}>{{ year_val }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <label for="published" class="form-label">Trạng thái</label>
+                    <div class="col-xl-2 col-lg-3 col-md-4">
+                        <label for="published" class="form-label small">Publish Status</label>
                         <select class="form-select form-select-sm" id="published" name="published">
-                            <option value="any" {% if not filter_published %}selected{% endif %}>Tất cả</option>
-                            <option value="true" {% if filter_published == 'true' %}selected{% endif %}>Đã công khai
-                            </option>
-                            <option value="false" {% if filter_published == 'false' %}selected{% endif %}>Chưa công
-                                khai
-                            </option>
+                            <option value="any" {% if filter_published == 'any' or not filter_published %}selected{% endif %}>Any</option>
+                            <option value="true" {% if filter_published == 'true' %}selected{% endif %}>Published</option>
+                            <option value="false" {% if filter_published == 'false' %}selected{% endif %}>Not Published</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary btn-sm w-100">Lọc / Tìm</button>
-                        {# Nút bỏ lọc quay về trang list mặc định #}
-                        <a href="{{ url_for('admin.list_academic_works') }}"
-                           class="btn btn-outline-secondary btn-sm w-100 mt-1">Bỏ lọc</a>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="featured" class="form-label">Nổi bật?</label>
+                    <div class="col-xl-1 col-lg-3 col-md-4">
+                        <label for="featured" class="form-label small">Featured</label>
                         <select class="form-select form-select-sm" id="featured" name="featured">
-                            <option value="any"
-                                    {% if not filter_featured or filter_featured == 'any' %}selected{% endif %}>Tất cả
-                            </option>
-                            <option value="true" {% if filter_featured == 'true' %}selected{% endif %}>Có</option>
-                            <option value="false" {% if filter_featured == 'false' %}selected{% endif %}>Không</option>
+                            <option value="any" {% if filter_featured == 'any' or not filter_featured %}selected{% endif %}>Any</option>
+                            <option value="true" {% if filter_featured == 'true' %}selected{% endif %}>Yes</option>
+                            <option value="false" {% if filter_featured == 'false' %}selected{% endif %}>No</option>
                         </select>
                     </div>
-                </form>
-            </div>
+                    <div class="col-xl-2 col-lg-6 col-md-12">
+                        <div class="d-grid d-md-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+                            <a href="{{ url_for('admin.list_academic_works') }}" class="btn btn-outline-secondary btn-sm flex-grow-1">Clear</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-        {# --- Kết thúc Form Lọc --- #}
+    </div>
+    {# --- Kết thúc Form Lọc --- #}
 
-
-        {# --- Phần Bảng Hiển thị Danh sách --- #}
-        {% if items_pagination and items_pagination.items %}
+    {# --- Bảng Hiển thị Danh sách Cải tiến --- #}
+    {% if items_pagination and items_pagination.items %}
+        <div class="card shadow-sm">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered table-striped">
+                <table class="table table-hover table-striped align-middle mb-0" style="font-size: 0.875rem;">
                     <thead class="table-light">
-                    <tr>
-                        {# Thêm style="width: X%;" cho từng cột #}
-                        <th scope="col" style="width: 5%;">STT</th>
-                        <th scope="col" style="width: 35%;">Tiêu đề</th>
-                        {# << Giảm % này để cột bé lại #}
-                        <th scope="col" style="width: 12%;">Loại</th>
-                        <th scope="col" style="width: 15%;">Tác giả/Nhóm</th>
-                        <th scope="col" style="width: 6%;">Năm</th>
-                        <th scope="col" style="width: 8%;">Công khai?</th>
-                        <th scope="col" style="width: 10%;">Ngày thêm</th>
-                        {# Cột Hành động có thể cần cả min-width để nút không vỡ #}
-                        <th scope="col" style="width: 9%; min-width: 120px;">Hành động</th>
-                    </tr>
+                        <tr>
+                            <th scope="col" style="width: 40px;">#</th>
+                            <th scope="col" style="width: 50px;" class="text-center">Image</th>
+                            <th scope="col">Title & Author</th>
+                            <th scope="col" style="width: 12%;">Type</th>
+                            <th scope="col" style="width: 7%;">Year</th>
+                            <th scope="col" style="width: 10%;" class="text-center">Status</th>
+                            <th scope="col" style="width: 10%;">Date Added</th>
+                            <th scope="col" class="text-center" style="width: 12%; min-width: 110px;">Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
                     {% for item in items_pagination.items %}
                         <tr>
-                            <th scope="row">{{ loop.index + items_pagination.per_page * (items_pagination.page - 1) }}</th>
-                            <td>{{ item.title }}</td>
-                            <td>
-                                {% if item.item_type == 'thesis' %}Luận văn/Đồ án
-                                {% elif item.item_type == 'proceeding' %}Bài báo/Kỷ yếu
-                                {% elif item.item_type == 'project' %}Dự án khác
-                                {% else %}{{ item.item_type }}{% endif %}
-                            </td>
-                            <td>{{ item.authors_text }}</td>
-                            <td>{{ item.year or 'N/A' }}</td>
-                            <td>
-                                {% if item.is_published %}
-                                    <span class="badge bg-success">Có</span>
+                            <td>{{ loop.index + items_pagination.per_page * (items_pagination.page - 1) }}</td>
+                            <td class="text-center">
+                                {% if item.image_file %}
+                                    {% set image_folder_path = config.get('ACADEMIC_WORK_IMAGE_FOLDER', 'static/academic_work_images').split('static/')[-1] %}
+                                    <img src="{{ url_for('static', filename=image_folder_path + '/' + item.image_file) }}"
+                                         alt="{{ item.title | truncate(20) }}" class="img-thumbnail" width="40" height="40" style="object-fit: cover;">
                                 {% else %}
-                                    <span class="badge bg-secondary">Không</span>
+                                    <div style="width:40px; height:40px; background-color:#f0f0f0; display:flex; align-items:center; justify-content:center; border-radius:0.25rem;" class="mx-auto">
+                                        <i class="bi bi-card-image text-muted h5 mb-0"></i>
+                                    </div>
                                 {% endif %}
                             </td>
-                            <td>{{ item.date_added.strftime('%d/%m/%Y') }}</td>
-
-
                             <td>
-                                {# Link này trỏ đến route 'showcase_detail' công khai #}
-                                {# target="_blank" sẽ mở link trong tab mới #}
-                                <a href="{{ url_for('showcase_detail', item_id=item.id) }}"
-                                   class="btn btn-outline-info btn-sm" {# Dùng màu info và outline cho nút Xem #}
-                                   title="Xem trang công khai"
-                                   target="_blank">
-                                    <i class="bi bi-eye-fill"></i> {# Icon con mắt #}
-                                </a>
-                                {# Nút Sửa #}
-                                <a href="{{ url_for('admin.edit_academic_work', item_id=item.id) }}"
-                                   class="btn btn-secondary btn-sm" title="Sửa">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </a>
-                                {# Nút Xóa (dùng Modal) #}
-                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#deleteAcademicWorkModal{{ item.id }}" title="Xóa">
-                                    <i class="bi bi-trash-fill"></i>
+                                <a href="{{ url_for('admin.edit_academic_work', item_id=item.id) }}" class="fw-semibold text-decoration-none link-dark d-block">{{ item.title }}</a>
+                                <small class="text-muted">{{ item.authors_text | truncate(60) }}</small>
+                            </td>
+                            <td>
+                                {% if item.item_type == 'thesis' %} <span class="badge bg-primary-subtle text-primary-emphasis">Thesis/Project</span>
+                                {% elif item.item_type == 'proceeding' %} <span class="badge bg-info-subtle text-info-emphasis">Proceeding</span>
+                                {% elif item.item_type == 'project' %} <span class="badge bg-secondary-subtle text-secondary-emphasis">Other Project</span>
+                                {% else %} <span class="badge bg-light text-dark border">{{ item.item_type | title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.year or 'N/A' }}</td>
+                            <td class="text-center">
+                                {% if item.is_published %}
+                                    <span class="badge bg-success-subtle text-success-emphasis rounded-pill py-1 px-2" title="Published"><i class="bi bi-check-circle-fill"></i></span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill py-1 px-2" title="Not Published"><i class="bi bi-x-circle-fill"></i></span>
+                                {% endif %}
+                                {% if item.is_featured %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill py-1 px-2 ms-1" title="Featured"><i class="bi bi-star-fill"></i></span>
+                                {% endif %}
+                            </td>
+                            <td><small class="text-muted">{{ item.date_added.strftime('%d/%m/%y') }}</small></td> {# Định dạng ngày ngắn hơn #}
+                            <td class="text-center">
+                                <a href="{{ url_for('showcase_detail', item_id=item.id) }}" class="btn btn-sm btn-outline-info border-0" title="View Public Page" target="_blank"><i class="bi bi-eye"></i></a>
+                                <a href="{{ url_for('admin.edit_academic_work', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary border-0 mx-1" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                <button type="button" class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal"
+                                        data-bs-target="#deleteAcademicWorkModal{{ item.id }}" title="Delete">
+                                    <i class="bi bi-trash"></i>
                                 </button>
-
-                                {# Modal Xác nhận Xóa cho từng item #}
-                                <div class="modal fade" id="deleteAcademicWorkModal{{ item.id }}" tabindex="-1"
-                                     aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                                {# Modal Xác nhận Xóa (Giữ nguyên logic, dịch text nếu cần) #}
+                                <div class="modal fade" id="deleteAcademicWorkModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-sm">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title fs-6" id="deleteModalLabel{{ item.id }}">Xác nhận
-                                                    Xóa</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
+                                                <h5 class="modal-title fs-6" id="deleteModalLabel{{ item.id }}">Confirm Deletion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
-                                            <div class="modal-body">
-                                                Xóa công trình "{{ item.title }}"?
-                                            </div>
+                                            <div class="modal-body">Delete work "{{ item.title }}"?</div>
                                             <div class="modal-footer">
-
-                                                <button type="button" class="btn btn-secondary btn-sm"
-                                                        data-bs-dismiss="modal">Hủy
-                                                </button>
-                                                <form action="{{ url_for('admin.delete_academic_work', item_id=item.id) }}"
-                                                      method="POST" style="display: inline;">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{{ url_for('admin.delete_academic_work', item_id=item.id) }}" method="POST" style="display: inline;">
                                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -173,11 +162,7 @@
                     </tbody>
                 </table>
             </div>
-        {% else %}
-            <div class="alert alert-info">Không tìm thấy công trình nào. <a
-                    href="{{ url_for('admin.create_academic_work') }}" class="alert-link">Thêm công trình mới</a>.
-            </div>
-        {% endif %}
+        </div>
         {# --- Kết thúc Bảng --- #}
 
         {# --- Phân trang --- #}
@@ -206,6 +191,7 @@
                 </ul>
             </nav>
         {% endif %}
+ {% endif %}
         {# --- Kết thúc Phân Trang --- #}
 
     </div>

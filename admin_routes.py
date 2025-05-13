@@ -17,6 +17,8 @@ from sqlalchemy import or_, asc, desc
 # Import từ Werkzeug cho tên file an toàn
 from werkzeug.utils import secure_filename
 
+from app import app
+
 # Import PIL/Pillow để xử lý ảnh (nếu có resize)
 try:
     from PIL import Image
@@ -100,7 +102,7 @@ def save_showcase_image(form_picture, old_picture_filename=None):
 @login_required
 @admin_required
 def index():
-    # ... (Code query thống kê giữ nguyên) ...
+
     user_count = User.query.count()
     lecturer_count = User.query.filter_by(role='lecturer').count()
     student_count = User.query.filter_by(role='student').count()
@@ -442,3 +444,52 @@ def delete_academic_work(item_id):
     return redirect(url_for('admin.list_academic_works'))
 
 # === KẾT THÚC QUẢN LÝ AcademicWork ===
+
+
+@admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+@admin_required  # Đảm bảo chỉ admin mới thực hiện được
+def delete_user(user_id):  # <<< TÊN HÀM LÀ 'delete_user'
+    # Ngăn admin tự xóa chính mình
+    if user_id == current_user.id:
+        flash('Bạn không thể xóa chính tài khoản của mình.', 'warning')
+        return redirect(url_for('admin.list_users'))
+
+    user_to_delete = User.query.get_or_404(user_id)
+
+    # Cẩn thận: Cân nhắc việc xóa mềm (soft delete) thay vì xóa cứng
+    # Hoặc xử lý các bản ghi liên quan (ví dụ: bài đăng của user đó sẽ xử lý thế nào?)
+    # Ví dụ: Nếu Post có ondelete='CASCADE' với user_id, các bài đăng của user này sẽ tự xóa.
+    # Nếu không, bạn cần xử lý logic đó ở đây (ví dụ: gán bài đăng cho một user admin khác, hoặc không cho xóa user có bài đăng)
+
+    try:
+        # Trước khi xóa user, có thể cần xóa các file liên quan của user đó (ví dụ: ảnh đại diện)
+        if user_to_delete.image_file and not user_to_delete.image_file.startswith('default'):
+            user_pics_dir = current_app.config.get('USER_PICS_FOLDER',
+                                                   os.path.join(current_app.root_path, 'static', 'user_pics'))
+            image_path = os.path.join(user_pics_dir, user_to_delete.image_file)
+            if os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                except Exception as e:
+                    app.logger.error(f"Error deleting profile picture for user {user_id} during admin delete: {e}")
+
+        # Xóa các bản ghi phụ thuộc trước nếu cần (ví dụ: nếu không có ondelete cascade mạnh mẽ)
+        # Ví dụ: TopicApplication.query.filter_by(user_id=user_id).delete()
+        # StudentIdea.query.filter_by(student_id=user_id).delete()
+        # Notification.query.filter_by(sender_id=user_id).delete()
+        # Notification.query.filter_by(recipient_id=user_id).delete()
+        # PostLike.query.filter_by(user_id=user_id).delete()
+        # AcademicWorkLike.query.filter_by(user_id=user_id).delete()
+        # Posts (nếu không cascade): Post.query.filter_by(user_id=user_id).delete()
+
+        # Sau đó mới xóa user
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash(f'Người dùng "{user_to_delete.full_name}" đã được xóa thành công.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error deleting user {user_id} by admin: {e}")
+        flash(f'Lỗi khi xóa người dùng: {e}', 'danger')
+
+    return redirect(url_for('admin.list_users'))

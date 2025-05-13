@@ -1,170 +1,139 @@
-{% extends "base.html" %} {# Hoặc kế thừa từ layout admin riêng nếu có: "admin/admin_base.html" #}
+{% extends "base.html" %} {# Hoặc "admin/admin_base.html" #}
 
-{% block title %}{{ title }}{% endblock %} {# Title được truyền từ view function #}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-9"> {# Dùng cột rộng hơn một chút #}
-                <div class="card shadow-sm">
-                    <div class="card-header"><h2 class="mb-0">{{ legend }}</h2></div>
-                    {# legend được truyền từ view function #}
-                    <div class="card-body">
-                        {# Form sẽ submit về chính URL hiện tại (create hoặc edit route) #}
-                        {# enctype="multipart/form-data" là bắt buộc để upload file ảnh #}
-                        <form method="POST" action="" novalidate enctype="multipart/form-data">
-                            {{ form.hidden_tag() }} {# Luôn cần cho CSRF protection #}
-                            <fieldset>
-                                {# --- Render các trường của AcademicWorkForm --- #}
-
-                                {# Title #}
-                                <div class="mb-3">
-                                    {{ form.title.label(class="form-label") }}
-                                    {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
-                                    {% if form.title.errors %}
-                                        <div class="invalid-feedback">{% for error in form.title.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                </div>
-
-                                {# Item Type #}
-                                <div class="mb-3">
-                                    {{ form.item_type.label(class="form-label") }}
-                                    {{ form.item_type(class="form-select" + (" is-invalid" if form.item_type.errors else "")) }}
-                                    {% if form.item_type.errors %}
-                                        <div class="invalid-feedback">{% for error in form.item_type.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                </div>
-
-                                {# Authors Text #}
-                                <div class="mb-3">
-                                    {{ form.authors_text.label(class="form-label") }}
-                                    {{ form.authors_text(class="form-control" + (" is-invalid" if form.authors_text.errors else "")) }}
-                                    {% if form.authors_text.errors %}
-                                        <div class="invalid-feedback">{% for error in form.authors_text.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                    <div class="form-text">Nhập tên các tác giả, cách nhau bởi dấu phẩy hoặc xuống
-                                        dòng.
-                                    </div>
-                                </div>
-
-                                {# Year #}
-                                <div class="mb-3">
-                                    {{ form.year.label(class="form-label") }}
-                                    {{ form.year(class="form-control" + (" is-invalid" if form.year.errors else ""), type="number") }}
-                                    {# Dùng type="number" cho dễ nhập #}
-                                    {% if form.year.errors %}
-                                        <div class="invalid-feedback">{% for error in form.year.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                </div>
-
-                                {# Abstract #}
-                                <div class="mb-3">
-                                    {{ form.abstract.label(class="form-label") }}
-                                    {{ form.abstract(class="form-control" + (" is-invalid" if form.abstract.errors else ""), rows="3") }}
-                                    {% if form.abstract.errors %}
-                                        <div class="invalid-feedback">{% for error in form.abstract.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                </div>
-
-                                {# Full Content - Dùng Trix Editor (Giả định Trix đã nhúng ở base.html) #}
-                                <div class="mb-3">
-                                    {{ form.full_content.label(class="form-label") }}
-                                    {# Input ẩn để Trix lưu dữ liệu vào #}
-                                    {# Value lấy từ form (nếu validation fail) hoặc từ item (nếu edit) #}
-                                    <input type="hidden" name="full_content" id="academic_work_content_input"
-                                           value="{{ form.full_content.data or (item.full_content if item else '') }}">
-                                    {# Thẻ Trix Editor #}
-                                    <trix-editor input="academic_work_content_input"
-                                                 class="form-control trix-content {% if form.full_content.errors %} is-invalid {% endif %}"
-                                                 style="min-height: 250px;"></trix-editor>
-                                    {# Hiển thị lỗi (cần d-block cho Trix) #}
-                                    {% if form.full_content.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.full_content.errors %}<span>{{ error }}</span>
-                                                <br>{% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                {# Image File #}
-                                <div class="mb-3">
-                                    {{ form.image_file.label(class="form-label") }}
-                                    {# Hiển thị ảnh hiện tại nếu đang edit và có ảnh #}
-                                    {# Biến 'item' được truyền vào từ hàm edit_academic_work #}
-                                    {% if item and item.image_file %}
-                                        <div class="mb-2">
-                                            <small>Ảnh hiện tại:</small><br>
-                                            {# Lấy đường dẫn từ config đã thiết lập #}
-                                            {% set image_folder_path = config.get('ACADEMIC_WORK_IMAGE_FOLDER', 'static/academic_work_images').split('static/')[-1] %}
-                                            <img src="{{ url_for('static', filename=image_folder_path + '/' + item.image_file) }}"
-                                                 alt="Ảnh hiện tại" class="img-thumbnail" width="200">
-                                        </div>
-                                    {% endif %}
-                                    {# Input chọn file #}
-                                    {{ form.image_file(class="form-control" + (" is-invalid" if form.image_file.errors else "")) }}
-                                    {% if form.image_file.errors %}
-                                        <div class="invalid-feedback">{% for error in form.image_file.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                    {% if item and item.image_file %}
-                                        <small class="form-text text-danger">Lưu ý: Chọn file mới sẽ thay thế ảnh hiện
-                                            tại.</small>
-                                    {% endif %}
-                                </div>
-
-                                {# External Link #}
-                                <div class="mb-3">
-                                    {{ form.external_link.label(class="form-label") }}
-                                    {{ form.external_link(class="form-control" + (" is-invalid" if form.external_link.errors else ""), placeholder="https://...") }}
-                                    {% if form.external_link.errors %}
-                                        <div class="invalid-feedback">{% for error in form.external_link.errors %}
-                                            <span>{{ error }}</span><br>{% endfor %}</div>
-                                    {% endif %}
-                                </div>
-
-                                {# Is Published Checkbox - Dùng kiểu switch cho đẹp hơn #}
-                                <div class="mb-3 form-check form-switch">
-                                    {{ form.is_published(class="form-check-input", role="switch") }}
-                                    {{ form.is_published.label(class="form-check-label") }}
-                                </div>
-
-                                <div class="mb-3 form-check form-switch">
-                                    {{ form.is_featured(class="form-check-input", role="switch") }}
-                                    {{ form.is_featured.label(class="form-check-label") }}
-                                    {% if form.is_featured.errors %}
-                                        {# Hiển thị lỗi nếu có (ít khi xảy ra với boolean) #}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.is_featured.errors %}<span>{{ error }}</span>
-                                                <br>{% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                {# --- KẾT THÚC is_featured --- #}
-
-                            </fieldset>
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                                {# Nút Hủy bỏ quay về trang danh sách #}
-                                <a href="{{ url_for('admin.list_academic_works') }}" class="btn btn-outline-secondary">Hủy
-                                    bỏ</a>
-                                {# Nút Submit chính, label lấy từ form #}
-                                {{ form.submit(class="btn btn-primary") }}
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid mt-4 px-lg-4"> {# Sử dụng container-fluid để rộng hơn #}
+    <div class="page-header mb-3 border-bottom d-flex justify-content-between align-items-center">
+        <h1 class="h2">{{ legend }}</h1>
+        {# Có thể thêm nút quay lại danh sách ở đây nếu muốn #}
+        {# <a href="{{ url_for('admin.list_academic_works') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a> #}
     </div>
 
+    <form method="POST" action="" novalidate enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="row g-4">
+
+            {# --- CỘT TRÁI: NỘI DUNG CHÍNH --- #}
+            <div class="col-lg-8">
+                <fieldset>
+                    {# Card 1: Thông tin cơ bản #}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header"><h5 class="mb-0">Core Information</h5></div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.title.label(class="form-label") }}
+                                {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else "")) }}
+                                {% if form.title.errors %}<div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.authors_text.label(class="form-label") }}
+                                {{ form.authors_text(class="form-control" + (" is-invalid" if form.authors_text.errors else "")) }}
+                                {% if form.authors_text.errors %}<div class="invalid-feedback">{% for error in form.authors_text.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                                <div class="form-text">Enter author names, separated by commas or new lines.</div>
+                            </div>
+                             <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    {{ form.item_type.label(class="form-label") }}
+                                    {{ form.item_type(class="form-select" + (" is-invalid" if form.item_type.errors else "")) }}
+                                    {% if form.item_type.errors %}<div class="invalid-feedback">{% for error in form.item_type.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.year.label(class="form-label") }}
+                                    {{ form.year(class="form-control" + (" is-invalid" if form.year.errors else ""), type="number") }}
+                                    {% if form.year.errors %}<div class="invalid-feedback">{% for error in form.year.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Card 2: Tóm tắt & Nội dung chi tiết #}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header"><h5 class="mb-0">Content Details</h5></div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.abstract.label(class="form-label") }}
+                                {{ form.abstract(class="form-control" + (" is-invalid" if form.abstract.errors else ""), rows="4") }}
+                                {% if form.abstract.errors %}<div class="invalid-feedback">{% for error in form.abstract.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.full_content.label(class="form-label") }}
+                                <input type="hidden" name="full_content" id="academic_work_content_input"
+                                       value="{{ form.full_content.data or (item.full_content if item else '') }}">
+                                <trix-editor input="academic_work_content_input"
+                                             class="form-control trix-content {% if form.full_content.errors %} is-invalid {% endif %}"
+                                             style="min-height: 300px;"></trix-editor>
+                                {% if form.full_content.errors %}<div class="invalid-feedback d-block">{% for error in form.full_content.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            {# --- CỘT PHẢI: MEDIA, LINKS & PUBLISHING OPTIONS --- #}
+            <div class="col-lg-4">
+                {# Card 1: Hành động (Sticky) #}
+                 <div class="card shadow-sm mb-4 position-sticky" style="top: 20px;">
+                    <div class="card-header"><h5 class="mb-0">Actions</h5></div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('admin.list_academic_works') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+
+                {# Card 2: Media & Links #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header"><h5 class="mb-0">Media & External Link</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.image_file.label(class="form-label") }}
+                            {% if item and item.image_file %}
+                                <div class="mb-2 text-center">
+                                    <img src="{{ url_for('static', filename=config.get('ACADEMIC_WORK_IMAGE_FOLDER', 'static/academic_work_images').split('static/')[-1] + '/' + item.image_file) }}"
+                                         alt="Current Image" class="img-thumbnail mb-2" style="max-height: 150px; max-width: 100%;">
+                                    <small class="d-block text-muted">Current Image</small>
+                                </div>
+                            {% endif %}
+                            {{ form.image_file(class="form-control form-control-sm" + (" is-invalid" if form.image_file.errors else "")) }}
+                            {% if form.image_file.errors %}<div class="invalid-feedback">{% for error in form.image_file.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                            {% if item and item.image_file %}
+                                <small class="form-text text-danger">Note: Choosing a new file will replace the current image.</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.external_link.label(class="form-label") }}
+                            {{ form.external_link(class="form-control" + (" is-invalid" if form.external_link.errors else ""), placeholder="https://...") }}
+                            {% if form.external_link.errors %}<div class="invalid-feedback">{% for error in form.external_link.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Card 3: Publishing Options #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header"><h5 class="mb-0">Visibility</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3 form-check form-switch">
+                            {{ form.is_published(class="form-check-input", role="switch") }}
+                            {{ form.is_published.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check form-switch">
+                            {{ form.is_featured(class="form-check-input", role="switch") }}
+                            {{ form.is_featured.label(class="form-check-label") }}
+                             {% if form.is_featured.errors %}<div class="invalid-feedback d-block">{% for error in form.is_featured.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div> {# End Right Column #}
+        </div> {# End Main Row #}
+    </form>
+</div>
 {% endblock content %}
 
-{# Block scripts nếu cần JS riêng cho Trix hoặc file input phức tạp hơn #}
 {% block scripts %}
     {# {{ super() }} #}
-    {# Nếu bạn cần khởi tạo Trix Editor bằng JS riêng thì đặt ở đây #}
+    {# No specific JS needed for Trix if it's initialized globally or automatically #}
 {% endblock scripts %}
