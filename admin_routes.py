@@ -264,57 +264,94 @@ def delete_post_by_admin(post_id):
 # === START: CÁC ROUTE MỚI QUẢN LÝ AcademicWork ===
 
 # --- Route hiển thị danh sách AcademicWork ---
+# admin_routes.py
+
 @admin_bp.route('/academic-works')
 @login_required
 @admin_required
 def list_academic_works():
-    page = request.args.get('page', 1, type=int)
-    search_query = request.args.get('q', None, type=str)
-    filter_type = request.args.get('item_type', None, type=str)
-    filter_year = request.args.get('year', None, type=int)
-    filter_published = request.args.get('published', None, type=str)
-    filter_featured = request.args.get('featured', None, type=str)  # Nhận 'true'/'false'/'any'
+    try:  # Bọc toàn bộ hoặc các phần chính trong try-except
+        year_from_str = request.args.get('year_from', None)
+        year_to_str = request.args.get('year_to', None)
+        page = request.args.get('page', 1, type=int)
+        search_query = request.args.get('q', None, type=str)
+        filter_type = request.args.get('item_type', None, type=str)
+        # filter_year = request.args.get('year', None, type=int) # Đã bỏ nếu chỉ dùng from/to
+        filter_published = request.args.get('published', None, type=str)
+        filter_featured = request.args.get('featured', None, type=str)
 
-    PER_PAGE = 15
-    query = AcademicWork.query
+        PER_PAGE = 15
+        query = AcademicWork.query
 
-    # Áp dụng Search
-    if search_query:
-        search_term = f"%{search_query}%"
-        query = query.filter(or_(
-            AcademicWork.title.ilike(search_term),
-            AcademicWork.authors_text.ilike(search_term),
-            AcademicWork.abstract.ilike(search_term)
-        ))
+        year_from = None
+        if year_from_str and year_from_str.isdigit():
+            year_from = int(year_from_str)
 
-    # Áp dụng Filter
-    if filter_type: query = query.filter(AcademicWork.item_type == filter_type)
-    if filter_year: query = query.filter(AcademicWork.year == filter_year)
-    if filter_published == 'true': query = query.filter(AcademicWork.is_published == True)
-    elif filter_published == 'false': query = query.filter(AcademicWork.is_published == False)
-    if filter_featured == 'true':
-        query = query.filter(AcademicWork.is_featured == True)
-    elif filter_featured == 'false':
-        query = query.filter(AcademicWork.is_featured == False)
+        year_to = None
+        if year_to_str and year_to_str.isdigit():
+            year_to = int(year_to_str)
 
-    # Sắp xếp
-    query = query.order_by(AcademicWork.year.desc().nullslast(), AcademicWork.date_added.desc())
-    pagination = query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+        if year_from is not None and year_to is not None:
+            if year_from <= year_to:
+                query = query.filter(AcademicWork.year.between(year_from, year_to))
+        elif year_from is not None:
+            query = query.filter(AcademicWork.year >= year_from)
+        elif year_to is not None:
+            query = query.filter(AcademicWork.year <= year_to)
+        # elif filter_year: # Bỏ nếu không dùng
+        #     query = query.filter(AcademicWork.year == filter_year)
 
-    # Lấy các giá trị duy nhất cho bộ lọc
-    distinct_types = db.session.query(AcademicWork.item_type).distinct().order_by(AcademicWork.item_type).all()
-    distinct_years = db.session.query(AcademicWork.year).filter(AcademicWork.year != None).distinct().order_by(AcademicWork.year.desc()).all()
+        if search_query:
+            search_term = f"%{search_query}%"
+            query = query.filter(or_(
+                AcademicWork.title.ilike(search_term),
+                AcademicWork.authors_text.ilike(search_term),
+                AcademicWork.abstract.ilike(search_term)
+            ))
 
-    # CẦN TẠO TEMPLATE: 'admin/academic_works_list.html'
-    return render_template('admin/academic_works_list.html',
-                           title="Quản lý Công trình Showcase",
-                           items_pagination=pagination,
-                           search_query=search_query,
-                           distinct_types=[t[0] for t in distinct_types],
-                           distinct_years=[y[0] for y in distinct_years],
-                           filter_type=filter_type,
-                           filter_year=filter_year,
-                           filter_published=filter_published, filter_featured=filter_featured)
+        if filter_type: query = query.filter(AcademicWork.item_type == filter_type)
+
+        if filter_published == 'true':
+            query = query.filter(AcademicWork.is_published == True)
+        elif filter_published == 'false':
+            query = query.filter(AcademicWork.is_published == False)
+
+        if filter_featured == 'true':
+            query = query.filter(AcademicWork.is_featured == True)
+        elif filter_featured == 'false':
+            query = query.filter(AcademicWork.is_featured == False)
+
+        query = query.order_by(AcademicWork.year.desc().nullslast(), AcademicWork.date_added.desc())
+        pagination = query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+
+        distinct_types_results = db.session.query(AcademicWork.item_type).distinct().order_by(
+            AcademicWork.item_type).all()
+        distinct_years_results = db.session.query(AcademicWork.year).filter(
+            AcademicWork.year != None).distinct().order_by(AcademicWork.year.desc()).all()
+
+        distinct_types = [t[0] for t in distinct_types_results]
+        distinct_years = [y[0] for y in distinct_years_results]
+
+        return render_template('admin/academic_works_list.html',
+                               title="Feature Works Manager",
+                               items_pagination=pagination,
+                               search_query=search_query,
+                               distinct_types=distinct_types,
+                               distinct_years=distinct_years,
+                               filter_type=filter_type,
+                               filter_year_from=year_from_str,
+                               filter_year_to=year_to_str,
+                               filter_published=filter_published,
+                               filter_featured=filter_featured)
+
+    except Exception as e:
+        app.logger.error(f"An error occurred in list_academic_works: {e}", exc_info=True)  # Ghi log cả traceback
+        # Trả về một trang lỗi chung hoặc redirect với flash message
+        flash("An unexpected error occurred. Please try again later.", "danger")
+        # Hoặc render một template lỗi đơn giản:
+        # return render_template("500.html", error=str(e)), 500
+        # Hoặc redirect về trang admin chính:
+        return redirect(url_for('admin.index'))  # Giả sử hàm admin dashboard là 'index' hoặc 'dashboard'
 
 
 # --- Route tạo mới AcademicWork ---
