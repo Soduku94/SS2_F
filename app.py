@@ -700,7 +700,8 @@ def home():  # Original name
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():  # Original name
-    if current_user.is_authenticated: return redirect(url_for('dashboard'))
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter(func.lower(User.email) == func.lower(form.email.data)).first()

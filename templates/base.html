@@ -206,21 +206,23 @@
                 const toastContainer = document.querySelector('.toast-container');
                 if (toastContainer) {
                     {% for category, message in messages %}
-                        // --- KIỂM TRA: Chỉ tạo Toast nếu category là 'auth' ---
-                        {% if category == 'auth' %}
-                            const toastId = 'flash-toast-auth-{{ loop.index }}';
+                        console.log("Flash Message:", {{ category | tojson | safe }}, {{ message | tojson | safe }});
 
-                            // Xác định màu nền cho toast 'auth' (tùy chọn)
-                            let bgClass = 'text-bg-info'; // Màu xanh dương mặc định
-                            if ('{{ message }}'.toLowerCase().includes('không đúng') || '{{ message }}'.toLowerCase().includes('thất bại')) {
-                                bgClass = 'text-bg-danger'; // Màu đỏ nếu lỗi
-                            } else if ('{{ message }}'.toLowerCase().includes('thành công')) {
-                                bgClass = 'text-bg-success'; // Màu xanh lá nếu thành công
+                        {% if category == 'auth' %}
+                        { // <<< THÊM KHỐI MỞ ĐỂ TẠO SCOPE MỚI
+                            const toastId = 'flash-toast-auth-{{ loop.index }}'; // toastId giờ đây an toàn trong scope này
+                            let bgClass = 'text-bg-info';
+
+                            const lowerMessage = {{ message | tojson | safe }}.toLowerCase();
+
+                            if (lowerMessage.includes('thất bại') || lowerMessage.includes('không đúng') || lowerMessage.includes('failed') || lowerMessage.includes('incorrect')) {
+                                bgClass = 'text-bg-danger';
+                            } else if (lowerMessage.includes('thành công') || lowerMessage.includes('success')) {
+                                bgClass = 'text-bg-success';
                             }
 
-                            // Tạo HTML cho Toast
                             const toastHTML = `
-                            <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
                               <div class="d-flex">
                                 <div class="toast-body">
                                   {{ message | safe }}
@@ -229,19 +231,17 @@
                               </div>
                             </div>`;
 
-                            // Thêm và hiển thị Toast
                             toastContainer.insertAdjacentHTML('beforeend', toastHTML);
                             const toastElement = document.getElementById(toastId);
                             if (toastElement) {
-                                const toast = new bootstrap.Toast(toastElement, {delay: 3000}); // Tự ẩn sau 5s
+                                const toast = new bootstrap.Toast(toastElement);
                                 toast.show();
-                                // Xóa khỏi DOM sau khi ẩn (optional)
                                 toastElement.addEventListener('hidden.bs.toast', function () {
                                     toastElement.remove();
                                 });
                             }
+                        } // <<< THÊM KHỐI ĐÓNG
                         {% endif %}
-                        // --- KẾT THÚC KIỂM TRA category == 'auth' ---
                     {% endfor %}
                 } else {
                     console.warn('Toast container (.toast-container) not found.');
