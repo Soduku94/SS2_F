@@ -714,7 +714,7 @@ def login():  # Original name
 
             flash('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.', 'auth')
 
-    return render_template('login.html', title='Đăng nhập', form=form)
+    return render_template('login/login.html', title='Đăng nhập', form=form)
 
 
 @app.route('/logout')
