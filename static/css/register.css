@@ -1,0 +1,160 @@
+
+/* --- Body: Đặt lại ảnh nền --- */
+/* --- Body cho Trang Đăng Ký --- */
+/* --- Layout Đăng Ký V3 (Kế thừa base.html) --- */
+
+/* Body của trang đăng ký này - có thể đặt màu nền khác nếu muốn */
+body.page-register-v3 {
+    background-color: #f0f2f5; /* Ví dụ: màu nền xám nhạt cho toàn trang này */
+    /* Hoặc nếu muốn giữ nền trắng của base.html thì không cần dòng trên */
+}
+
+/* Container chính cho nội dung đăng ký, nằm bên dưới navbar */
+.register-content-container-v3 {
+    /* padding-top và padding-bottom được quản lý bởi margin của container này */
+    /* hoặc bởi padding-top chung của body trong base.html */
+}
+
+/* Row chứa 2 cột */
+.register-content-container-v3 .row {
+    /* min-vh-75 để row có chiều cao tối thiểu, có thể điều chỉnh */
+    /* align-items-stretch để các cột con có chiều cao bằng nhau */
+    background-color: #fff; /* Nền trắng cho cả khu vực 2 cột */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Thêm bóng đổ nhẹ */
+    border-radius: 0.5rem; /* Bo góc cho cả khối */
+    overflow: hidden; /* Đảm bảo bo góc áp dụng cho ảnh nền cột phải */
+}
+
+/* --- Cột Form Bên Trái (V3) --- */
+.register-form-section-v3 {
+    /* display: flex, flex-column, justify-content-center, align-items-center đã có từ HTML */
+    /* padding đã có từ HTML (p-4 p-sm-5) */
+
+}
+
+.register-form-wrapper-v3 {
+    width: 100%;
+    max-width: 450px; /* Giới hạn chiều rộng của form */
+}
+
+.register-title-v3 {
+    font-weight: 600;
+    color: #212529;
+}
+
+.register-label-v3 {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.register-input-v3,
+.register-input-v3:focus {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    background-color: #fff;
+    color: #212529;
+    box-shadow: none;
+}
+.register-input-v3::placeholder {
+    color: #adb5bd;
+    font-size: 0.85rem;
+}
+
+.form-select.register-input-v3 {
+    color: #212529;
+}
+.form-select.register-input-v3:required:invalid { /* Style cho placeholder của select */
+    color: #adb5bd;
+}
+.form-select.register-input-v3 option {
+    color: #212529; /* Màu chữ cho các option */
+}
+
+
+.register-checkbox-v3 {
+    border-color: #adb5bd;
+}
+.register-checkbox-label-v3 { /* Giữ nguyên style cho phần text thường nếu muốn */
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.register-checkbox-label-v3 a {
+    color: #000000; /* <<< Đổi thành màu đen */
+    text-decoration: underline; /* <<< Thêm gạch chân */
+    font-weight: 500; /* Giữ hoặc điều chỉnh độ đậm nếu muốn */
+}
+
+.register-checkbox-label-v3 a:hover {
+    text-decoration: underline; /* Giữ gạch chân khi hover */
+    color: #333333; /* Optional: đổi màu khi hover thành xám đậm hơn nếu muốn */
+}
+
+.register-submit-btn-v3 {
+    background-color: #990000; /* Màu đỏ đậm */
+    border-color: #990000;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    border-radius: 0.3rem;
+    margin-top: 1rem;
+}
+.register-submit-btn-v3:hover {
+    background-color: #990000;
+    border-color: #990000;
+}
+
+.register-login-link-v3,
+.register-login-link-v3 a {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+.register-login-link-v3 a {
+    color: #990000; /* Màu đỏ đậm cho link */
+    font-weight: 500;
+    text-decoration: none;
+}
+.register-login-link-v3 a:hover {
+    text-decoration: underline;
+}
+
+/* Icon ẩn/hiện mật khẩu (ví dụ đơn giản) */
+.password-toggle-icon {
+    position: absolute;
+    top: 70%; /* Điều chỉnh lại cho phù hợp với padding của input */
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-weight: 500;
+    user-select: none; /* Tránh việc vô tình bôi đen chữ Hide/Show */
+}
+
+
+/* --- Cột Ảnh Bên Phải (V3) --- */
+.register-image-section-v3 {
+    background-image: url('/static/images/register_background.png'); /* <<< THAY ĐÚNG TÊN FILE ẢNH CỦA BẠN */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Không cần padding ở đây vì nó là background */
+}
+
+/* Đảm bảo trên màn hình nhỏ, cột form chiếm toàn bộ chiều rộng và không bị ảnh hưởng bởi cột ảnh */
+@media (max-width: 767.98px) { /* md breakpoint */
+    .register-form-section-v3 {
+        /* padding có thể giữ nguyên hoặc điều chỉnh riêng cho mobile */
+    }
+    .register-content-container-v3 .row {
+        min-height: auto; /* Reset min-height trên mobile nếu không muốn nó quá dài */
+        background-color: #fff; /* Đảm bảo nền trắng cho form trên mobile */
+        box-shadow: none; /* Bỏ bóng đổ trên mobile nếu muốn */
+        border-radius: 0;
+    }
+}

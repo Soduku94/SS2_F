@@ -1,0 +1,111 @@
+
+/* --- Layout Đăng Nhập Mới (V1) - Giữ Header/Footer --- */
+
+/* --- Layout Đăng Nhập V3 (Nền ảnh, form giữa, giữ header/footer) --- */
+
+/* Đảm bảo body chung có padding-top phù hợp với navbar */
+/* body {
+    padding-top: 42px; /* GIÁ TRỊ NÀY PHẢI ĐÚNG VỚI CHIỀU CAO NAVBAR CỦA BẠN */
+/* font-family: 'IBM Plex Sans', sans-serif; /* Đảm bảo font chung được áp dụng */
+/* } */
+
+/* Body của trang login - Ảnh nền toàn màn hình */
+/* Body của trang login - Ảnh nền toàn màn hình */
+body.page-login-v3 { /* <<< Đảm bảo class này khớp với class bạn đặt trong login.html */
+    background-image: url('/static/images/login_background_image.jpg'); /* <<< KIỂM TRA KỸ ĐƯỜNG DẪN VÀ TÊN FILE NÀY */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    /* Các style khác nếu có */
+}
+
+/* Container chính cho form login */
+.login-container-v3 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* Điều chỉnh min-height dựa trên chiều cao thực tế của header và footer */
+    /* Ví dụ: Navbar ~42px, Footer ~58px (bao gồm padding) */
+    min-height: calc(100vh - var(--navbar-height, 42px) - var(--footer-height-actual, 58px));
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+/* Khung Form Đăng Nhập màu trắng, bo tròn */
+.login-form-wrapper-v3 {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 0.5rem; /* Bo góc nhẹ nhàng hơn, hoặc 0.25rem nếu muốn gần vuông */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Bóng đổ nhẹ */
+    width: 100%;
+    max-width: 400px; /* Giảm max-width một chút nếu cần */
+}
+
+.login-title-v3 {
+    font-weight: 600;
+    color: #212529;
+    text-align: center;
+    font-size: 1.5rem; /* Cỡ chữ tiêu đề */
+}
+
+.login-label-v3 {
+    font-size: 0.8rem; /* Giảm kích thước label */
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.login-input-v3,
+.login-input-v3:focus {
+    border-radius: 0.25rem; /* Bo góc input */
+    border: 1px solid #ced4da;
+    padding: 0.55rem 0.75rem; /* Điều chỉnh padding input */
+    font-size: 0.9rem;
+    color: #212529;
+    box-shadow: none;
+}
+.login-input-v3::placeholder {
+    color: #adb5bd;
+    font-size: 0.85rem;
+}
+
+.login-checkbox-v3 {
+    border-color: #adb5bd;
+}
+.login-checkbox-label-v3 {
+    font-size: 0.8rem; /* Giảm kích thước chữ checkbox */
+    color: #495057;
+    padding-left: 0.2rem;
+}
+
+.login-submit-btn-v3 {
+    background-color: #990000; /* Màu đỏ đậm cho nút login */
+    border-color: #990000;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    border-radius: 0.25rem; /* Bo góc nút */
+    margin-top: 1rem;
+}
+.login-submit-btn-v3:hover {
+    background-color: #990000;
+    border-color: #990000;
+}
+
+.login-links-v3 {
+    font-size: 0.8rem; /* Chữ link nhỏ hơn */
+}
+.login-links-v3 p {
+    margin-bottom: 0.3rem;
+}
+.login-links-v3 a {
+    color: #990000; /* Màu đỏ cho link */
+    font-weight: 500;
+    text-decoration: none;
+}
+.login-links-v3 a:hover {
+    text-decoration: underline;
+}
