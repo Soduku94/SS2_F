@@ -1,152 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title if title else "My Ideas" }}{% endblock %}
+
+{# Class riêng cho body trang này nếu cần style nền khác biệt #}
+{% block body_attributes %}class="page-my-ideas-v3-final"{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>{{ title }}</h1>
-        {# Nút gửi ý tưởng mới #}
-        <a href="{{ url_for('submit_idea') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle-fill"></i> Gửi ý tưởng mới
-        </a>
-    </div>
+{# Trong templates/my_ideas.html #}
+<div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom my-ideas-header-bar-v3-final">
+    <h1 class="my-ideas-page-title-v3-final">{{ title if title else "My Ideas" }}</h1>
+    <a href="{{ url_for('submit_idea') }}" class="btn my-ideas-submit-btn-v3-final"> {# <<< Class của nút này #}
+        <i class="bi bi-plus-lg me-1"></i>Gửi ý tưởng mới
+    </a>
+</div>
 
-    {# --- Phần Tabs --- #}
-    <ul class="nav nav-tabs" id="myIdeasTab" role="tablist">
+    <ul class="nav nav-tabs my-ideas-nav-tabs-v3-final" id="myIdeasTabV3Final" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pending-my-tab" data-bs-toggle="tab" data-bs-target="#pending-my-tab-pane" type="button" role="tab" aria-controls="pending-my-tab-pane" aria-selected="true">
-                Đang chờ duyệt ({{ pending_ideas|length }})
+            <button class="nav-link active my-ideas-nav-link-v3-final" id="pending-ideas-tab-v3-final" data-bs-toggle="tab" data-bs-target="#pending-ideas-pane-v3-final" type="button" role="tab" aria-controls="pending-ideas-pane-v3-final" aria-selected="true">
+                Đang chờ duyệt <span class="badge bg-light text-dark border ms-1">{{ pending_ideas|length }}</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="responded-my-tab" data-bs-toggle="tab" data-bs-target="#responded-my-tab-pane" type="button" role="tab" aria-controls="responded-my-tab-pane" aria-selected="false">
-                Đã phản hồi ({{ responded_ideas|length }})
+            <button class="nav-link my-ideas-nav-link-v3-final" id="responded-ideas-tab-v3-final" data-bs-toggle="tab" data-bs-target="#responded-ideas-pane-v3-final" type="button" role="tab" aria-controls="responded-ideas-pane-v3-final" aria-selected="false">
+                Đã phản hồi <span class="badge bg-light text-dark border ms-1">{{ responded_ideas|length }}</span>
             </button>
         </li>
     </ul>
-    {# --- Nội dung Tabs --- #}
-    <div class="tab-content" id="myIdeasTabContent">
-        {# --- Tab Chờ duyệt --- #}
-        <div class="tab-pane fade show active" id="pending-my-tab-pane" role="tabpanel" aria-labelledby="pending-my-tab" tabindex="0">
-            <div class="list-group list-group-flush mt-3">
-                {% if pending_ideas %}
+
+    <div class="tab-content my-ideas-tab-content-v3-final pt-4" id="myIdeasTabContentV3Final">
+        <div class="tab-pane fade show active" id="pending-ideas-pane-v3-final" role="tabpanel" aria-labelledby="pending-ideas-tab-v3-final" tabindex="0">
+            {% if pending_ideas %}
+                <div class="list-group list-group-flush my-ideas-list-group-v3-final">
                     {% for idea in pending_ideas %}
-                        <div class="list-group-item"> {# Dùng div thay vì <a> để chứa nút #}
-                            <div class="d-flex w-100 justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-1">{{ idea.title }}</h5>
-                                    <p class="mb-1"><small>Gửi ngày: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
-                                     {# Hiển thị người nhận nếu có #}
-                                     {% if idea.recipients %}
-                                        <p class="mb-1"><small>Gửi đến:
-                                            {% for lecturer in idea.recipients %}
-                                                {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                        </small></p>
-                                     {% endif %}
-                                    <span class="badge bg-warning text-dark">Đang chờ duyệt</span>
+                    <div class="list-group-item my-ideas-list-item-v3-final px-0">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="idea-info-v3-final">
+                                <h5 class="mb-1 idea-item-title-v3-final">{{ idea.title }}</h5>
+                                <p class="mb-1 idea-item-meta-v3-final"><small>Gửi ngày: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                                {% if idea.recipients.count() > 0 %}
+                                    <p class="mb-1 idea-item-meta-v3-final"><small>Gửi đến:
+                                        {% for lecturer in idea.recipients %}
+                                            {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </small></p>
+                                {% else %}
+                                    <p class="mb-1 idea-item-meta-v3-final"><small>Gửi đến: Tất cả Giảng viên</small></p>
+                                {% endif %}
+                                <span class="badge idea-item-status-v3-final status-pending-v3-final">Đang chờ duyệt</span>
+                            </div>
+                            <div class="idea-item-actions-v3-final ms-3 text-nowrap">
+                                <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-secondary mb-1" title="Xem chi tiết"><i class="bi bi-eye"></i> Xem</a>
+                                <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Xóa ý tưởng"><i class="bi bi-trash"></i> Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                    {# Modal xác nhận xóa #}
+                    <div class="modal fade" id="deleteMyIdeaModal{{ idea.id }}" tabindex="-1" aria-labelledby="deleteMyIdeaModalLabel{{ idea.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Xác nhận xóa</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                {# Các nút hành động cho Sinh viên #}
-                                <div class="ms-3 mt-1">
-                                    <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-primary mb-1" title="Xem chi tiết"><i class="bi bi-eye-fill"></i> Xem</a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Xóa ý tưởng"><i class="bi bi-trash-fill"></i> Xóa</button>
+                                <div class="modal-body">Xóa ý tưởng "{{ idea.title }}"?</div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                    <form action="{{ url_for('delete_my_idea', idea_id=idea.id) }}" method="POST" style="display: inline;">
+                                        {{ csrf_token() }}
+                                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                         {# Modal xác nhận xóa (đặt trong vòng lặp) #}
-                         <div class="modal fade" id="deleteMyIdeaModal{{ idea.id }}" tabindex="-1" aria-labelledby="deleteMyIdeaModalLabel{{ idea.id }}" aria-hidden="true">
-                             <div class="modal-dialog modal-sm">
-                                 <div class="modal-content">
-                                     <div class="modal-header">
-                                        <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Xác nhận Xóa</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                     </div>
-                                     <div class="modal-body">Xóa ý tưởng "{{ idea.title }}"?</div>
-                                     <div class="modal-footer">
-                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                         <form action="{{ url_for('delete_my_idea', idea_id=idea.id) }}" method="POST" style="display: inline;">
-                                             <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                         </form>
-                                     </div>
-                                 </div>
-                             </div>
-                         </div>
+                    </div>
                     {% endfor %}
-                {% else %}
-                    <div class="alert alert-info mt-3">Bạn chưa gửi ý tưởng nào đang chờ duyệt.</div>
-                {% endif %}
-                {# Phân trang cho pending_ideas nếu cần sau #}
-            </div>
+                </div>
+            {% else %}
+                <div class="alert my-ideas-alert-empty-v3-final" role="alert">
+                    Bạn chưa gửi ý tưởng nào đang chờ duyệt.
+                </div>
+            {% endif %}
         </div>
 
-        {# --- Tab Đã phản hồi --- #}
-        <div class="tab-pane fade" id="responded-my-tab-pane" role="tabpanel" aria-labelledby="responded-my-tab" tabindex="0">
-             <div class="list-group list-group-flush mt-3">
-                {% if responded_ideas %}
+        <div class="tab-pane fade" id="responded-ideas-pane-v3-final" role="tabpanel" aria-labelledby="responded-ideas-tab-v3-final" tabindex="0">
+            {% if responded_ideas %}
+                <div class="list-group list-group-flush my-ideas-list-group-v3-final">
                     {% for idea in responded_ideas %}
-                         <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-1">{{ idea.title }}</h5>
-                                    <p class="mb-1"><small>Gửi ngày: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
-                                     {# Hiển thị người nhận nếu có #}
-                                     {% if idea.recipients %}
-                                        <p class="mb-1"><small>Gửi đến:
-                                            {% for lecturer in idea.recipients %}
-                                                {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                        </small></p>
-                                     {% endif %}
-                                     {# Hiển thị trạng thái đã phản hồi #}
-                                     {% if idea.status == 'approved' %}
-                                        <span class="badge bg-success">Đã chấp thuận</span>
-                                     {% elif idea.status == 'rejected' %}
-                                        <span class="badge bg-danger">Đã từ chối</span>
-                                     {% elif idea.status == 'reviewed' %}
-                                        <span class="badge bg-secondary">Đã xem xét</span>
-                                     {% else %}
-                                        <span class="badge bg-light text-dark">{{ idea.status }}</span>
-                                     {% endif %}
-                                     {# Hiển thị phản hồi nếu có #}
-                                     {% if idea.feedback %}
-                                        <p class="mt-2 mb-0 small text-muted"><em>Phản hồi: {{ idea.feedback | truncate(100) }}</em></p>
-                                     {% endif %}
-                                </div>
-                                {# Các nút hành động cho Sinh viên #}
-                                <div class="ms-3 mt-1">
-                                     <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-primary mb-1" title="Xem chi tiết & phản hồi"><i class="bi bi-eye-fill"></i> Xem</a>
-                                     <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Xóa ý tưởng"><i class="bi bi-trash-fill"></i> Xóa</button>
-                                </div>
-                            </div>
-                         </div>
-                          {# Modal xác nhận xóa (cần đặt trong vòng lặp, ID giống ở tab trên) #}
-                         <div class="modal fade" id="deleteMyIdeaModal{{ idea.id }}" tabindex="-1" aria-labelledby="deleteMyIdeaModalLabel{{ idea.id }}" aria-hidden="true">
-                             {# ... Nội dung modal giống hệt như ở tab pending ... #}
-                             <div class="modal-dialog modal-sm">
-                                 <div class="modal-content">
-                                     <div class="modal-header">
-                                        <h5 class="modal-title fs-6" id="deleteMyIdeaModalLabel{{ idea.id }}">Xác nhận Xóa</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                     </div>
-                                     <div class="modal-body">Xóa ý tưởng "{{ idea.title }}"?</div>
-                                     <div class="modal-footer">
-                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                         <form action="{{ url_for('delete_my_idea', idea_id=idea.id) }}" method="POST" style="display: inline;">
-                                             <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                         </form>
-                                     </div>
-                                 </div>
-                             </div>
-                         </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="alert alert-info mt-3">Bạn không có ý tưởng nào đã được phản hồi.</div>
-                {% endif %}
-                {# Phân trang cho responded_ideas nếu cần sau #}
-            </div>
-        </div>
-    </div> {# Kết thúc tab-content #}
+                    <div class="list-group-item my-ideas-list-item-v3-final px-0">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="idea-info-v3-final">
+                                <h5 class="mb-1 idea-item-title-v3-final">{{ idea.title }}</h5>
+                                <p class="mb-1 idea-item-meta-v3-final"><small>Gửi ngày: {{ idea.submission_date.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                                {% if idea.recipients.count() > 0 %}
+                                    <p class="mb-1 idea-item-meta-v3-final"><small>Gửi đến:
+                                        {% for lecturer in idea.recipients %}
+                                            {{ lecturer.full_name }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </small></p>
+                                {% else %}
+                                     <p class="mb-1 idea-item-meta-v3-final"><small>Gửi đến: Tất cả Giảng viên</small></p>
+                                {% endif %}
 
+                                {% if idea.status == 'approved' %}
+                                   <span class="badge idea-item-status-v3-final status-approved-v3-final">Đã chấp thuận</span>
+                                {% elif idea.status == 'rejected' %}
+                                   <span class="badge idea-item-status-v3-final status-rejected-v3-final">Đã từ chối</span>
+                                {% elif idea.status == 'reviewed' %}
+                                   <span class="badge idea-item-status-v3-final status-reviewed-v3-final">Đã xem xét</span>
+                                {% else %}
+                                   <span class="badge idea-item-status-v3-final status-other-v3-final">{{ idea.status | title }}</span>
+                                {% endif %}
+
+                                {% if idea.feedback %}
+                                    <div class="mt-2 idea-item-feedback-v3-final p-2 bg-light border rounded">
+                                        <p class="mb-0 small"><em><strong>Phản hồi:</strong> {{ idea.feedback | striptags | truncate(150, True) }}</em></p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="idea-item-actions-v3-final ms-3 text-nowrap">
+                                 <a href="{{ url_for('view_my_idea', idea_id=idea.id) }}" class="btn btn-sm btn-outline-secondary mb-1" title="Xem chi tiết & phản hồi"><i class="bi bi-eye"></i> Xem</a>
+                                 <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-bs-toggle="modal" data-bs-target="#deleteMyIdeaModal{{ idea.id }}" title="Xóa ý tưởng"><i class="bi bi-trash"></i> Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                    {# Modal xác nhận xóa #}
+                    <div class="modal fade" id="deleteMyIdeaModal{{ idea.id }}" ... >
+                         <div class="modal-dialog modal-sm">
+                            {# ... nội dung modal ... #}
+                         </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert my-ideas-alert-empty-v3-final" role="alert">
+                    Bạn không có ý tưởng nào đã được phản hồi.
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
+
+{% block scripts %}{{ super() }}{% endblock %}

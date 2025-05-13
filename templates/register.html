@@ -1,72 +1,120 @@
 {% extends "base.html" %}
-{% block title %}{{ title }}{% endblock %}
+
+{% block title %}Student Registration{% endblock %}
+
+{# Class này có thể dùng để style body riêng cho trang này nếu cần, ví dụ màu nền khác #}
+{% block body_attributes %}class="page-register-2col-final"{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6"> {# Có thể dùng col-md-8 nếu muốn rộng hơn #}
-        <div class="card shadow-sm">
-            <div class="card-header"><h2>{{ title }}</h2></div>
-            <div class="card-body">
-                {# Action trỏ về route 'register' #}
+<div class="container-fluid register-main-container-2col-final g-0">
+    <div class="row g-0 register-row-2col-final align-items-stretch">
+
+        <div class="col-lg-5 col-md-6 d-flex flex-column justify-content-center align-items-center register-form-section-2col-final p-4 p-lg-5">
+            <div class="register-form-wrapper-2col-final w-100">
+                <div class="text-md-start mb-4">
+                     {# Bạn có thể bỏ dòng này nếu không muốn brand text ở đây #}
+                     </div>
+
+                <h1 class="mb-3 h2 register-title-2col-final">Student Registration</h1>
+                {# Bỏ dòng "Fill in the details below to create your account." theo yêu cầu ẩn comment HTML #}
+                {# <p class="mb-4 register-subtitle-2col-final">Fill in the details below to create your account.</p> #}
+
                 <form method="POST" action="{{ url_for('register') }}" novalidate>
                     {{ form.hidden_tag() }}
                     <fieldset>
-                        {# 1. Họ và tên #}
                         <div class="mb-3">
-                            {{ form.full_name.label(class="form-label") }}
-                            {% if form.full_name.errors %} {{ form.full_name(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.full_name.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.full_name(class="form-control") }} {% endif %}
+                            {{ form.full_name.label(class="form-label register-label-2col-final") }}
+                            {{ form.full_name(class="form-control register-input-2col-final" + (" is-invalid" if form.full_name.errors else ""), placeholder="Enter full name") }}
+                            {% if form.full_name.errors %}<div class="invalid-feedback">{% for e in form.full_name.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
                         </div>
-                        {# 2. MSSV #}
-                         <div class="mb-3">
-                            {{ form.student_id.label(class="form-label") }}
-                            {% if form.student_id.errors %} {{ form.student_id(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.student_id.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.student_id(class="form-control") }} {% endif %}
-                        </div>
-                        {# 3. Email Đăng nhập #}
-                        <div class="mb-3">
-                            {{ form.email.label(class="form-label") }}
-                             {% if form.email.errors %} {{ form.email(class="form-control is-invalid", placeholder="abc@fit.edu.vn") }} <div class="invalid-feedback">{% for e in form.email.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.email(class="form-control", placeholder="abc@fit.edu.vn") }} {% endif %}
-                        </div>
-                         {# 4. Lớp học #}
-                         <div class="mb-3">
-                             {{ form.class_name.label(class="form-label") }}
-                             {% if form.class_name.errors %} {{ form.class_name(class="form-control is-invalid", placeholder="Ví dụ: 22CTT1") }} <div class="invalid-feedback">{% for e in form.class_name.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.class_name(class="form-control", placeholder="Ví dụ: 22CTT1") }} {% endif %}
-                         </div>
-                         {# 5. Ngày sinh #}
-                         <div class="mb-3">
-                             {{ form.date_of_birth.label(class="form-label") }}
-                             {% if form.date_of_birth.errors %} {{ form.date_of_birth(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.date_of_birth.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.date_of_birth(class="form-control") }} {% endif %}
 
-                         </div>
-                          {# 6. Giới tính #}
-                         <div class="mb-3">
-                             {{ form.gender.label(class="form-label") }}
-                             {% if form.gender.errors %} {{ form.gender(class="form-select is-invalid") }} <div class="invalid-feedback">{% for e in form.gender.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.gender(class="form-select") }} {% endif %}
-                         </div>
-                         {# 7. Số điện thoại #}
-                         <div class="mb-3">
-                             {{ form.phone_number.label(class="form-label") }}
-                             {% if form.phone_number.errors %} {{ form.phone_number(class="form-control is-invalid", placeholder="Số điện thoại") }} <div class="invalid-feedback">{% for e in form.phone_number.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.phone_number(class="form-control", placeholder="Số điện thoại") }} {% endif %}
-                         </div>
-                         {# 8. Mật khẩu #}
-                         <div class="mb-3">
-                            {{ form.password.label(class="form-label") }}
-                            {% if form.password.errors %} {{ form.password(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.password.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.password(class="form-control") }} {% endif %}
+                        <div class="mb-3">
+                            {{ form.student_id.label(class="form-label register-label-2col-final") }}
+                            {{ form.student_id(class="form-control register-input-2col-final" + (" is-invalid" if form.student_id.errors else ""), placeholder="Enter Student ID") }}
+                            {% if form.student_id.errors %}<div class="invalid-feedback">{% for e in form.student_id.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
                         </div>
-                         {# 9. Xác nhận Mật khẩu #}
+
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label register-label-2col-final") }}
+                            {{ form.email(class="form-control register-input-2col-final" + (" is-invalid" if form.email.errors else ""), placeholder="Enter your email") }}
+                            {% if form.email.errors %}<div class="invalid-feedback">{% for e in form.email.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.class_name.label(class="form-label register-label-2col-final") }}
+                            {{ form.class_name(class="form-control register-input-2col-final" + (" is-invalid" if form.class_name.errors else ""), placeholder="Enter class") }}
+                            {% if form.class_name.errors %}<div class="invalid-feedback">{% for e in form.class_name.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.date_of_birth.label(class="form-label register-label-2col-final") }}
+                            {{ form.date_of_birth(class="form-control register-input-2col-final" + (" is-invalid" if form.date_of_birth.errors else ""), type="text", placeholder="dd/mm/yyyy", onfocus="(this.type='date')", onblur="(this.type='text')") }}
+                            {% if form.date_of_birth.errors %}<div class="invalid-feedback">{% for e in form.date_of_birth.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
+                        </div>
+
                          <div class="mb-3">
-                            {{ form.confirm_password.label(class="form-label") }}
-                            {% if form.confirm_password.errors %} {{ form.confirm_password(class="form-control is-invalid") }} <div class="invalid-feedback">{% for e in form.confirm_password.errors %}<span>{{e}}</span><br>{% endfor %}</div> {% else %} {{ form.confirm_password(class="form-control") }} {% endif %}
+                            {{ form.gender.label(class="form-label register-label-2col-final") }}
+                            {{ form.gender(class="form-select register-input-2col-final" + (" is-invalid" if form.gender.errors else "")) }}
+                            {% if form.gender.errors %}<div class="invalid-feedback">{% for e in form.gender.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.phone_number.label(class="form-label register-label-2col-final") }}
+                            {{ form.phone_number(class="form-control register-input-2col-final" + (" is-invalid" if form.phone_number.errors else ""), placeholder="Enter Phone number") }}
+                            {% if form.phone_number.errors %}<div class="invalid-feedback">{% for e in form.phone_number.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3 position-relative">
+                            {{ form.password.label(class="form-label register-label-2col-final") }}
+                            {{ form.password(class="form-control register-input-2col-final" + (" is-invalid" if form.password.errors else ""), placeholder="Enter password", type="password", id="passwordField2ColFinal") }}
+                            <span toggle="#passwordField2ColFinal" class="password-toggle-icon-2col-final">Hide</span>
+                            {% if form.password.errors %}<div class="invalid-feedback">{% for e in form.password.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label register-label-2col-final") }}
+                            {{ form.confirm_password(class="form-control register-input-2col-final" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Confirm password", type="password") }}
+                            {% if form.confirm_password.errors %}<div class="invalid-feedback">{% for e in form.confirm_password.errors %}<span>{{e}}</span>{% endfor %}</div>{% endif %}
                         </div>
                     </fieldset>
-                    <div class="d-grid mt-3">
-                         {{ form.submit(class="btn btn-primary") }}
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input register-checkbox-2col-final" type="checkbox" value="" id="agreeTerms2ColFinal" required>
+                        <label class="form-check-label register-checkbox-label-2col-final" for="agreeTerms2ColFinal">
+                            By creating an account, I agree to our <a href="#">Terms of use</a> and <a href="#">Privacy Policy</a>
+                        </label>
+                        <div class="invalid-feedback">You must agree before submitting.</div>
                     </div>
+
+                    {{ form.submit(class="btn w-100 register-submit-btn-2col-final") }}
                 </form>
+                <p class="text-center mt-4 register-login-link-2col-final">
+                    Already have an account? <a href="{{ url_for('login') }}">Sign In</a>
+                </p>
             </div>
-             <div class="card-footer text-center">
-                Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập tại đây</a>
-            </div>
+        </div>
+
+        <div class="col-lg-7 col-md-6 d-none d-md-block register-image-col-2col-final">
+            {# Ảnh nền sẽ được đặt cho div này bằng CSS #}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // JavaScript cho nút ẩn/hiện mật khẩu
+    const togglePassword2ColFinal = document.querySelector('.password-toggle-icon-2col-final');
+    if (togglePassword2ColFinal) {
+        const passwordField2ColFinal = document.querySelector(togglePassword2ColFinal.getAttribute('toggle'));
+        if (passwordField2ColFinal) {
+            togglePassword2ColFinal.addEventListener('click', function () {
+                const type = passwordField2ColFinal.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField2ColFinal.setAttribute('type', type);
+                this.textContent = type === 'password' ? 'Hide' : 'Show';
+            });
+        }
+    }
+</script>
 {% endblock %}

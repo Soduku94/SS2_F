@@ -1,63 +1,81 @@
-{% extends "base.html" %} {# Kế thừa từ base.html #}
+{% extends "base.html" %}
 
-{% block title %}Đăng nhập - FIT Research Connect{% endblock %} {# Đặt tiêu đề riêng #}
+{% block title %}Log In - FIT Research Connect{% endblock %}
 
-{% block content %} {# Bắt đầu khối nội dung chính #}
-<div class="row justify-content-center">
-    <div class="col-md-6"> {# Giới hạn chiều rộng form #}
-        <div class="card">
-             <div class="card-header"><h1>Đăng nhập vào FIT Research Connect</h1></div>
-             <div class="card-body">
-                {# Flash messages sẽ được hiển thị từ base.html #}
+{# Thêm class riêng cho body của trang login để style ảnh nền #}
+{% block body_attributes %}class="page-login-centered-v1"{% endblock %}
 
-                <form method="POST" action="{{ url_for('login') }}" novalidate>
-                    {{ form.hidden_tag() }}
+{% block content %}
+<div class="login-container-centered-v1"> {# Container để căn giữa form #}
+    <div class="login-form-wrapper-centered-v1"> {# Khung trắng chứa form #}
+        <div class="text-center mb-4">
+            {# Optional: Bạn có thể thêm logo hoặc tên trang ở đây nếu muốn #}
+            {# <img src="{{ url_for('static', filename='logo_pics/logo_dark.png') }}" alt="FIT Research Connect" width="150" class="mb-3"> #}
+            <h1 class="login-title-centered-v1">Log in to FIT Research Connect</h1>
+        </div>
 
-                    <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {% if form.email.errors %}
-                            {{ form.email(class="form-control is-invalid", placeholder="Nhập email của bạn") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.email.errors %}
-                                    <span>{{ error }}</span><br>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form.email(class="form-control", placeholder="Nhập email của bạn") }}
-                        {% endif %}
+        {# Flash messages (ví dụ: lỗi đăng nhập) sẽ được hiển thị bởi base.html hoặc bạn có thể đặt ở đây #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {# Chỉ hiển thị flash 'auth' hoặc 'danger' ở đây #}
+                    {% if category == 'auth' or category == 'danger' %}
+                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'warning' }} alert-dismissible fade show small p-2 mb-3" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close btn-sm p-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.email.label(class="form-label login-label-centered-v1") }}
+                {% if form.email.errors %}
+                    {{ form.email(class="form-control login-input-centered-v1 is-invalid", placeholder="Enter your email") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}<span>{{ error }}</span><br>{% endfor %}
                     </div>
-
-                    <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {% if form.password.errors %}
-                             {{ form.password(class="form-control is-invalid", placeholder="Nhập mật khẩu") }}
-                             <div class="invalid-feedback">
-                                {% for error in form.password.errors %}
-                                    <span>{{ error }}</span><br>
-                                {% endfor %}
-                             </div>
-                        {% else %}
-                             {{ form.password(class="form-control", placeholder="Nhập mật khẩu") }}
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        {{ form.remember(class="form-check-input") }}
-                        {{ form.remember.label(class="form-check-label") }}
-                    </div>
-
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div> {# End card-body #}
-            <div class="card-footer text-center">
-                 {# === SỬA LẠI LINK NÀY === #}
-                 Chưa có tài khoản sinh viên? <a href="{{ url_for('register') }}">Đăng ký tại đây</a><br>
-                 <a href="#">Quên mật khẩu?</a>
+                {% else %}
+                    {{ form.email(class="form-control login-input-centered-v1", placeholder="Enter your email") }}
+                {% endif %}
             </div>
-        </div> {# End card #}
-    </div> {# End col-md-6 #}
-</div> {# End row #}
-{% endblock %} {# Kết thúc khối content #}
 
+            <div class="mb-3">
+                {{ form.password.label(class="form-label login-label-centered-v1") }}
+                {% if form.password.errors %}
+                     {{ form.password(class="form-control login-input-centered-v1 is-invalid", placeholder="Enter password") }}
+                     <div class="invalid-feedback">
+                        {% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}
+                     </div>
+                {% else %}
+                     {{ form.password(class="form-control login-input-centered-v1", placeholder="Enter password") }}
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    {{ form.remember(class="form-check-input login-checkbox-centered-v1") }}
+                    {{ form.remember.label(class="form-check-label login-checkbox-label-centered-v1") }}
+                </div>
+                <a href="#" class="login-link-centered-v1 small">Forgot your password?</a>
+            </div>
+
+
+            <div class="d-grid">
+                 {# Value của nút submit sẽ lấy từ định nghĩa trong forms.py (ví dụ: 'Login') #}
+                {{ form.submit(class="btn login-submit-btn-centered-v1") }}
+            </div>
+        </form>
+
+        <p class="text-center mt-4 login-register-link-centered-v1">
+            Don't have a student account? <a href="{{ url_for('register') }}">Register here</a>
+        </p>
+    </div> {# End login-form-wrapper-centered-v1 #}
+</div> {# End login-container-centered-v1 #}
+{% endblock %}
+
+{% block scripts %}{{ super() }}{% endblock %}
