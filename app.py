@@ -714,7 +714,7 @@ def login():  # Original name
 
             flash('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.', 'auth')
 
-    return render_template('login.html', title='Đăng nhập', form=form)
+    return render_template('login/login.html', title='Đăng nhập', form=form)
 
 
 @app.route('/logout')
@@ -839,7 +839,7 @@ def notifications():  # Original name
         .order_by(Notification.timestamp.desc()) \
         .paginate(page=page, per_page=NOTIFICATIONS_PER_PAGE, error_out=False)
 
-    return render_template('notifications.html', title='Thông báo của bạn', notifications_pagination=pagination)
+    return render_template('notifications.html', title='Your notifications', notifications_pagination=pagination)
 
 
 @app.route('/pending-ideas')
@@ -1072,7 +1072,7 @@ def register():  # Original name
 
             flash(f'Lỗi khi tạo tài khoản: {e}', 'danger')
 
-    return render_template('register.html', title='Đăng ký Sinh viên', form=form)
+    return render_template('register/register.html', title='Đăng ký Sinh viên', form=form)
 
 
 @app.route('/responded-ideas')
