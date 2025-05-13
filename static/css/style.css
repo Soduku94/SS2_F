@@ -990,3 +990,150 @@ body.page-submit-idea-v5-style {
 .submit-idea-back-link-v5-style:hover {
     text-decoration: underline;
 }
+/* --- Header/Navbar Styling (Custom Red - Giống image_6f0a00.png) --- */
+
+/* Body padding-top cần khớp với chiều cao navbar mới */
+body {
+    /* font-family: 'IBM Plex Sans', sans-serif; */ /* Đảm bảo font chung */
+    /* Điều chỉnh giá trị này cho phù hợp với chiều cao thực tế của navbar mới.
+       Navbar này có vẻ cao hơn các phiên bản thu nhỏ trước đó. */
+    padding-top: 65px; /* <<< ƯỚC TÍNH, CẦN KIỂM TRA VÀ ĐIỀU CHỈNH */
+}
+
+.main-header-custom-red {
+    background-color: #a41e22 !important; /* Màu nền đỏ sẫm */
+    padding-top: 0.2rem !important; /* Giữ padding dọc nhỏ nếu muốn */
+    padding-bottom: 0.2rem !important;
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Bỏ bóng đổ nếu không muốn */
+}
+
+.main-header-logo-wrapper {
+    background-color: #ffffff; /* Nền trắng cho dải logo */
+    padding: 0.5rem 0.75rem; /* Padding cho logo */
+    margin-left: -12px; /* Kéo logo sát lề trái của container-fluid (Bootstrap mặc định có padding cho container-fluid) */
+    margin-right: 1rem; /* Khoảng cách với ô tìm kiếm */
+    height: 100%; /* Cho nền trắng cao bằng navbar (cần navbar có chiều cao cố định hoặc dùng flex) */
+    display: flex;
+    align-items: center;
+}
+.main-header-logo-wrapper img.main-header-logo-img {
+    height: 38px; /* Điều chỉnh chiều cao logo */
+    max-width: 90px;
+}
+
+.main-header-search-wrapper {
+    max-width: 480px; /* Điều chỉnh chiều rộng ô tìm kiếm */
+    width: 100%;
+    position: relative;
+}
+
+.main-header-search-wrapper .input-group {
+    border-radius: 25px; /* Bo tròn mạnh */
+    background-color: #fff;
+    overflow: hidden;
+    border: 1px solid #fff;
+}
+
+.main-header-search-wrapper .search-icon-bg-custom-red {
+    background-color: transparent;
+    border: none;
+    padding-left: 0.85rem; /* Tăng padding trái cho icon */
+    padding-right: 0.35rem;
+    color: #495057; /* Màu icon kính lúp */
+}
+.main-header-search-wrapper .search-icon-bg-custom-red .bi-search {
+    font-size: 0.9rem;
+}
+
+.main-header-search-wrapper .search-input-custom-red {
+    border: none;
+    box-shadow: none !important;
+    padding-left: 0.5rem;
+    font-size: 0.875rem;
+    background-color: transparent;
+    color: #212529; /* Màu chữ nhập */
+}
+.main-header-search-wrapper .search-input-custom-red::placeholder {
+    color: #6c757d; /* Màu placeholder "Nhập tìm kiếm" */
+}
+
+.main-header-search-wrapper .search-button-custom-red {
+    background-color: transparent;
+    border: none;
+    color: #495057; /* Màu chữ nút "Tìm kiếm" */
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding-right: 1rem; /* Tăng padding phải cho nút */
+    padding-left: 0.5rem;
+}
+.main-header-search-wrapper .search-button-custom-red:hover {
+    color: #000;
+}
+
+/* Dropdown gợi ý tìm kiếm */
+.search-results-dropdown-custom-red {
+    width: 100%;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 20px; /* Bo tròn góc dưới */
+    border-bottom-right-radius: 20px;
+    margin-top: -1px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+
+.main-header-nav-items-custom-red .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important; /* Chữ trắng */
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem !important; /* Padding link */
+    margin-left: 0.3rem; /* Khoảng cách giữa các link */
+    margin-right: 0.3rem;
+}
+.main-header-nav-items-custom-red .nav-link:hover,
+.main-header-nav-items-custom-red .nav-link:focus,
+.main-header-nav-items-custom-red .nav-link.active {
+    color: #ffffff !important;
+    background-color: rgba(0,0,0,0.1); /* Nền sẫm hơn chút khi active/hover */
+    border-radius: 0.25rem;
+}
+
+.main-header-icon-custom-red { /* Icon chuông thông báo */
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+.main-header-icon-custom-red:hover {
+    color: #ffffff;
+}
+.notification-badge-custom-red { /* Chấm đỏ thông báo */
+    background-color: #fff !important; /* Nền trắng */
+    width: 8px;
+    height: 8px;
+    padding: 0 !important;
+    top: 10px !important; /* Điều chỉnh vị trí */
+    left: 70% !important; /* Điều chỉnh vị trí */
+}
+
+.main-header-avatar-custom-red {
+    width: 32px; /* Kích thước avatar */
+    height: 32px;
+    background-color: #000; /* Nền đen cho avatar như trong ảnh */
+}
+.main-header-username-custom-red {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+}
+
+.main-header-dropdown-custom-red {
+    font-size: 0.9rem;
+    /* Các style khác cho dropdown nếu cần */
+}
+
+/* Màu cho navbar-toggler icon trên nền đỏ */
+.main-header-custom-red .navbar-toggler {
+    border-color: rgba(255,255,255,0.3) !important;
+}
+.main-header-custom-red .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}

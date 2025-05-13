@@ -15,161 +15,113 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="d-flex flex-column min-vh-100">
+{# templates/base.html #}
 
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top custom_navbar">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red"> {# Class mới cho navbar #}
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('home') }}">
+        {# LOGO #}
+        <a class="navbar-brand main-header-logo-wrapper" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo" class="main-header-logo-img"> {# Đặt tên file logo của bạn #}
+        </a>
 
-            <img src="{{ url_for('static', filename='academic_work_images/placeholder/Logo ĐH Hà Nội-HANU.png') }}" alt="FIT Research Connect Logo" height="30">
-          </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavCustomRed"
+                aria-controls="navbarNavCustomRed" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            {% if current_user.is_authenticated %}
-                {# --- Navbar KHI ĐÃ ĐĂNG NHẬP --- #}
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active fw-bold" aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
-                    <li class="nav-item">
-                        {# Thêm class 'active' nếu đang ở trang showcase list hoặc detail #}
-                        <a class="nav-link active fw-bold {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
-                           ...
-                           href="{{ url_for('showcase') }}">Featured Works</a>
 
+        <div class="collapse navbar-collapse" id="navbarNavCustomRed">
+            {# Ô TÌM KIẾM - Đặt ở giữa #}
+            <div class="mx-auto main-header-search-wrapper">
+                <form class="d-flex main-header-search-form" role="search" method="GET" action="{{ url_for('search_results') }}">
+                    <div class="input-group">
+                        <span class="input-group-text search-icon-bg-custom-red"><i class="bi bi-search"></i></span>
+                        <input class="form-control search-input-custom-red" type="search" placeholder="Nhập tìm kiếm..."
+                               aria-label="Search" name="q" id="navbarSearchInputCustomRed" autocomplete="off"
+                               value="{{ request.args.get('q', '') }}">
+                        <button class="btn search-button-custom-red" type="submit">Tìm kiếm</button>
+                    </div>
+                </form>
+                <div class="dropdown-menu search-results-dropdown-custom-red" id="searchResultsDropdownCustomRed"></div>
+            </div>
+
+            {# CÁC LINK ĐIỀU HƯỚNG VÀ USER AVATAR - Đẩy sang phải #}
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center main-header-nav-items-custom-red">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
+                           href="{{ url_for('showcase') }}">Featured Works</a>
                     </li>
                     {% if current_user.role == 'lecturer' %}
-                        <li class="nav-item">
-                            <a class="nav-link active fw-bold " href="{{ url_for('create_post') }}">New Research/Post</a>
+                        {# Các link cho lecturer #}
+                         <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('create_post') }}">New Research/Post</a>
                         </li>
-                        <li class="nav-item"> {# Sửa lỗi thiếu thẻ li ở đây #}
-                            <a class="nav-link active fw-bold " href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
-                        </li>
-                    {% endif %}
-                    {% if current_user.role == 'student' %}
                         <li class="nav-item">
-                            <a class="nav-link active fw-bold {% if request.endpoint == 'my_applications' %}active{% endif %}"
+                            <a class="nav-link" href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
+                        </li>
+                    {% elif current_user.role == 'student' %}
+                        {# Các link cho student #}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'my_applications' %}active{% endif %}"
                                href="{{ url_for('my_applications') }}">Registered Topics</a>
                         </li>
-
-
                         <li class="nav-item">
-                            <a class="nav-link active fw-bold" href="{{ url_for('my_ideas') }}">My Ideas</a>
+                            <a class="nav-link" href="{{ url_for('my_ideas') }}">My Ideas</a>
                         </li>
-
-                        {# --- START: THÊM LINK SHOWCASE VÀO ĐÂY --- #}
-
                     {% endif %}
-                </ul>
-                {# --- SỬA LẠI DIV BAO QUANH FORM TÌM KIẾM --- #}
-                {# Thêm flex-grow-1 để nó chiếm không gian thừa, dùng mx-lg-2 để có chút margin ngang trên màn lớn #}
-                <div class="flex-grow-1 mx-lg-2 position-relative">
-                    <form class="d-flex" role="search" method="GET" action="{{ url_for('search_results') }}">
-                        {# --- BẮT ĐẦU THAY ĐỔI TẠI ĐÂY --- #}
-                        <div class="search-input-container me-2">
-                            <i class="bi bi-search search-input-icon"></i>
-                            <input class="form-control" type="search" placeholder="Search topics..."
-                                   aria-label="Search" name="q" id="navbarSearchInput" autocomplete="off"
-                                   value="{{ request.args.get('q', '') }}">
-                        </div>
-                        {# --- KẾT THÚC THAY ĐỔI --- #}
-                        <button class="btn btn-outline-light" type="submit">Search</button>
-                    </form>
-                    {# Div hiển thị gợi ý (giữ nguyên) #}
-                    <div class="dropdown-menu" id="searchResultsDropdown"
-                         style="width: 100%; display: none; position: absolute; top: 100%; z-index: 1050;">
-                    </div>
-                </div>
 
-
-                {# Cụm icon/user bên phải, thêm ms-lg-auto để đẩy sang phải trên màn lớn #}
-                <ul class="navbar-nav ms-lg-auto">
-                    <li class="nav-item position-relative">
-
+                    {# Thông báo và User Avatar #}
+                    <li class="nav-item position-relative me-2"> {# Thêm me-2 để cách avatar #}
                         <a class="nav-link d-flex align-items-center" href="{{ url_for('notifications') }}"
                            title="Notifications">
-                            <i class="bi bi-bell-fill  custom-bell-icon"></i>
-                            {# <<< THÊM KHỐI IF HIỂN THỊ CHẤM ĐỎ >>> #}
+                            <i class="bi bi-bell-fill main-header-icon-custom-red"></i>
                             {% if current_user.is_authenticated and unread_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                    <span class="visually-hidden">Notifications</span> {# Cho accessibility #}
+                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-white border border-light rounded-circle notification-badge-custom-red">
+                                    <span class="visually-hidden">New notifications</span>
                                 </span>
                             {% endif %}
-                            {# <<< KẾT THÚC KHỐI IF >>> #}
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                           id="navbarDropdownUserLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-
-                            {# --- Logic xác định URL ảnh đại diện (ĐÚNG) --- #}
-                            {# 1. Lấy tên file từ DB, nếu không có thì dùng default.jpg #}
+                           id="navbarDropdownUserLinkCustomRed" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
-                            {# 2. Mặc định thư mục là user_pics #}
                             {% set image_folder = 'user_pics' %}
-
-                            {# 3. KIỂM TRA: Nếu tên file LÀ default -> Đổi sang thư mục profile_pics #}
                             {% if image_filename.startswith('default') %}
-                                {% set image_folder = 'profile_pics' %} {# Đổi thư mục #}
-                                {# Chọn ảnh default cụ thể theo giới tính #}
-                                {% if current_user.gender == 'female' %}
-                                    {% set image_filename = 'default_female.jpg' %}
-                                {% elif current_user.gender == 'male' %}
-                                    {% set image_filename = 'default_male.jpg' %}
-                                {% else %}
-                                    {% set image_filename = 'default.jpg' %} {# Fallback #}
-                                {% endif %}
-                            {% endif %} {# Kết thúc kiểm tra default #}
-
-                            {# 4. Tạo URL cuối cùng #}
+                                {% set image_folder = 'profile_pics' %}
+                                {% if current_user.gender == 'female' %}{% set image_filename = 'default_female.jpg' %}
+                                {% elif current_user.gender == 'male' %}{% set image_filename = 'default_male.jpg' %}
+                                {% else %}{% set image_filename = 'default.jpg' %}{% endif %}
+                            {% endif %}
                             {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
-                            {# --- Kết thúc Logic --- #}
-
-                            {# 5. Hiển thị ảnh - dùng cho Navbar #}
-                            <img src="{{ avatar_url }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32"
-                                 style="object-fit: cover;">
-
-                            {# Hiển thị tên #}
-                            {{ current_user.full_name }}
+                            <img src="{{ avatar_url }}" alt="Avatar" class="rounded-circle me-1 main-header-avatar-custom-red">
+                            <span class="main-header-username-custom-red">{{ current_user.full_name }}</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUserLink">
-                            <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile </a></li>
-                            <li><a class="dropdown-item" href="#">Setting</a></li>
-
-                            {# Khối chỉ hiển thị cho Admin #}
+                        <ul class="dropdown-menu dropdown-menu-end main-header-dropdown-custom-red" aria-labelledby="navbarDropdownUserLinkCustomRed">
+                            <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
                             {% if current_user.is_authenticated and current_user.role == 'admin' %}
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                {# Link đến trang Admin Dashboard #}
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a></li>
-
                             {% endif %}
                             {% if current_user.is_authenticated and current_user.role == 'lecturer' %}
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                {# <<< THÊM DÒNG NÀY >>> #}
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('my_posts') }}">My Posts</a></li>
                             {% endif %}
-
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a></li>
                         </ul>
                     </li>
-                </ul>
-            {% else %}
-
-            {% endif %}
+                {% else %}
+                    {# Navbar items for non-authenticated users if any #}
+                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>
-
 <main class="container mt-5 mb-5">
 
 
