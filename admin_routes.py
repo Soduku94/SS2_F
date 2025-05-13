@@ -208,9 +208,9 @@ def view_user_detail(user_id):
         try: cohort = f"K{user.student_id[:2]}"
         except: cohort = "N/A"
     # Lấy URL ảnh, nên có hàm helper hoặc trong model User
-    image_folder = 'user_pics' if user.image_file and not user.image_file.startswith('default') else 'profile_pics'
+    image_folder = 'user_pics' if user.image_file and not user.image_file.startswith('default') else 'tech_background_right.jpg'
     image_file_name = user.image_file or 'default.jpg' # Fallback
-    if image_folder == 'profile_pics': # Logic chọn default theo gender nếu cần
+    if image_folder == 'tech_background_right.jpg': # Logic chọn default theo gender nếu cần
         if user.gender == 'female': image_file_name = 'default_female.jpg'
         elif user.gender == 'male': image_file_name = 'default_male.jpg'
         else: image_file_name = 'default.jpg'

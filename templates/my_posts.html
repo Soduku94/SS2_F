@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %} {# Example: "My Posts" #}
 
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>{{ title }}</h1>
-        {# Nút tạo bài đăng mới #}
+        {# Button to create a new post #}
         <a href="{{ url_for('create_post') }}" class="btn btn-success">
-            <i class="bi bi-plus-circle-fill"></i> Đăng bài / Đề tài mới
+            <i class="bi bi-plus-circle-fill"></i> Create New Post / Topic
         </a>
     </div>
 
@@ -18,30 +18,30 @@
              <div class="card-body">
                  <h5 class="card-title">
                     <a href="{{ url_for('view_post', post_id=post.id) }}" class="text-decoration-none link-dark fw-bold">{{ post.title }}</a>
-                    {# Badges loại bài, trạng thái, nổi bật... #}
-                    {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Đề tài</span>
-                    {% elif post.post_type == 'article' %} <span class="badge bg-secondary ms-1">Bài viết</span> {% endif %}
-                     {% if post.is_featured %} <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Nổi bật</span> {% endif %}
+                    {# Badges for post type, status, featured... #}
+                    {% if post.post_type == 'topic' %} <span class="badge bg-primary ms-1">Topic</span>
+                    {% elif post.post_type == 'article' %} <span class="badge bg-secondary ms-1">Article</span> {% endif %}
+                     {% if post.is_featured %} <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pin-angle-fill"></i> Featured</span> {% endif %}
                     {% if post.post_type == 'topic' and post.status %}
-                         {% if post.status == 'recruiting' %} <span class="badge bg-success ms-1">Tìm sinh viên</span>
-                         {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark ms-1">Chờ duyệt</span>
-                         {% elif post.status == 'closed' %} <span class="badge bg-secondary ms-1">Đã đóng</span>
-                         {% elif post.status == 'working_on' %} <span class="badge bg-info ms-1">Đang thực hiện</span>
-                         {% elif post.status == 'published' %} <span class="badge bg-light text-dark ms-1">Công khai</span>
+                         {% if post.status == 'recruiting' %} <span class="badge bg-success ms-1">Recruiting Students</span>
+                         {% elif post.status == 'pending' %} <span class="badge bg-warning text-dark ms-1">Pending Approval</span>
+                         {% elif post.status == 'closed' %} <span class="badge bg-secondary ms-1">Closed</span>
+                         {% elif post.status == 'working_on' %} <span class="badge bg-info ms-1">In Progress</span>
+                         {% elif post.status == 'published' %} <span class="badge bg-light text-dark ms-1">Published</span>
                          {% endif %}
                     {% elif post.post_type == 'article' and post.status == 'published' %}
-                         <span class="badge bg-light text-dark ms-1">Công khai</span>
+                         <span class="badge bg-light text-dark ms-1">Published</span>
                     {% endif %}
-                    {# BỎ HIỂN THỊ SỐ LƯỢT QUAN TÂM CŨ Ở ĐÂY #}
+                    {# REMOVED OLD INTEREST COUNT DISPLAY HERE #}
                  </h5>
-                 <p class="card-text mb-1"><small class="text-muted">Đăng vào {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</small></p>
+                 <p class="card-text mb-1"><small class="text-muted">Posted on {{ post.date_posted.strftime('%d/%m/%Y %H:%M') }}</small></p>
                  {# Content #}
                  <p class="card-text small">{{ post.content | striptags | truncate(200, True, '...') }}</p>
                  {# Tags #}
                  {% if post.tags.count() > 0 %}
                     <div class="mb-2 post-tags-summary">
                          <small class="text-muted">
-                            Thẻ:
+                            Tags:
                             {% for tag in post.tags.limit(3) %}<span class="badge rounded-pill bg-secondary me-1">{{ tag.name }}</span>{% endfor %}
                             {% if post.tags.count() > 3 %}<span class="badge rounded-pill bg-light text-dark">...</span>{% endif %}
                         </small>
@@ -60,67 +60,99 @@
                     </div>
                  {% endif %}
 
-                 {# === START: Cụm Nút Hành Động Mới (Cho Giảng viên) === #}
+                 {# === START: New Action Button Group (For Lecturer) === #}
                  <div class="mt-2 d-flex align-items-center flex-wrap gap-2">
-                     {# 1. Nút Xem chi tiết #}
-                     <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                     {# 1. View Details Button #}
+                     <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
 
-                     {# 2. Nút Sửa #}
-                     <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-fill"></i> Sửa</a>
+                     {# 2. Edit Button #}
+                     <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-fill"></i> Edit</a>
 
-                     {# 3. Nút Xóa (Modal Trigger) #}
-                     <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}"><i class="bi bi-trash-fill"></i> Xóa</button>
+                     {# 3. Delete Button (Modal Trigger) #}
+                     <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}"><i class="bi bi-trash-fill"></i> Delete</button>
 
-                     {# 4. Nút Like (Hiển thị số like, Giảng viên cũng có thể like bài của mình?) #}
+                     {# 4. Like Button (Display like count, Lecturer can also like their own posts?) #}
                      <div class="d-inline-block post-like-button-container">
                          <button
                              type="button"
                              class="btn btn-sm post-like-toggle-btn {% if not current_user.is_authenticated %}disabled btn-outline-secondary{% elif post.id in user_liked_posts %}btn-danger{% else %}btn-outline-danger{% endif %}"
                              data-post-id="{{ post.id }}"
                              data-url="{{ url_for('toggle_post_like', post_id=post.id) }}"
-                             title="{% if not current_user.is_authenticated %}Đăng nhập để thích{% elif post.id in user_liked_posts %}Bỏ thích{% else %}Thích{% endif %}"
+                             title="{% if not current_user.is_authenticated %}Login to like{% elif post.id in user_liked_posts %}Unlike{% else %}Like{% endif %}"
                              {% if not current_user.is_authenticated %}disabled{% endif %}>
                              <i class="bi {% if post.id in user_liked_posts %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-                             Thích
+                             Like
                              <span class="like-count">({{ like_counts.get(post.id, 0) }})</span>
                          </button>
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                      </div>
 
-                      {# 5. Nút Xem Đơn Đăng ký (Giữ nguyên từ trước) #}
+                      {# 5. View Applications Button (Kept from before) #}
                      {% if post.post_type == 'topic' and post.status in ['recruiting', 'working_on', 'pending', 'closed'] %}
                         {% set pending_app_count = post.applications.filter_by(status='pending').count() %}
-                        <a href="{{ url_for('view_topic_applications', post_id=post.id) }}" class="btn btn-sm btn-outline-info position-relative" title="Xem đơn đăng ký">
-                            <i class="bi bi-people-fill"></i> Đơn ĐK
+                        <a href="{{ url_for('view_topic_applications', post_id=post.id) }}" class="btn btn-sm btn-outline-info position-relative" title="View Applications">
+                            <i class="bi bi-people-fill"></i> Applications
                             {% if pending_app_count > 0 %}
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ pending_app_count }}<span class="visually-hidden">đơn chờ</span>
+                                {{ pending_app_count }}<span class="visually-hidden"> pending applications</span>
                             </span>
                             {% endif %}
                         </a>
                      {% endif %}
                  </div>
-                {# === END: Cụm Nút Hành Động Mới === #}
+                {# === END: New Action Button Group === #}
 
-                 {# Modal xác nhận xóa (Giữ nguyên) #}
-                 <div class="modal fade" id="deletePostModal{{ post.id }}" ...>
-                     {# ... Nội dung modal ... #}
-                 </div>
+                {# Delete confirmation modal (Kept as is - assuming content inside will be translated if needed) #}
+                <div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1" aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fs-6" id="deletePostModalLabel{{ post.id }}">Confirm Deletion</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">Delete post "{{ post.title }}"?</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            </div> {# Kết thúc card-body #}
-        </div> {# Kết thúc card #}
+            </div> {# End card-body #}
+        </div> {# End card #}
         {% endfor %}
     {% else %}
-        <div class="alert alert-info">Bạn chưa có bài đăng nào. <a href="{{ url_for('create_post') }}" class="alert-link">Tạo bài đăng mới ngay</a>!</div>
+        <div class="alert alert-info">You haven't created any posts yet. <a href="{{ url_for('create_post') }}" class="alert-link">Create a new post now</a>!</div>
     {% endif %}
 
-    {# --- Phân Trang (Giữ nguyên) --- #}
+    {# --- Pagination (Kept as is) --- #}
     {% if posts_pagination and posts_pagination.pages > 1 %}
     <nav aria-label="My posts navigation" class="mt-4">
-         {# ... code phân trang ... #}
+         {# ... pagination code (assuming it uses standard symbols or will be translated if it has text) ... #}
+         {# Example for completeness if it had text, but typically uses arrows or numbers #}
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not posts_pagination.has_prev %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('my_posts', page=posts_pagination.prev_num) if posts_pagination.has_prev else '#' }}">&laquo; Previous</a>
+            </li>
+            {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                    <li class="page-item {% if posts_pagination.page == page_num %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('my_posts', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+            <li class="page-item {% if not posts_pagination.has_next %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('my_posts', page=posts_pagination.next_num) if posts_pagination.has_next else '#' }}">Next &raquo;</a>
+            </li>
+        </ul>
     </nav>
     {% endif %}
-    {# --- Kết thúc Phân Trang --- #}
+    {# --- End Pagination --- #}
 
 </div>
 {% endblock %}

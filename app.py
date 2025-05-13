@@ -92,7 +92,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # --- CẬP NHẬT/THÊM ĐƯỜNG DẪN ẢNH ---
 # Thư mục cho ảnh mặc định (đã có)
-DEFAULT_PICS_FOLDER = os.path.join(app.root_path, 'static', 'profile_pics')
+DEFAULT_PICS_FOLDER = os.path.join(app.root_path, 'static', 'tech_background_right.jpg')
 os.makedirs(DEFAULT_PICS_FOLDER, exist_ok=True)
 
 # Thư mục MỚI cho ảnh user upload

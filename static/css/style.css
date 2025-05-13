@@ -831,144 +831,162 @@ body.page-login-centered-v1 {
     font-size: 0.9rem;
     text-align: left; /* Chữ căn trái */
 }
-/* --- Giao diện Trang "Gửi Ý tưởng Nghiên Cứu Mới" (Phong cách V2 - Giống image_5e562c.png) --- */
+/* --- Giao diện Trang "Gửi Ý tưởng Nghiên Cứu Mới" (Style Final - Giống image_5e384a.png) --- */
 
-body.page-form-layout { /* Class này có thể đã có, đảm bảo nền là xám nhạt hoặc trắng */
+body.page-submit-idea-style-final {
     background-color: #f8f9fa; /* Nền xám rất nhạt cho không gian ngoài form */
-    /* padding-top đã được body chung lo từ navbar */
 }
 
-.formpage-container { /* Class này có thể đã có */
+.submit-idea-container-style-final {
     padding-bottom: 3rem;
 }
 
-/* Khung nền chính của form */
-.formpage-wrapper-v2 { /* Class mới cho wrapper này */
-    background-color: #f8d7da; /* Màu nền hồng nhạt (đỏ rất nhạt) */
-    border-radius: 0.75rem; /* Bo tròn góc */
+/* Khung nền hồng nhạt bao quanh form */
+.submit-idea-form-wrapper-style-final {
+    background-color: #f8d7da; /* Màu nền hồng nhạt */
+    border-radius: 0.75rem;
     padding: 2rem 2.5rem;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.07);
 }
 
-.formpage-title-v2 { /* Class mới */
-    color: #212529; /* Màu chữ đen cho tiêu đề */
+.submit-idea-title-style-final {
+    color: #212529;
     font-weight: 600;
     font-size: 1.7rem;
 }
 
-.formpage-label-v2 { /* Class mới */
+.submit-idea-label-style-final {
     font-size: 0.8rem;
     font-weight: 500;
-    color: #212529; /* Màu label đen */
+    color: #212529;
     margin-bottom: 0.25rem;
 }
 
-/* Input, Select, Trix, Krajee file input - Nền trắng, viền xám */
-.formpage-input-v2, /* Class chung mới cho text input, select */
-.formpage-trix-v2.trix-content, /* Phần nội dung của Trix */
-/* Krajee: input tên file ("Select files...") */
-#ideaAttachmentInputFormpageV2+.file-input .file-caption-name,
-/* Krajee: nút browse - đã có class riêng formpage-krajee-browse-btn-v2 */
-#ideaAttachmentInputFormpageV2+.file-input .btn.formpage-krajee-browse-btn-v2
+/* === Input, Select, Trix, Krajee file input - NỀN TRẮNG === */
+.submit-idea-input-style-final, /* Class chung cho text input, select */
+.submit-idea-trix-wrapper-style-final, /* Wrapper cho Trix Editor */
+#ideaAttachmentInputStyleFinal+.file-input .file-caption-main, /* Phần chính của caption Krajee */
+#ideaAttachmentInputStyleFinal+.file-input .btn.submit-idea-krajee-browse-btn-style-final /* Nút Browse Krajee */
 {
     background-color: #ffffff !important;
     border: 1px solid #ced4da !important;
     color: #212529 !important;
     border-radius: 0.25rem;
     font-size: 0.9rem;
-    padding-top: 0.45rem;
-    padding-bottom: 0.45rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    /* Padding sẽ được xử lý riêng cho từng loại nếu cần */
     box-shadow: none !important;
 }
-.formpage-input-v2::placeholder {
+
+/* Padding chung cho input text và select */
+.submit-idea-input-style-final {
+    padding: 0.45rem 0.75rem;
+}
+.submit-idea-input-style-final::placeholder {
     color: #6c757d;
 }
 
 /* Focus state cho các input */
-.formpage-input-v2:focus,
-.formpage-trix-v2.trix-content:focus-within,
-#ideaAttachmentInputFormpageV2+.file-input .file-caption-name:focus {
+.submit-idea-input-style-final:focus,
+.submit-idea-trix-wrapper-style-final:focus-within, /* Khi focus vào bên trong Trix wrapper */
+#ideaAttachmentInputStyleFinal+.file-input .file-caption-name:focus {
     border-color: #86b7fe !important;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
 }
 
 /* Trix editor specific */
-.formpage-trix-v2 { /* Div bao ngoài của Trix */
-    border: 1px solid #ced4da !important;
-    border-radius: 0.25rem;
-    min-height: 150px;
-    background-color: #fff;
+.submit-idea-trix-wrapper-style-final { /* Div bao ngoài của Trix */
+    /* Nền trắng và viền đã được set ở trên */
+    padding: 0; /* Reset padding của div wrapper này nếu có */
+    min-height: 150px; /* Chiều cao tối thiểu */
+    display: flex; /* Để toolbar và content xếp chồng lên nhau */
+    flex-direction: column;
 }
-.formpage-trix-v2 .trix-toolbar { /* Thanh công cụ của Trix */
+.submit-idea-trix-wrapper-style-final .trix-toolbar { /* Thanh công cụ của Trix */
     background-color: #ffffff !important; /* Nền trắng cho toolbar */
     border-bottom: 1px solid #dee2e6 !important;
+    border-top-left-radius: 0.25rem; /* Bo góc cho toolbar */
+    border-top-right-radius: 0.25rem;
 }
-.formpage-trix-v2 .trix-toolbar .trix-button {
+.submit-idea-trix-wrapper-style-final .trix-toolbar .trix-button {
     background-color: transparent !important;
-    color: #212529 !important; /* Màu icon/chữ trên toolbar */
+    color: #212529 !important;
 }
-.formpage-trix-v2 .trix-toolbar .trix-button--active {
-    background-color: #e9ecef !important; /* Nền xám rất nhạt cho nút active */
+.submit-idea-trix-wrapper-style-final .trix-toolbar .trix-button--active {
+    background-color: #e9ecef !important;
 }
-.formpage-trix-v2 .trix-content {
-    /* Đã được style bởi .formpage-input-v2 */
+.submit-idea-trix-wrapper-style-final .trix-content { /* Phần nhập liệu của Trix */
+    background-color: #fff !important;
+    color: #212529 !important;
+    flex-grow: 1; /* Cho phép vùng content co giãn */
+    padding: 0.45rem 0.75rem; /* Padding giống input thường */
+    border: none !important; /* Bỏ viền riêng của trix-content */
+    border-bottom-left-radius: 0.25rem; /* Bo góc cho content */
+    border-bottom-right-radius: 0.25rem;
 }
 
 
 /* Krajee File Input specific */
-/* Vùng kéo thả file */
-#ideaAttachmentInputFormpageV2+.file-input .file-drop-zone {
-    border: 2px dashed #ced4da !important; /* Viền nét đứt nhạt hơn */
+/* Vùng kéo thả file - NỀN TRẮNG */
+#ideaAttachmentInputCurrentStyleV2+.file-input .file-drop-zone, /* Giữ lại ID từ phiên bản trước nếu đúng */
+#ideaAttachmentInputStyleFinal+.file-input .submit-idea-dropzone-style-final /* Hoặc class mới */
+{
+    border: 2px dashed #ced4da !important; /* Viền nét đứt */
     background-color: #ffffff !important; /* Nền trắng */
     border-radius: 0.25rem;
     padding: 1.5rem 1rem;
 }
-#ideaAttachmentInputFormpageV2+.file-input .file-drop-zone-title {
+#ideaAttachmentInputStyleFinal+.file-input .file-drop-zone-title {
     color: #495057 !important;
     font-size: 0.9rem !important;
 }
-/* Input hiển thị tên file đã chọn ("Select files...") */
-#ideaAttachmentInputFormpageV2+.file-input .file-caption-name {
-    border-right: none !important; /* Bỏ viền phải để liền với nút browse */
-}
-/* Nút "Browse..." */
-/* Krajee File Input specific */
-/* ... các style khác cho Krajee ... */
 
-/* Nút "Browse..." */
-#ideaAttachmentInputFormpage+.file-input .btn.formpage-krajee-browse-btn {
-    background-color: #c82333 !important; /* <<< MÀU ĐỎ ĐẬM */
-    border: 1px solid #c82333 !important; /* <<< VIỀN MÀU ĐỎ ĐẬM */
+/* Input hiển thị tên file đã chọn ("Select files...") - NỀN TRẮNG */
+#ideaAttachmentInputStyleFinal+.file-input .file-caption-main .file-caption-name {
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important; /* Thêm lại border nếu cần */
+    border-right: none !important; /* Bỏ viền phải để liền với nút browse */
+    color: #212529 !important;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+#ideaAttachmentInputStyleFinal+.file-input .file-caption-main .file-caption-name::placeholder {
+    color: #6c757d;
+}
+
+
+/* Nút "Browse..." - NỀN TRẮNG, CHỮ ĐEN */
+#ideaAttachmentInputStyleFinal+.file-input .btn.submit-idea-krajee-browse-btn-style-final {
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important;
     border-left: none !important;
-    color: #ffffff !important; /* <<< CHỮ MÀU TRẮNG */
+    color: #212529 !important; /* Chữ đen */
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
     padding: 0.45rem 0.75rem;
     font-size: 0.9rem;
 }
-
-/* (Tùy chọn) Style khi hover nút Browse */
-#ideaAttachmentInputFormpage+.file-input .btn.formpage-krajee-browse-btn:hover {
-    background-color: #aF1e2d !important;
-    border-color: #aF1e2d !important;
-    color: #ffffff !important;
+#ideaAttachmentInputStyleFinal+.file-input .btn.submit-idea-krajee-browse-btn-style-final:hover {
+    background-color: #f8f9fa !important; /* Nền xám rất nhạt khi hover */
 }
+
 /* Ẩn các nút không cần thiết của Krajee */
-#ideaAttachmentInputFormpageV2+.file-input .fileinput-upload-button,
-#ideaAttachmentInputFormpageV2+.file-input .fileinput-remove-button {
+#ideaAttachmentInputStyleFinal+.file-input .fileinput-upload-button,
+#ideaAttachmentInputStyleFinal+.file-input .fileinput-remove-button {
     display: none !important;
 }
 
 
-.formpage-form-text-v2 { /* Chữ hướng dẫn cho select giảng viên */
+.submit-idea-form-text-style-final {
     font-size: 0.75rem;
-    color: #58151c; /* Màu đỏ sẫm */
+    color: #58151c;
 }
 
-.formpage-submit-btn-v2 {
-    background-color: #a41e22; /* Màu đỏ sẫm */
+.submit-idea-submit-btn-style-final {
+    background-color: #a41e22;
     border-color: #a41e22;
     color: #fff;
     font-weight: 500;
@@ -976,17 +994,17 @@ body.page-form-layout { /* Class này có thể đã có, đảm bảo nền là
     font-size: 1rem;
     border-radius: 0.3rem;
 }
-.formpage-submit-btn-v2:hover {
+.submit-idea-submit-btn-style-final:hover {
     background-color: #8c181c;
     border-color: #8c181c;
 }
 
-.formpage-back-link-v2,
-.formpage-back-link-v2:hover {
-    color: #58151c; /* Màu đỏ sẫm */
+.submit-idea-back-link-style-final,
+.submit-idea-back-link-style-final:hover {
+    color: #58151c;
     font-size: 0.9rem;
     text-decoration: none;
 }
-.formpage-back-link-v2:hover {
+.submit-idea-back-link-style-final:hover {
     text-decoration: underline;
 }
