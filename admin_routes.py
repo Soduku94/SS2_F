@@ -17,6 +17,8 @@ from sqlalchemy import or_, asc, desc
 # Import từ Werkzeug cho tên file an toàn
 from werkzeug.utils import secure_filename
 
+from app import app
+
 # Import PIL/Pillow để xử lý ảnh (nếu có resize)
 try:
     from PIL import Image
@@ -100,7 +102,7 @@ def save_showcase_image(form_picture, old_picture_filename=None):
 @login_required
 @admin_required
 def index():
-    # ... (Code query thống kê giữ nguyên) ...
+
     user_count = User.query.count()
     lecturer_count = User.query.filter_by(role='lecturer').count()
     student_count = User.query.filter_by(role='student').count()
@@ -262,57 +264,94 @@ def delete_post_by_admin(post_id):
 # === START: CÁC ROUTE MỚI QUẢN LÝ AcademicWork ===
 
 # --- Route hiển thị danh sách AcademicWork ---
+# admin_routes.py
+
 @admin_bp.route('/academic-works')
 @login_required
 @admin_required
 def list_academic_works():
-    page = request.args.get('page', 1, type=int)
-    search_query = request.args.get('q', None, type=str)
-    filter_type = request.args.get('item_type', None, type=str)
-    filter_year = request.args.get('year', None, type=int)
-    filter_published = request.args.get('published', None, type=str)
-    filter_featured = request.args.get('featured', None, type=str)  # Nhận 'true'/'false'/'any'
+    try:  # Bọc toàn bộ hoặc các phần chính trong try-except
+        year_from_str = request.args.get('year_from', None)
+        year_to_str = request.args.get('year_to', None)
+        page = request.args.get('page', 1, type=int)
+        search_query = request.args.get('q', None, type=str)
+        filter_type = request.args.get('item_type', None, type=str)
+        # filter_year = request.args.get('year', None, type=int) # Đã bỏ nếu chỉ dùng from/to
+        filter_published = request.args.get('published', None, type=str)
+        filter_featured = request.args.get('featured', None, type=str)
 
-    PER_PAGE = 15
-    query = AcademicWork.query
+        PER_PAGE = 15
+        query = AcademicWork.query
 
-    # Áp dụng Search
-    if search_query:
-        search_term = f"%{search_query}%"
-        query = query.filter(or_(
-            AcademicWork.title.ilike(search_term),
-            AcademicWork.authors_text.ilike(search_term),
-            AcademicWork.abstract.ilike(search_term)
-        ))
+        year_from = None
+        if year_from_str and year_from_str.isdigit():
+            year_from = int(year_from_str)
 
-    # Áp dụng Filter
-    if filter_type: query = query.filter(AcademicWork.item_type == filter_type)
-    if filter_year: query = query.filter(AcademicWork.year == filter_year)
-    if filter_published == 'true': query = query.filter(AcademicWork.is_published == True)
-    elif filter_published == 'false': query = query.filter(AcademicWork.is_published == False)
-    if filter_featured == 'true':
-        query = query.filter(AcademicWork.is_featured == True)
-    elif filter_featured == 'false':
-        query = query.filter(AcademicWork.is_featured == False)
+        year_to = None
+        if year_to_str and year_to_str.isdigit():
+            year_to = int(year_to_str)
 
-    # Sắp xếp
-    query = query.order_by(AcademicWork.year.desc().nullslast(), AcademicWork.date_added.desc())
-    pagination = query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+        if year_from is not None and year_to is not None:
+            if year_from <= year_to:
+                query = query.filter(AcademicWork.year.between(year_from, year_to))
+        elif year_from is not None:
+            query = query.filter(AcademicWork.year >= year_from)
+        elif year_to is not None:
+            query = query.filter(AcademicWork.year <= year_to)
+        # elif filter_year: # Bỏ nếu không dùng
+        #     query = query.filter(AcademicWork.year == filter_year)
 
-    # Lấy các giá trị duy nhất cho bộ lọc
-    distinct_types = db.session.query(AcademicWork.item_type).distinct().order_by(AcademicWork.item_type).all()
-    distinct_years = db.session.query(AcademicWork.year).filter(AcademicWork.year != None).distinct().order_by(AcademicWork.year.desc()).all()
+        if search_query:
+            search_term = f"%{search_query}%"
+            query = query.filter(or_(
+                AcademicWork.title.ilike(search_term),
+                AcademicWork.authors_text.ilike(search_term),
+                AcademicWork.abstract.ilike(search_term)
+            ))
 
-    # CẦN TẠO TEMPLATE: 'admin/academic_works_list.html'
-    return render_template('admin/academic_works_list.html',
-                           title="Quản lý Công trình Showcase",
-                           items_pagination=pagination,
-                           search_query=search_query,
-                           distinct_types=[t[0] for t in distinct_types],
-                           distinct_years=[y[0] for y in distinct_years],
-                           filter_type=filter_type,
-                           filter_year=filter_year,
-                           filter_published=filter_published, filter_featured=filter_featured)
+        if filter_type: query = query.filter(AcademicWork.item_type == filter_type)
+
+        if filter_published == 'true':
+            query = query.filter(AcademicWork.is_published == True)
+        elif filter_published == 'false':
+            query = query.filter(AcademicWork.is_published == False)
+
+        if filter_featured == 'true':
+            query = query.filter(AcademicWork.is_featured == True)
+        elif filter_featured == 'false':
+            query = query.filter(AcademicWork.is_featured == False)
+
+        query = query.order_by(AcademicWork.year.desc().nullslast(), AcademicWork.date_added.desc())
+        pagination = query.paginate(page=page, per_page=PER_PAGE, error_out=False)
+
+        distinct_types_results = db.session.query(AcademicWork.item_type).distinct().order_by(
+            AcademicWork.item_type).all()
+        distinct_years_results = db.session.query(AcademicWork.year).filter(
+            AcademicWork.year != None).distinct().order_by(AcademicWork.year.desc()).all()
+
+        distinct_types = [t[0] for t in distinct_types_results]
+        distinct_years = [y[0] for y in distinct_years_results]
+
+        return render_template('admin/academic_works_list.html',
+                               title="Feature Works Manager",
+                               items_pagination=pagination,
+                               search_query=search_query,
+                               distinct_types=distinct_types,
+                               distinct_years=distinct_years,
+                               filter_type=filter_type,
+                               filter_year_from=year_from_str,
+                               filter_year_to=year_to_str,
+                               filter_published=filter_published,
+                               filter_featured=filter_featured)
+
+    except Exception as e:
+        app.logger.error(f"An error occurred in list_academic_works: {e}", exc_info=True)  # Ghi log cả traceback
+        # Trả về một trang lỗi chung hoặc redirect với flash message
+        flash("An unexpected error occurred. Please try again later.", "danger")
+        # Hoặc render một template lỗi đơn giản:
+        # return render_template("500.html", error=str(e)), 500
+        # Hoặc redirect về trang admin chính:
+        return redirect(url_for('admin.index'))  # Giả sử hàm admin dashboard là 'index' hoặc 'dashboard'
 
 
 # --- Route tạo mới AcademicWork ---
@@ -442,3 +481,52 @@ def delete_academic_work(item_id):
     return redirect(url_for('admin.list_academic_works'))
 
 # === KẾT THÚC QUẢN LÝ AcademicWork ===
+
+
+@admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+@admin_required  # Đảm bảo chỉ admin mới thực hiện được
+def delete_user(user_id):  # <<< TÊN HÀM LÀ 'delete_user'
+    # Ngăn admin tự xóa chính mình
+    if user_id == current_user.id:
+        flash('Bạn không thể xóa chính tài khoản của mình.', 'warning')
+        return redirect(url_for('admin.list_users'))
+
+    user_to_delete = User.query.get_or_404(user_id)
+
+    # Cẩn thận: Cân nhắc việc xóa mềm (soft delete) thay vì xóa cứng
+    # Hoặc xử lý các bản ghi liên quan (ví dụ: bài đăng của user đó sẽ xử lý thế nào?)
+    # Ví dụ: Nếu Post có ondelete='CASCADE' với user_id, các bài đăng của user này sẽ tự xóa.
+    # Nếu không, bạn cần xử lý logic đó ở đây (ví dụ: gán bài đăng cho một user admin khác, hoặc không cho xóa user có bài đăng)
+
+    try:
+        # Trước khi xóa user, có thể cần xóa các file liên quan của user đó (ví dụ: ảnh đại diện)
+        if user_to_delete.image_file and not user_to_delete.image_file.startswith('default'):
+            user_pics_dir = current_app.config.get('USER_PICS_FOLDER',
+                                                   os.path.join(current_app.root_path, 'static', 'user_pics'))
+            image_path = os.path.join(user_pics_dir, user_to_delete.image_file)
+            if os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                except Exception as e:
+                    app.logger.error(f"Error deleting profile picture for user {user_id} during admin delete: {e}")
+
+        # Xóa các bản ghi phụ thuộc trước nếu cần (ví dụ: nếu không có ondelete cascade mạnh mẽ)
+        # Ví dụ: TopicApplication.query.filter_by(user_id=user_id).delete()
+        # StudentIdea.query.filter_by(student_id=user_id).delete()
+        # Notification.query.filter_by(sender_id=user_id).delete()
+        # Notification.query.filter_by(recipient_id=user_id).delete()
+        # PostLike.query.filter_by(user_id=user_id).delete()
+        # AcademicWorkLike.query.filter_by(user_id=user_id).delete()
+        # Posts (nếu không cascade): Post.query.filter_by(user_id=user_id).delete()
+
+        # Sau đó mới xóa user
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash(f'Người dùng "{user_to_delete.full_name}" đã được xóa thành công.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error deleting user {user_id} by admin: {e}")
+        flash(f'Lỗi khi xóa người dùng: {e}', 'danger')
+
+    return redirect(url_for('admin.list_users'))

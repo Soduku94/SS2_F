@@ -1,65 +1,45 @@
-{% extends "base.html" %} {# Hoặc admin/admin_base.html nếu có #}
+{% extends "base.html" %} {# Hoặc "admin/admin_base.html" #}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title or "Create New User" }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-lg-8 col-md-10"> {# Cột rộng hơn một chút #}
             <div class="card shadow-sm">
-                <div class="card-header"><h2>{{ title }}</h2></div>
-                <div class="card-body">
-                    {# Form trỏ về chính route này (action="") #}
+                <div class="card-header bg-primary text-white"> {# Header nổi bật hơn #}
+                    <h2 class="mb-0 h4"><i class="bi bi-person-plus-fill me-2"></i>{{ title or "Create New User" }}</h2>
+                </div>
+                <div class="card-body p-4"> {# Tăng padding #}
                     <form method="POST" action="" novalidate>
                         {{ form.hidden_tag() }} {# CSRF token #}
-                        <fieldset>
-                             {# Trường Họ tên #}
+
+                        <fieldset class="mb-4">
+                            <legend class="h5 mb-3 border-bottom pb-2">Account Information</legend>
+                            {# Trường Họ tên #}
                              <div class="mb-3">
-                                {{ form.full_name.label(class="form-label") }}
+                                {{ form.full_name.label(class="form-label fw-semibold") }}
                                 {% if form.full_name.errors %}
-                                    {{ form.full_name(class="form-control is-invalid") }}
+                                    {{ form.full_name(class="form-control is-invalid", placeholder="Enter full name") }}
                                     <div class="invalid-feedback">{% for error in form.full_name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
                                 {% else %}
-                                    {{ form.full_name(class="form-control") }}
+                                    {{ form.full_name(class="form-control", placeholder="Enter full name") }}
                                 {% endif %}
                             </div>
 
                             {# Trường Email #}
                             <div class="mb-3">
-                                {{ form.email.label(class="form-label") }}
+                                {{ form.email.label(class="form-label fw-semibold") }}
                                 {% if form.email.errors %}
-                                    {{ form.email(class="form-control is-invalid", placeholder="Email để đăng nhập") }}
+                                    {{ form.email(class="form-control is-invalid", placeholder="Login email address") }}
                                     <div class="invalid-feedback">{% for error in form.email.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
                                 {% else %}
-                                    {{ form.email(class="form-control", placeholder="Email để đăng nhập") }}
+                                    {{ form.email(class="form-control", placeholder="Login email address") }}
                                 {% endif %}
                             </div>
-
-                            {# Trường Mật khẩu #}
-                            <div class="mb-3">
-                                {{ form.password.label(class="form-label") }}
-                                {% if form.password.errors %}
-                                    {{ form.password(class="form-control is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                                {% else %}
-                                    {{ form.password(class="form-control") }}
-                                {% endif %}
-                            </div>
-
-                            {# Trường Xác nhận Mật khẩu #}
-                            <div class="mb-3">
-                                {{ form.confirm_password.label(class="form-label") }}
-                                {% if form.confirm_password.errors %}
-                                    {{ form.confirm_password(class="form-control is-invalid") }}
-                                    <div class="invalid-feedback">{% for error in form.confirm_password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
-                                {% else %}
-                                    {{ form.confirm_password(class="form-control") }}
-                                {% endif %}
-                            </div>
-
                             {# Trường Chọn Vai trò #}
                             <div class="mb-3">
-                                {{ form.role.label(class="form-label") }}
+                                {{ form.role.label(class="form-label fw-semibold") }}
                                 {% if form.role.errors %}
                                     {{ form.role(class="form-select is-invalid") }}
                                     <div class="invalid-feedback">{% for error in form.role.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
@@ -67,20 +47,62 @@
                                     {{ form.role(class="form-select") }}
                                 {% endif %}
                             </div>
-
-                            {# Nếu bạn có thêm trường student_id, class_name vào AdminUserCreateForm thì render chúng ở đây #}
-                            {# Ví dụ:
-                            <div class="mb-3">
-                                {{ form.student_id.label(class="form-label") }}
-                                {{ form.student_id(class="form-control", placeholder="Chỉ nhập nếu vai trò là Sinh viên") }}
-                                ... (hiển thị lỗi nếu có) ...
-                            </div>
-                            #}
-
                         </fieldset>
-                        <div class="mt-3 d-flex justify-content-end"> {# Đưa nút về bên phải #}
-                             <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary me-2">Hủy bỏ</a>
-                             {{ form.submit(class="btn btn-primary") }} {# Nút submit text là 'Tạo người dùng' #}
+
+                        <fieldset class="mb-4">
+                            <legend class="h5 mb-3 border-bottom pb-2">Set Password</legend>
+                            {# Hàng cho Mật khẩu và Xác nhận Mật khẩu #}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.password.label(class="form-label fw-semibold") }}
+                                        {% if form.password.errors %}
+                                            {{ form.password(class="form-control is-invalid") }}
+                                            <div class="invalid-feedback">{% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                                        {% else %}
+                                            {{ form.password(class="form-control") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.confirm_password.label(class="form-label fw-semibold") }}
+                                        {% if form.confirm_password.errors %}
+                                            {{ form.confirm_password(class="form-control is-invalid") }}
+                                            <div class="invalid-feedback">{% for error in form.confirm_password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                                        {% else %}
+                                            {{ form.confirm_password(class="form-control") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        {# Khu vực cho các trường tùy chọn dựa trên vai trò (ví dụ: Student ID, Class Name) #}
+                        {# Bạn có thể dùng JavaScript để ẩn/hiện khối này dựa trên lựa chọn form.role #}
+                        <fieldset class="mb-3" id="studentSpecificFields" style="display: none;"> {# Mặc định ẩn #}
+                            <legend class="h6 mb-3 border-bottom pb-1 text-muted">Student Specific (If applicable)</legend>
+                             <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.student_id.label(class="form-label") }} {# Giả sử có trường này trong AdminUserCreateForm #}
+                                        {{ form.student_id(class="form-control" + (" is-invalid" if form.student_id.errors else ""), placeholder="Enter Student ID") }}
+                                        {% if form.student_id.errors %}<div class="invalid-feedback">{% for error in form.student_id.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.class_name.label(class="form-label") }} {# Giả sử có trường này trong AdminUserCreateForm #}
+                                        {{ form.class_name(class="form-control" + (" is-invalid" if form.class_name.errors else ""), placeholder="Enter Class Name") }}
+                                        {% if form.class_name.errors %}<div class="invalid-feedback">{% for error in form.class_name.errors %}<span>{{ error }}</span><br>{% endfor %}</div>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <div class="mt-4 d-flex justify-content-end border-top pt-3">
+                             <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                             {{ form.submit(class="btn btn-primary px-4") }} {# Nút submit với text từ form, ví dụ "Create User" #}
                         </div>
                     </form>
                 </div> {# End card-body #}
@@ -88,4 +110,32 @@
         </div> {# End col #}
     </div> {# End row #}
 </div> {# End container #}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // JavaScript để ẩn/hiện các trường Student Specific dựa trên lựa chọn Role
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('{{ form.role.id }}');
+        const studentFieldsDiv = document.getElementById('studentSpecificFields');
+
+        function toggleStudentFields() {
+            if (roleSelect && studentFieldsDiv) {
+                if (roleSelect.value === 'student') {
+                    studentFieldsDiv.style.display = 'block';
+                } else {
+                    studentFieldsDiv.style.display = 'none';
+                }
+            }
+        }
+
+        if (roleSelect) {
+            // Gọi lần đầu khi tải trang
+            toggleStudentFields();
+            // Thêm event listener khi role thay đổi
+            roleSelect.addEventListener('change', toggleStudentFields);
+        }
+    });
+</script>
 {% endblock %}

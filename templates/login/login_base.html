@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Login{% endblock %}</title>
+    {# Bootstrap CSS #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    {# CSS tùy chỉnh cho trang login #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
+    {# Nếu form login sử dụng CSRF (thường là mặc định với Flask-WTF), bạn nên có meta tag này #}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {% block head_extra %}{% endblock %} {# Block cho các CSS hoặc meta tags khác nếu cần #}
+</head>
+<body {% block body_attributes %}{% endblock %}> {# Cho phép trang con thêm class vào body #}
+
+    <main class="register-main-content"> {# Giữ lại class này nếu CSS của bạn dùng nó #}
+        {% block content %}{% endblock %}
+    </main>
+
+    {# Toast Container - Đặt ở đây để luôn có sẵn trên các trang kế thừa #}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        {# Toasts sẽ được JavaScript chèn vào đây #}
+    </div>
+
+    {# Block Scripts cho các trang con và các script chung #}
+    {% block scripts %}
+        {# Bootstrap Bundle JS (bao gồm Popper) - Rất quan trọng cho Toast và các component khác #}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        {# Các script khác có thể cần cho trang login hoặc các trang kế thừa base này #}
+    {% endblock %}
+
+    {# Script hiển thị Flash Messages dưới dạng Toast #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const toastContainer = document.querySelector('.toast-container');
+                    if (toastContainer) {
+                        {% for category, message in messages %}
+                            // Dòng debug này giúp bạn thấy message và category trong console của trình duyệt
+                            // console.log("Flash Message (from login_base.html):", {{ category | tojson | safe }}, {{ message | tojson | safe }});
+
+                            // Chỉ xử lý toast cho category 'auth' hoặc các category bạn muốn
+                            {% if category == 'auth' %}
+                            { // Block scope cho các biến const/let bên trong vòng lặp
+                                const toastId = 'flash-toast-loginbase-{{ category }}-{{ loop.index }}';
+                                let bgClass = 'text-bg-info'; // Màu nền mặc định
+
+                                const lowerMessage = {{ message | tojson | safe }}.toLowerCase();
+
+                                // Logic xác định màu nền dựa trên nội dung message
+                                if (lowerMessage.includes('thất bại') || lowerMessage.includes('không đúng') || lowerMessage.includes('failed') || lowerMessage.includes('incorrect')) {
+                                    bgClass = 'text-bg-danger';
+                                } else if (lowerMessage.includes('thành công') || lowerMessage.includes('success') || lowerMessage.includes('đã đăng xuất') || lowerMessage.includes('logged out')) {
+                                    bgClass = 'text-bg-success';
+                                } else if (category == 'info') { // Ví dụ thêm category 'info'
+                                    bgClass = 'text-bg-info';
+                                } else if (category == 'warning') {
+                                     bgClass = 'text-bg-warning';
+                                }
+
+
+                                const toastHTML = `
+                                <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                                  <div class="d-flex">
+                                    <div class="toast-body">
+                                      {{ message | safe }} {# Giữ |safe nếu message của bạn có thể chứa HTML an toàn #}
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                  </div>
+                                </div>`;
+
+                                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                                const toastElement = document.getElementById(toastId);
+                                if (toastElement) {
+                                    const toast = new bootstrap.Toast(toastElement);
+                                    toast.show();
+                                    toastElement.addEventListener('hidden.bs.toast', function () {
+                                        toastElement.remove(); // Xóa toast khỏi DOM sau khi ẩn
+                                    });
+                                }
+                            } // Đóng block scope
+                            {% endif %} {# Kết thúc if category == 'auth' #}
+                        {% endfor %}
+                    } else {
+                        console.warn('Toast container (.toast-container) not found on this page.');
+                    }
+                });
+            </script>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>
