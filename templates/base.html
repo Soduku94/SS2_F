@@ -1,6 +1,5 @@
-{# templates/base.html #}
 <!DOCTYPE html>
-<html lang="vi"> {# Đổi lang="vi" nếu website chủ yếu tiếng Việt #}
+<html lang="vie">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,18 +9,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/css/fileinput.min.css">
     <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
 
+
     <title>{% block title %}FIT Research Connect{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<body class="d-flex flex-column min-vh-100"> {# Giữ lại class cho footer dính cuối trang #}
+<body class="d-flex flex-column min-vh-100">
+{# templates/base.html #}
 
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red">
+{# templates/base.html #}
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red"> {# Đã có class main-header-custom-red #}
     <div class="container-fluid">
-        {# LOGO #}
+        {# LOGO - Bọc trong div có nền trắng riêng #}
         <a class="navbar-brand main-header-logo-wrapper" href="{{ url_for('home') }}">
-            {# Đảm bảo tên file logo chính xác và đã được đặt trong static/logo_pics/ #}
-            <img src="{{ url_for('static', filename='logo_pics/hanu_logo.png') }}" alt="FIT Research Connect Logo" class="main-header-logo-img">
+            {# Thay 'logo_fit_hanoi.png' bằng tên file logo chính xác của bạn trong static/logo_pics/ #}
+            <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo" class="main-header-logo-img">
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavCustomRed"
@@ -30,29 +32,36 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNavCustomRed">
-            {# Ô TÌM KIẾM #}
-            <div class="main-header-search-wrapper">
+            {# Ô TÌM KIẾM - Đặt ở giữa #}
+            <div class="mx-auto main-header-search-wrapper">
                 <form class="d-flex main-header-search-form" role="search" method="GET" action="{{ url_for('search_results') }}">
                     <div class="input-group">
+                        {# Icon kính lúp bên trái input #}
                         <span class="input-group-text search-icon-bg-custom-red"><i class="bi bi-search"></i></span>
-                        <input class="form-control search-input-custom-red" type="search" placeholder="Search"
+                        <input class="form-control search-input-custom-red" type="search" placeholder="Search" {# Đổi placeholder #}
                                aria-label="Search" name="q" id="navbarSearchInputCustomRed" autocomplete="off"
                                value="{{ request.args.get('q', '') }}">
+                        {# Bỏ nút "Tìm kiếm" text ở đây nếu ảnh không có #}
+                        {# <button class="btn search-button-custom-red" type="submit">Tìm kiếm</button> #}
                     </div>
                 </form>
                 <div class="dropdown-menu search-results-dropdown-custom-red" id="searchResultsDropdownCustomRed"></div>
             </div>
 
-            {# CÁC LINK ĐIỀU HƯỚNG #}
-            <ul class="navbar-nav main-header-nav-items-custom-red">
+            {# CÁC LINK ĐIỀU HƯỚNG VÀ USER AVATAR - Đẩy sang phải #}
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center main-header-nav-items-custom-red">
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
+                        {# Đổi tên link "FIT Researches" thành "Dashboard" hoặc route tương ứng #}
                         <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
                            href="{{ url_for('showcase') }}">Featured Works</a>
                     </li>
+
+                    {# Các link này sẽ hiển thị tùy theo vai trò người dùng (student/lecturer) #}
+                    {# Sinh viên sẽ thấy "Registered Topics" và "My Ideas" #}
                     {% if current_user.role == 'student' %}
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'my_applications' %}active{% endif %}"
@@ -63,6 +72,7 @@
                                href="{{ url_for('my_ideas') }}">My Ideas</a>
                         </li>
                     {% elif current_user.role == 'lecturer' %}
+                        {# Giảng viên có thể có các link khác, ví dụ: #}
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'my_posts' %}active{% endif %}" href="{{ url_for('my_posts') }}">My Posts</a>
                         </li>
@@ -70,12 +80,8 @@
                             <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}" href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
                         </li>
                     {% endif %}
-                {% endif %}
-            </ul>
 
-            {# USER AVATAR VÀ THÔNG BÁO - Đẩy sang phải cùng #}
-            <ul class="navbar-nav ms-auto align-items-center user-actions-section">
-                 {% if current_user.is_authenticated %}
+                    {# Thông báo và User Avatar #}
                     <li class="nav-item position-relative me-2">
                         <a class="nav-link d-flex align-items-center" href="{{ url_for('notifications') }}"
                            title="Notifications">
@@ -90,6 +96,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
                            id="navbarDropdownUserLinkCustomRed" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {# Logic lấy avatar giữ nguyên #}
                             {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
                             {% set image_folder = 'user_pics' %}
                             {% if image_filename.startswith('default') %}
@@ -104,7 +111,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end main-header-dropdown-custom-red" aria-labelledby="navbarDropdownUserLinkCustomRed">
                             <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li> {# Bạn có thể thêm route cho Settings sau #}
+                            {# Các mục dropdown khác giữ nguyên hoặc tùy chỉnh #}
                             {% if current_user.is_authenticated and current_user.role == 'admin' %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a></li>
@@ -118,7 +125,7 @@
                         </ul>
                     </li>
                 {% else %}
-                    {# Các mục cho người dùng chưa đăng nhập nếu cần #}
+                    {# Các mục cho người dùng chưa đăng nhập (nếu có) #}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                     </li>
@@ -130,51 +137,35 @@
         </div>
     </div>
 </nav>
+<main class="container mt-5 mb-5">
 
-{# Main content block - Đặt bên ngoài nav, bên trong body #}
-<main role="main" class="container mt-4 mb-5 app-main-content"> {# Thêm class và điều chỉnh margin #}
-    {# Flash messages hiển thị ở đây nếu muốn, hoặc bạn có thể dùng Toast JS như đã có #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                {% if category != 'auth' %} {# Chỉ hiển thị các flash không phải 'auth' ở đây, vì 'auth' dùng Toast #}
-                    <div class="alert alert-{{ category if category else 'info' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
+    {# Content Block giữ nguyên #}
     {% block content %}{% endblock %}
 </main>
 
-<footer class="bg-dark text-light text-center py-3 mt-auto custom-footer">
-    <div class="container">
-        <p class="mb-0 small">&copy; {{ "now"|date("Y") }} Faculty of Information Technology - Hanoi University</p>
-    </div>
-</footer>
-
-{# Toast Container - Đặt ở cuối body để không bị che khuất #}
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-    {# Toasts sẽ được JavaScript chèn vào đây #}
-</div>
-
-{# Scripts #}
+{# Scripts giữ nguyên #}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
-<script src="https://unpkg.com/@yaireo/tagify/dist/tagify.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/plugins/piexif.min.js" type="text/javascript"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/plugins/sortable.min.js" type="text/javascript"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/plugins/piexif.min.js"
+        type="text/javascript"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/plugins/sortable.min.js"
+        type="text/javascript"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/fileinput.min.js"></script>
-{# <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/locales/vi.js"></script> #} {# Bỏ tiếng Việt cho fileinput nếu không cần #}
 
-{# Script cho jsAll.js và các script tùy chỉnh khác #}
-<script src="{{ url_for('static', filename='js/jsAll.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/js/locales/vi.js"></script>
 
-{# --- Script cho Flash Messages dạng Toast (auth category) --- #}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
+
+
+{% block scripts %}{% endblock %}
+{# === THÊM ĐOẠN CODE HIỂN THỊ FLASH MESSAGES === #}
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         <script>
@@ -182,30 +173,31 @@
                 const toastContainer = document.querySelector('.toast-container');
                 if (toastContainer) {
                     {% for category, message in messages %}
-                        // console.log("Base Flash Message:", {{ category | tojson | safe }}, {{ message | tojson | safe }});
+                        console.log("Flash Message:", {{ category | tojson | safe }}, {{ message | tojson | safe }});
+
                         {% if category == 'auth' %}
-                        {
-                            const toastId = 'flash-toast-base-{{ loop.index }}';
-                            let bgClass = 'text-bg-info'; // Default
+                        { // <<< THÊM KHỐI MỞ ĐỂ TẠO SCOPE MỚI
+                            const toastId = 'flash-toast-auth-{{ loop.index }}'; // toastId giờ đây an toàn trong scope này
+                            let bgClass = 'text-bg-info';
+
                             const lowerMessage = {{ message | tojson | safe }}.toLowerCase();
 
                             if (lowerMessage.includes('thất bại') || lowerMessage.includes('không đúng') || lowerMessage.includes('failed') || lowerMessage.includes('incorrect')) {
                                 bgClass = 'text-bg-danger';
-                            } else if (lowerMessage.includes('thành công') || lowerMessage.includes('success') || lowerMessage.includes('đã đăng xuất') || lowerMessage.includes('logged out')) {
+                            } else if (lowerMessage.includes('thành công') || lowerMessage.includes('success')) {
                                 bgClass = 'text-bg-success';
-                            } else if (category == 'info') {
-                                bgClass = 'text-bg-info';
-                            } else if (category == 'warning') {
-                                 bgClass = 'text-bg-warning text-dark'; // Thêm text-dark cho warning
                             }
 
                             const toastHTML = `
-                            <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="7000">
+                            <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
                               <div class="d-flex">
-                                <div class="toast-body">${ {{ message|tojson|safe }} }</div>
+                                <div class="toast-body">
+                                  {{ message | safe }}
+                                </div>
                                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                               </div>
                             </div>`;
+
                             toastContainer.insertAdjacentHTML('beforeend', toastHTML);
                             const toastElement = document.getElementById(toastId);
                             if (toastElement) {
@@ -215,35 +207,39 @@
                                     toastElement.remove();
                                 });
                             }
-                        }
+                        } // <<< THÊM KHỐI ĐÓNG
                         {% endif %}
                     {% endfor %}
                 } else {
-                    console.warn('Toast container (.toast-container) not found in base.html for flash messages.');
+                    console.warn('Toast container (.toast-container) not found.');
                 }
             });
         </script>
     {% endif %}
 {% endwith %}
-{# --- Kết thúc Script Flash Messages --- #}
 
-{# --- Script cho Search Suggestions (AJAX) --- #}
+
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('navbarSearchInputCustomRed');
-    const resultsDropdown = document.getElementById('searchResultsDropdownCustomRed');
-    let searchTimeout;
+    const searchInput = document.getElementById('navbarSearchInput');
+    const resultsDropdown = document.getElementById('searchResultsDropdown');
+    let searchTimeout; // Biến để quản lý debounce
 
     if (searchInput && resultsDropdown) {
         searchInput.addEventListener('input', function (event) {
             const query = event.target.value.trim();
+
+            // Hủy bỏ timeout cũ nếu người dùng gõ tiếp
             clearTimeout(searchTimeout);
 
-            if (query.length >= 2) { // Bắt đầu tìm khi có ít nhất 2 ký tự
+            if (query.length >= 1) { // Chỉ tìm khi đủ dài
+                // Đặt timeout mới - chỉ gửi yêu cầu sau khi người dùng ngừng gõ 300ms
                 searchTimeout = setTimeout(() => {
+                    // Gọi API để lấy gợi ý
                     fetch(`/api/search-suggestions?q=${encodeURIComponent(query)}`)
                         .then(response => {
-                            if (!response.ok) { throw new Error('Network response was not ok'); }
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
                             return response.json();
                         })
                         .then(data => {
@@ -252,124 +248,257 @@ document.addEventListener('DOMContentLoaded', function () {
                                 data.forEach(item => {
                                     const link = document.createElement('a');
                                     link.classList.add('dropdown-item');
-                                    link.href = item.url;
-                                    // Hiển thị Title - Author. Bạn có thể tùy chỉnh format này
-                                    let displayText = item.title;
-                                    if (item.author) {
-                                        displayText += ` <small class="text-muted">by ${item.author}</small>`;
-                                    }
-                                    link.innerHTML = displayText; // Dùng innerHTML để render <small>
+                                    link.href = item.url; // URL từ API
+                                    link.textContent = `${item.title} - ${item.author}`; // Format Title - Author
                                     resultsDropdown.appendChild(link);
                                 });
-                                resultsDropdown.style.display = 'block';
+                                resultsDropdown.style.display = 'block'; // Hiển thị dropdown
                             } else {
-                                resultsDropdown.innerHTML = '<span class="dropdown-item text-muted">No suggestions found.</span>';
+                                // Hiển thị thông báo không tìm thấy hoặc ẩn dropdown
+                                const noResult = document.createElement('span');
+                                noResult.classList.add('dropdown-item', 'text-muted');
+                                noResult.textContent = 'Không tìm thấy kết quả nào';
+                                resultsDropdown.appendChild(noResult);
                                 resultsDropdown.style.display = 'block';
+                                // Hoặc resultsDropdown.style.display = 'none';
                             }
                         })
                         .catch(error => {
                             console.error('Error fetching search suggestions:', error);
-                            resultsDropdown.innerHTML = '<span class="dropdown-item text-danger">Error fetching suggestions.</span>';
+                            resultsDropdown.innerHTML = '<span class="dropdown-item text-danger">Lỗi khi tìm kiếm</span>';
                             resultsDropdown.style.display = 'block';
                         });
-                }, 300); // 300ms debounce
+                }, 300); // Thời gian chờ (ms) trước khi gửi yêu cầu
             } else {
-                resultsDropdown.style.display = 'none';
-                resultsDropdown.innerHTML = '';
+                resultsDropdown.innerHTML = ''; // Xóa kết quả nếu query quá ngắn
+                resultsDropdown.style.display = 'none'; // Ẩn dropdown
             }
         });
 
-        // Ẩn dropdown khi click ra ngoài
+        // Ẩn dropdown khi click ra ngoài hoặc chọn một mục
         document.addEventListener('click', function (event) {
-            if (resultsDropdown.style.display === 'block' && !searchInput.contains(event.target) && !resultsDropdown.contains(event.target)) {
+            if (!searchInput.contains(event.target) && !resultsDropdown.contains(event.target)) {
                 resultsDropdown.style.display = 'none';
             }
         });
-         // Ẩn dropdown khi input mất focus, nhưng có độ trễ để cho phép click vào link
-        searchInput.addEventListener('blur', function() {
+
+        // (Tùy chọn) Ẩn dropdown khi input trống hoặc mất focus
+        searchInput.addEventListener('blur', function () {
+            // Thêm độ trễ nhỏ để cho phép click vào link trong dropdown trước khi nó ẩn đi
             setTimeout(() => {
-                if (!resultsDropdown.contains(document.activeElement)) { // Kiểm tra xem focus có chuyển vào dropdown không
+                if (!resultsDropdown.contains(document.activeElement)) {
                     resultsDropdown.style.display = 'none';
                 }
             }, 150);
         });
-        // Hiển thị lại khi focus nếu có nội dung
-        searchInput.addEventListener('focus', function() {
-            if (searchInput.value.length >= 2 && resultsDropdown.children.length > 0) {
-                 resultsDropdown.style.display = 'block';
+        searchInput.addEventListener('focus', function () {
+            // Hiển thị lại nếu có kết quả khi focus (tùy chọn)
+            if (resultsDropdown.children.length > 0 && searchInput.value.length >= 2) {
+                resultsDropdown.style.display = 'block';
             }
         });
+
+
+    } else {
+        if (!searchInput) console.error("Không tìm thấy #navbarSearchInput");
+        if (!resultsDropdown) console.error("Không tìm thấy #searchResultsDropdown");
     }
-});
 </script>
-{# --- Kết thúc Script Search Suggestions --- #}
-
-{# --- Script cho nút Like (PostLike) --- #}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.body.addEventListener('click', function (event) {
-        const likeButton = event.target.closest('.post-like-toggle-btn');
-        if (likeButton) {
-            event.preventDefault();
-            if (likeButton.disabled) return;
 
-            const url = likeButton.dataset.url;
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    // Đặt trong base.html, block scripts, hoặc file JS riêng
 
-            if (!csrfToken && "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true') {
-                console.error('CSRF Token not found for Post Like!');
-                // showBootstrapToast('Security error. Please refresh.', 'danger'); // Sử dụng hàm toast nếu có
-                alert('Security error. Please refresh.');
-                return;
-            }
+    document.addEventListener('DOMContentLoaded', function () {
 
-            likeButton.disabled = true;
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    const likeIcon = likeButton.querySelector('i');
-                    const likeCountSpan = likeButton.querySelector('.like-count');
-                    if (likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`;
+        // Lắng nghe sự kiện click trên toàn bộ document,
+        // nhưng chỉ xử lý nếu phần tử được click có class 'interest-toggle-btn'
+        document.body.addEventListener('click', function (event) {
+            const button = event.target.closest('.interest-toggle-btn'); // Tìm nút gần nhất được click
 
-                    if (data.liked) {
-                        likeButton.classList.remove('btn-outline-danger');
-                        likeButton.classList.add('btn-danger');
-                        if (likeIcon) { likeIcon.classList.remove('bi-heart'); likeIcon.classList.add('bi-heart-fill'); }
-                        likeButton.title = 'Unlike';
-                    } else {
-                        likeButton.classList.remove('btn-danger');
-                        likeButton.classList.add('btn-outline-danger');
-                        if (likeIcon) { likeIcon.classList.remove('bi-heart-fill'); likeIcon.classList.add('bi-heart'); }
-                        likeButton.title = 'Like';
-                    }
-                } else {
-                    // showBootstrapToast(data.message || 'Error liking post.', 'warning');
-                    alert(data.message || 'Error liking post.');
+            if (button) {
+                event.preventDefault(); // Ngăn hành vi mặc định nếu là link/submit
+
+                // Lấy thông tin từ data attributes của nút
+                const postId = button.dataset.postId;
+                const currentAction = button.dataset.currentAction;
+                const addUrl = button.dataset.addUrl;
+                const removeUrl = button.dataset.removeUrl;
+
+                // Xác định URL cần gọi dựa trên hành động hiện tại
+                const targetUrl = (currentAction === 'add') ? addUrl : removeUrl;
+
+                // Tìm CSRF token gần nhất (từ input ẩn chúng ta đã thêm)
+                const csrfInput = button.closest('.interest-button-container')?.querySelector('input[name="csrf_token"]');
+                const csrfToken = csrfInput ? csrfInput.value : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'); // Fallback lấy từ meta tag
+
+                const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+                if (isCsrfEnabled && !csrfToken) {
+                    console.error('Interest Button: CSRF Token not found!');
+                    alert('Lỗi bảo mật, không thể thực hiện. Vui lòng tải lại trang (F5).');
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Post Like Fetch error:', error);
-                // showBootstrapToast('Connection error or server issue.', 'danger');
-                alert('Connection error or server issue.');
-            })
-            .finally(() => {
-                if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true') {
-                    likeButton.disabled = false;
-                }
-            });
-        }
-    });
-});
+
+                // Gửi yêu cầu POST bằng Fetch API
+                fetch(targetUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // Hoặc để trống nếu backend không cần JSON body
+                        'X-CSRFToken': csrfToken // Gửi token qua header
+                    },
+                    body: JSON.stringify({}) // Body rỗng cho POST toggle
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errData => {
+                                throw new Error(errData.message || `HTTP error ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // --- Cập nhật giao diện nút ---
+                            const icon = button.querySelector('i');
+                            const textSpan = button.querySelector('.button-text');
+
+                            if (data.interested) { // Nếu kết quả là ĐÃ QUAN TÂM
+                                button.classList.remove('btn-success');
+                                button.classList.add('btn-outline-danger');
+                                icon.classList.remove('bi-heart-fill');
+                                icon.classList.add('bi-heartbreak-fill');
+                                textSpan.textContent = 'Bỏ quan tâm';
+                                button.title = 'Bỏ quan tâm';
+                                button.dataset.currentAction = 'remove'; // Đổi hành động cho lần click sau
+                            } else { // Nếu kết quả là ĐÃ BỎ QUAN TÂM
+                                button.classList.remove('btn-outline-danger');
+                                button.classList.add('btn-success');
+                                icon.classList.remove('bi-heartbreak-fill');
+                                icon.classList.add('bi-heart-fill');
+                                textSpan.textContent = 'Quan tâm';
+                                button.title = 'Đăng ký quan tâm';
+                                button.dataset.currentAction = 'add'; // Đổi hành động cho lần click sau
+                            }
+                            // (Tùy chọn) Cập nhật số lượt quan tâm nếu có hiển thị
+                            // Ví dụ: const countSpan = button.closest('.card-body').querySelector('.interest-count');
+                            // if (countSpan && data.interest_count !== undefined) { countSpan.textContent = data.interest_count; }
+
+                        } else {
+                            console.error('Error from backend:', data.message);
+                            alert(data.message || 'Đã có lỗi xảy ra.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        alert('Lỗi kết nối hoặc xử lý dữ liệu, vui lòng thử lại.');
+                    });
+            } // end if(button)
+        }); // end event listener
+
+    }); // end DOMContentLoaded
 </script>
-{# --- Kết thúc Script nút Like --- #}
 
 
-{% block scripts %}{% endblock %} {# Block scripts cho các trang con #}
+{# Đặt trong base.html, {% block scripts %} #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
 
+        // --- Xử lý nút Post Like ---
+        document.body.addEventListener('click', function (event) {
+            const likeButton = event.target.closest('.post-like-toggle-btn'); // Tìm nút like được click
+
+            if (likeButton) {
+                event.preventDefault();
+                if (likeButton.disabled) return;
+
+                const postId = likeButton.dataset.postId;
+                const url = likeButton.dataset.url;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || likeButton.closest('.post-like-button-container')?.querySelector('input[name="csrf_token"]')?.value;
+                const isCsrfEnabled = "{{ config.get('WTF_CSRF_ENABLED', True) }}".toLowerCase() === 'true';
+
+                if (isCsrfEnabled && !csrfToken) {
+                    console.error('Post Like: CSRF Token not found!');
+                    alert('Lỗi bảo mật, không thể thực hiện.');
+                    return;
+                }
+
+                likeButton.disabled = true; // Vô hiệu hóa tạm thời
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+                    body: JSON.stringify({})
+                })
+                    .then(response => { /* Xử lý response tốt hơn */
+                        if (!response.ok) {
+                            return response.json().catch(() => {
+                                throw new Error(`HTTP error ${response.status}`);
+                            })
+                                .then(errData => {
+                                    throw new Error(errData.message || `HTTP error ${response.status}`);
+                                });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const likeIcon = likeButton.querySelector('i');
+                            const likeCountSpan = likeButton.querySelector('.like-count');
+                            if (likeCountSpan) likeCountSpan.textContent = `(${data.like_count})`; // Cập nhật count
+
+                            if (data.liked) { // Cập nhật UI khi đã like
+                                likeButton.classList.remove('btn-outline-danger');
+                                likeButton.classList.add('btn-danger');
+                                if (likeIcon) {
+                                    likeIcon.classList.remove('bi-heart');
+                                    likeIcon.classList.add('bi-heart-fill');
+                                }
+                                likeButton.title = 'Bỏ thích';
+                            } else { // Cập nhật UI khi đã bỏ like
+                                likeButton.classList.remove('btn-danger');
+                                likeButton.classList.add('btn-outline-danger');
+                                if (likeIcon) {
+                                    likeIcon.classList.remove('bi-heart-fill');
+                                    likeIcon.classList.add('bi-heart');
+                                }
+                                likeButton.title = 'Thích';
+                            }
+                        } else {
+                            alert(data.message || 'Có lỗi.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Post Like Fetch error:', error);
+                        alert(error.message || 'Lỗi kết nối.');
+                    })
+                    .finally(() => {
+                        if ("{{ current_user and current_user.is_authenticated }}".toLowerCase() === 'true') {
+                            likeButton.disabled = false;
+                        } // Kích hoạt lại nút
+                    });
+            }
+        }); // Kết thúc listener nút like
+
+        // --- Các listener khác (vd: Showcase Like, Apply Modal confirm) cũng có thể đặt ở đây ---
+
+    });
+</script>
+<script src="/static/js/jsAll.js" defer></script>
+
+
+<footer class="bg-dark text-light text-center py-3 mt-auto custom-footer">
+    {# mt-auto giúp đẩy footer xuống dưới cùng nếu trang ngắn #}
+    <div class="container">
+        {# Thay 2025 bằng năm hiện tại nếu muốn hoặc giữ nguyên #}
+        <p class="mb-0 small">&copy; 2025 Faculty of Information Technology - Hanoi University</p>
+        {# Thêm các link khác nếu muốn #}
+        {# <p class="mb-0 small"><a href="#" class="text-light">Liên hệ</a> | <a href="#" class="text-light">Giới thiệu</a></p> #}
+    </div>
+</footer>
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <script src="https://unpkg.com/@yaireo/tagify/dist/tagify.min.js"></script>
+
+</div>
+<script src="{{ url_for('static', filename='js/jsAll.js') }}"></script>
 </body>
+
 </html>
