@@ -66,9 +66,15 @@ body {
 }
 
 
+/* Trong static/css/style.css */
+
 .custom-footer {
-    background-color: #2E86AB !important; /* Giống màu navbar */
-    color: rgba(255, 255, 255, 0.9) !important; /* Màu chữ tương tự navbar, hoặc dùng text-light của Bootstrap nếu bạn thấy phù hợp */
+    background-color: #990000 !important; /* Đổi sang màu đỏ giống header */
+    color: rgba(255, 255, 255, 0.9) !important; /* Giữ màu chữ trắng hoặc điều chỉnh nếu cần */
+    /* Các thuộc tính khác của footer nếu có */
+    /* padding-top: 1rem; */ /* Ví dụ */
+    /* padding-bottom: 1rem; */ /* Ví dụ */
+    /* text-align: center; */ /* Đã có trong base.html */
 }
 
 
@@ -831,164 +837,268 @@ body.page-login-centered-v1 {
     font-size: 0.9rem;
     text-align: left; /* Chữ căn trái */
 }
-/* --- Giao diện Trang "Gửi Ý tưởng Nghiên Cứu Mới" (V5 Style - Giống image_5e384a.png) --- */
+/* static/css/style.css */
 
-body.page-submit-idea-v5-style {
-    background-color: #f8f9fa; /* Nền xám rất nhạt cho không gian ngoài form */
+/* Giao diện trang Gửi Ý Tưởng Mới */
+.submit-idea-card {
+    background-color: #F8E0E0; /* Màu hồng nhạt cho nền card - điều chỉnh mã màu cho phù hợp */
+    border: none; /* Bỏ viền mặc định của card nếu muốn */
 }
 
-.submit-idea-container-v5-style {
-    padding-bottom: 3rem;
+.submit-idea-card .card-header {
+    background-color: transparent; /* Nền header trong suốt để lấy màu của card */
+    border-bottom: 1px solid rgba(0,0,0,.08); /* Viền mờ dưới header */
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
 }
 
-/* Khung nền hồng nhạt bao quanh form */
-.submit-idea-form-wrapper-v5-style {
-    background-color: #f8d7da; /* Màu nền hồng nhạt */
-    border-radius: 0.75rem;
-    padding: 2rem 2.5rem;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
-}
-
-.submit-idea-title-v5-style {
-    color: #212529;
+.submit-idea-card .card-header h2 {
+    color: #333; /* Màu chữ tiêu đề */
+    font-size: 1.75rem; /* Cỡ chữ tiêu đề */
     font-weight: 600;
-    font-size: 1.7rem;
 }
 
-.submit-idea-label-v5-style {
-    font-size: 0.8rem;
+.submit-idea-card .card-body {
+    padding: 2rem; /* Tăng padding cho card body */
+}
+
+.submit-idea-card .form-label {
+    color: #454545; /* Màu chữ cho nhãn */
+    font-size: 0.875rem; /* Cỡ chữ nhãn */
+    margin-bottom: 0.3rem;
     font-weight: 500;
-    color: #212529;
-    margin-bottom: 0.25rem;
 }
 
-/* Input, Select, Trix, Krajee file input - NỀN TRẮNG */
-.submit-idea-input-v5-style, /* Class chung cho text input, select */
-.submit-idea-trix-wrapper-v5-style .trix-content, /* Phần nội dung của Trix */
-.submit-idea-trix-wrapper-v5-style .trix-toolbar, /* Thanh công cụ Trix */
-#ideaAttachmentInputV5Style+.file-input .file-caption-main .file-caption-name, /* Ô hiển thị tên file Krajee */
-#ideaAttachmentInputV5Style+.file-input .file-drop-zone /* Vùng kéo thả Krajee */
-{
-    background-color: #ffffff !important;
-    border: 1px solid #ced4da !important;
-    color: #212529 !important;
-    border-radius: 0.25rem;
+/* Đảm bảo các input và select có nền trắng */
+.submit-idea-card .form-control,
+.submit-idea-card .form-select,
+.submit-idea-card .trix-content.trix-editor-custom { /* Target Trix editor */
+    background-color: #FFFFFF !important; /* Nền trắng */
+    border: 1px solid #ced4da; /* Viền mặc định của Bootstrap */
+}
+
+/* Style cho trường Bootstrap FileInput */
+.submit-idea-card .idea-attachment-field .file-drop-zone {
+    background-color: #FFFFFF !important;
+    border: 1px dashed #AEAEAE !important; /* Viền đứt nét xám nhạt */
+}
+
+.submit-idea-card .idea-attachment-field .file-drop-zone .file-drop-zone-title {
+    color: #888888 !important; /* Màu chữ "Drag & drop files here..." xám nhạt */
     font-size: 0.9rem;
-    padding-top: 0.45rem;
-    padding-bottom: 0.45rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    box-shadow: none !important;
-}
-.submit-idea-input-v5-style::placeholder {
-    color: #6c757d;
 }
 
-/* Focus state cho các input */
-.submit-idea-input-v5-style:focus,
-.submit-idea-trix-wrapper-v5-style:focus-within, /* Khi focus vào bên trong Trix wrapper */
-#ideaAttachmentInputV5Style+.file-input .file-caption-name:focus {
-    border-color: #86b7fe !important;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+/*
+ * TÙY CHỈNH NÚT BROWSE CỦA BOOTSTRAP FILEINPUT
+ * Các selector dưới đây là những selector phổ biến.
+ * BẠN CẦN KIỂM TRA (INSPECT) TRÊN TRANG CỦA MÌNH ĐỂ CÓ SELECTOR CHÍNH XÁC NHẤT.
+ * Hãy thử từng selector hoặc kết hợp chúng nếu cần.
+ */
+
+/* Cách 1: Nhắm vào class chung của nút browse nếu thư viện sử dụng */
+.fileinput-browse-button, /* Class này rất phổ biến */
+.btn-file { /* Class này cũng hay được dùng bởi Bootstrap FileInput */
+    background-color: #990000 !important; /* MÀU ĐỎ ĐẬM */
+    border-color: #800000 !important;   /* Màu viền đỏ đậm hơn */
+    color: #FFFFFF !important;          /* Chữ màu trắng */
 }
 
-/* Trix editor specific */
-.submit-idea-trix-wrapper-v5-style { /* Div bao ngoài của Trix */
-    border: 1px solid #ced4da !important; /* Viền này sẽ bị ghi đè bởi style input chung nếu trùng */
-    border-radius: 0.25rem;
-    min-height: 150px;
-    background-color: #fff; /* Đảm bảo div bao ngoài cũng có nền trắng */
-    padding: 0; /* Reset padding của wrapper này */
+.fileinput-browse-button:hover,
+.btn-file:hover {
+    background-color: #7A0000 !important; /* Màu đỏ đậm hơn khi hover */
+    border-color: #600000 !important;
+    color: #FFFFFF !important;
 }
-.submit-idea-trix-wrapper-v5-style .trix-toolbar {
-    border-bottom: 1px solid #dee2e6 !important; /* Viền dưới toolbar */
-    border-top-left-radius: 0.25rem; /* Bo góc cho toolbar */
-    border-top-right-radius: 0.25rem;
-    /* Nền trắng đã được đặt ở quy tắc chung */
+
+/* Cách 2: Nếu nút browse cụ thể có class .btn-primary trong ngữ cảnh FileInput */
+/* và bạn muốn ghi đè nó chỉ ở đây */
+.file-input-new .btn.btn-primary, /* Khi chưa có file nào được chọn */
+.file-input-ajax-new .btn.btn-primary, /* Cho trường hợp AJAX */
+.file-caption-main .btn.btn-primary, /* Đôi khi nút nằm trong caption */
+.kv-fileinput-theme .fileinput-browse-button.btn-primary { /* Cho các theme của Krajee */
+    background-color: #990000 !important;
+    border-color: #800000 !important;
+    color: #FFFFFF !important;
 }
-.submit-idea-trix-wrapper-v5-style .trix-toolbar .trix-button {
-    background-color: transparent !important;
-    color: #212529 !important;
-}
-.submit-idea-trix-wrapper-v5-style .trix-toolbar .trix-button--active {
-    background-color: #e9ecef !important;
-}
-.submit-idea-trix-wrapper-v5-style .trix-content {
-    min-height: 120px; /* Điều chỉnh chiều cao vùng nhập liệu */
-    border: none !important; /* Bỏ viền riêng của trix-content */
-    padding: 0.45rem 0.75rem; /* Padding giống input thường */
-    /* Nền trắng và màu chữ đã được đặt ở quy tắc chung */
+
+.file-input-new .btn.btn-primary:hover,
+.file-input-ajax-new .btn.btn-primary:hover,
+.file-caption-main .btn.btn-primary:hover,
+.kv-fileinput-theme .fileinput-browse-button.btn-primary:hover {
+    background-color: #7A0000 !important;
+    border-color: #600000 !important;
+    color: #FFFFFF !important;
 }
 
 
-/* Krajee File Input specific */
-/* Vùng kéo thả file */
-#ideaAttachmentInputV5Style+.file-input .submit-idea-dropzone-style-final, /* Nếu bạn dùng class tùy chỉnh dropZoneCssClass */
-#ideaAttachmentInputV5Style+.file-input .file-drop-zone /* Hoặc nhắm mục tiêu mặc định */
-{
-    border: 2px dashed #ced4da !important;
-    /* Nền trắng đã được đặt ở quy tắc chung */
-    border-radius: 0.25rem;
-    padding: 1.5rem 1rem;
+/* (QUAN TRỌNG) Nếu bạn đã thêm class tùy chỉnh cho form (ví dụ: .submit-idea-card)
+   và class cho trường input file (ví dụ: .idea-attachment-field),
+   bạn có thể làm cho selector cụ thể hơn nữa: */
+
+.submit-idea-card .idea-attachment-field .fileinput-browse-button,
+.submit-idea-card .idea-attachment-field .btn-file {
+    background-color: #990000 !important;
+    border-color: #800000 !important;
+    color: #FFFFFF !important;
 }
-#ideaAttachmentInputV5Style+.file-input .file-drop-zone-title {
-    color: #495057 !important;
-    font-size: 0.9rem !important;
+
+.submit-idea-card .idea-attachment-field .fileinput-browse-button:hover,
+.submit-idea-card .idea-attachment-field .btn-file:hover {
+    background-color: #7A0000 !important;
+    border-color: #600000 !important;
+    color: #FFFFFF !important;
 }
-/* Input hiển thị tên file đã chọn ("Select files...") */
-#ideaAttachmentInputV5Style+.file-input .file-caption-main .file-caption-name {
-    border-right: none !important;
+
+/* Tương tự cho form create_post nếu nó có class riêng */
+/* Ví dụ: .create-post-form .file-upload-field .fileinput-browse-button, */
+/* .create-post-form .file-upload-field .btn-file { ... } */
+
+
+/* Tùy chỉnh màu của icon thư mục bên trong nút Browse (nếu có và cần thiết) */
+.fileinput-browse-button .bi, /* Nếu dùng Bootstrap Icons */
+.btn-file .bi,
+.fileinput-browse-button .fas, /* Nếu dùng Font Awesome Solid */
+.btn-file .fas,
+.fileinput-browse-button .glyphicon, /* Nếu dùng Glyphicons (Bootstrap cũ) */
+.btn-file .glyphicon {
+    color: #FFFFFF !important; /* Đổi màu icon thành trắng */
+    /* Hoặc một màu khác nếu muốn */
 }
-/* Nút "Browse..." - MÀU ĐỎ */
-#ideaAttachmentInputV5Style+.file-input .btn.submit-idea-krajee-browse-btn-v5-style {
+/* Nút Submit Idea */
+.btn-submit-idea { /* Hoặc target trực tiếp .submit-idea-card .btn-danger */
     background-color: #990000 !important; /* Màu đỏ đậm */
-    border: 1px solid #990000 !important; /* Viền đỏ đậm */
-    color: #ffffff !important; /* Chữ trắng */
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-    border-top-right-radius: 0.25rem; /* Bo góc phải cho khớp */
-    border-bottom-right-radius: 0.25rem; /* Bo góc phải */
-    padding: 0.45rem 0.75rem;
-    font-size: 0.9rem;
-}
-#ideaAttachmentInputV5Style+.file-input .btn.submit-idea-krajee-browse-btn-v5-style:hover {
-    background-color: #aF1e2d !important;
-    border-color: #aF1e2d !important;
-}
-/* Ẩn các nút không cần thiết của Krajee */
-#ideaAttachmentInputV5Style+.file-input .fileinput-upload-button,
-#ideaAttachmentInputV5Style+.file-input .fileinput-remove-button {
-    display: none !important;
-}
-
-
-.submit-idea-form-text-v5-style {
-    font-size: 0.75rem;
-    color: #58151c;
-}
-
-.submit-idea-submit-btn-v5-style {
-    background-color: #a41e22;
-    border-color: #a41e22;
-    color: #fff;
-    font-weight: 500;
-    padding: 0.6rem 0;
+    border-color: #800000 !important;
+    color: #FFFFFF !important;
+    padding: 0.75rem 1.25rem;
     font-size: 1rem;
-    border-radius: 0.3rem;
+    font-weight: 500;
 }
-.submit-idea-submit-btn-v5-style:hover {
-    background-color: #8c181c;
-    border-color: #8c181c;
+.btn-submit-idea:hover {
+    background-color: #7A0000 !important;
+    border-color: #600000 !important;
+}
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+/*
+ * TÙY CHỈNH KHU VỰC KÉO THẢ FILE (DROP ZONE) CỦA BOOTSTRAP FILEINPUT
+ */
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+/*
+ * TÙY CHỈNH CONTAINER CHÍNH CỦA BOOTSTRAP FILEINPUT
+ * Làm cho toàn bộ khung của widget tải tệp có nền trắng.
+ */
+
+/* Selector chung cho container của widget FileInput */
+/* Bạn CẦN KIỂM TRA (INSPECT) để tìm class chính xác nhất */
+.file-input, /* Thử selector này trước */
+.file-input-new,
+.file-input-ajax-new,
+.kv-krajee-bs5 { /* Class này thường xuất hiện với theme bs5 của Krajee */
+    background-color: #FFFFFF !important; /* MÀU NỀN TRẮNG */
+    padding: 10px !important; /* Thêm chút padding nếu muốn nội dung bên trong không quá sát viền trắng */
+    border: 1px solid #DDDDDD !important; /* Viền xám nhạt cho toàn bộ widget */
+    border-radius: 0.25rem !important; /* Bo góc nhẹ cho widget */
 }
 
-.submit-idea-back-link-v5-style,
-.submit-idea-back-link-v5-style:hover {
-    color: #58151c;
-    font-size: 0.9rem;
+
+/* Nếu bạn đã sử dụng class '.submit-idea-card .idea-attachment-field'
+   cho thẻ input gốc, và thư viện FileInput KHÔNG tạo ra một div bao bọc
+   riêng biệt có class dễ nhận biết, bạn có thể phải style dựa trên cấu trúc
+   mà FileInput sinh ra.
+   Tuy nhiên, thường thì sẽ có một container chính. */
+
+/* Đảm bảo các phần tử con bên trong không ghi đè nền trắng này nếu không cần thiết */
+.file-input .file-preview, /* Khu vực preview ảnh */
+.file-input .file-caption-main { /* Khu vực chứa tên file và nút browse */
+    /* background-color: transparent !important; */ /* Nếu bạn muốn chúng lấy nền của .file-input */
+    /* Hoặc giữ nền trắng cho chúng như đã làm ở các bước trước */
+}
+
+/* Nhắc lại: Drop zone đã được style nền trắng ở bước trước */
+.submit-idea-card .idea-attachment-field .file-drop-zone {
+    background-color: #FFFFFF !important;
+    border: 1px dashed #AEAEAE !important;
+}
+
+.submit-idea-card .idea-attachment-field .file-drop-zone .file-drop-zone-title {
+    color: #888888 !important;
+}
+
+/* Nút Browse cũng đã được style màu đỏ */
+.submit-idea-card .idea-attachment-field .fileinput-browse-button,
+.submit-idea-card .idea-attachment-field .btn-file {
+    background-color: #990000 !important;
+    border-color: #800000 !important;
+    color: #FFFFFF !important;
+}
+.submit-idea-card .idea-attachment-field .fileinput-browse-button:hover,
+.submit-idea-card .idea-attachment-field .btn-file:hover {
+    background-color: #7A0000 !important;
+    border-color: #600000 !important;
+}
+
+/* Trường "Select files..." (caption) */
+.submit-idea-card .idea-attachment-field .file-caption-name,
+.submit-idea-card .idea-attachment-field .file-caption .input-group-text,
+.submit-idea-card .idea-attachment-field .file-caption .form-control {
+    background-color: #FFFFFF !important; /* Đảm bảo phần này cũng trắng */
+    border-color: #ced4da !important; /* Hoặc màu viền bạn muốn */
+}
+
+
+/* Chữ placeholder bên trong drop zone */
+.file-drop-zone .file-drop-zone-title {
+    color: #6c757d !important; /* Màu xám cho chữ "Drag & drop files here..." */
+    font-size: 1rem !important;  /* Điều chỉnh kích thước chữ nếu cần */
+}
+
+/*
+ * (QUAN TRỌNG) Nếu bạn muốn áp dụng thay đổi này CỤ THỂ cho form "Gửi Ý Tưởng Mới",
+ * và bạn đã thêm class 'submit-idea-card' cho card và 'idea-attachment-field' cho input file,
+ * hãy sử dụng selector cụ thể hơn như sau:
+ */
+
+.submit-idea-card .idea-attachment-field .file-drop-zone .file-drop-zone-title {
+    color: #888888 !important; /* Màu chữ "Drag & drop files here..." xám nhạt */
+    font-size: 0.95rem; /* Điều chỉnh kích thước chữ */
+}
+
+/*
+ * Tương tự, nếu bạn có trường tải lên ở trang "Tạo Bài Đăng Mới" và muốn style khác,
+ * bạn cần tạo class riêng cho form hoặc trường đó và viết quy tắc CSS tương ứng.
+ */
+/* Link "Quay lại Danh sách Ý tưởng" */
+.submit-idea-card .link-secondary {
+    color: #333 !important; /* Màu chữ đen/xám */
     text-decoration: none;
 }
-.submit-idea-back-link-v5-style:hover {
+.submit-idea-card .link-secondary:hover {
+    color: #000 !important;
     text-decoration: underline;
+}
+
+/* Style cho Trix editor nếu cần thêm */
+.trix-editor-custom {
+    min-height: 150px; /* Điều chỉnh chiều cao tối thiểu của Trix editor */
+}
+.trix-toolbar .trix-button-group {
+    /* border-bottom-color: #d1d1d1; */
+}
+.trix-toolbar .trix-button {
+    /* background: #f0f0f0; */
 }
 /* --- Header/Navbar Styling (Custom Red - Giống image_6f0a00.png) --- */
 
@@ -1001,7 +1111,7 @@ body {
 }
 
 .main-header-custom-red {
-    background-color: #a41e22 !important; /* Màu nền đỏ sẫm */
+    background-color: #990000!important; /* Màu nền đỏ sẫm */
     padding-top: 0.2rem !important; /* Giữ padding dọc nhỏ nếu muốn */
     padding-bottom: 0.2rem !important;
     /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Bỏ bóng đổ nếu không muốn */
@@ -1136,4 +1246,458 @@ body {
 }
 .main-header-custom-red .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+/* static/css/style.css */
+
+/* ... Các style hiện có của bạn ... */
+
+/* Navbar tổng thể */
+/* Trong static/css/style.css */
+
+/* ... các style khác ... */
+
+.custom_navbar {
+    background-color: #990000 !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.navbar-brand {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    margin-right: 1rem; /* Giữ khoảng cách với mục tiếp theo (thanh tìm kiếm) */
+    /* margin-left: 0; */ /* Không cần margin-left ở đây nếu bạn đặt cho img */
+}
+
+#navbarLogo { /* Hoặc .navbar-brand img nếu bạn không dùng ID */
+    height: 35px;   /* Chiều cao logo bạn đã chọn */
+    width: auto;    /* Để chiều rộng tự điều chỉnh */
+    margin-left: 0; /* Đặt lại về 0 để nó nằm ở đầu của .navbar-brand */
+                    /* Nếu .navbar-brand đã có padding-left, logo sẽ cách lề một chút */
+    vertical-align: middle;
+}
+
+/* Thanh tìm kiếm và các mục khác giữ nguyên hoặc điều chỉnh theo nhu cầu */
+/* ... */
+
+
+/* Thanh tìm kiếm tùy chỉnh */
+.search-form-custom {
+    width: 35%; /* Đặt chiều rộng cố định hoặc % cho thanh tìm kiếm */
+    min-width: 200px; /* Chiều rộng tối thiểu */
+    max-width: 400px; /* Chiều rộng tối đa */
+}
+
+.search-input-container {
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #ced4da; /* Màu icon nhạt hơn */
+}
+
+.search-input-container .form-control {
+    padding-left: 34px;
+    border-radius: 0.25rem; /* Bo góc nhẹ */
+    font-size: 0.875rem; /* Cỡ chữ placeholder và input */
+    background-color: #fff; /* Nền trắng cho ô tìm kiếm */
+    border: 1px solid #ced4da; /* Viền cho ô tìm kiếm */
+    color: #212529;
+}
+.search-input-container .form-control::placeholder {
+    color: #6c757d;
+}
+.search-input-container .form-control:focus {
+    background-color: #fff;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+
+/* Các mục điều hướng (Nav Links) */
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important; /* Màu chữ trắng hơi mờ */
+    font-size: 0.9rem; /* Cỡ chữ nhỏ hơn một chút cho nav-link */
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-weight: 500; /* Giảm độ đậm */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: #ffffff !important;
+}
+
+/* Căn giữa các nav-link nếu dùng mx-auto cho ul */
+/* Điều chỉnh lại nếu mx-auto không hoạt động như ý */
+#navbarNav .navbar-nav.mx-auto {
+   /* Có thể cần thêm flex-grow: 1 cho #navbarNav > ul.navbar-nav.mx-auto
+      để nó chiếm không gian và các item được căn giữa thực sự,
+      nhưng điều này còn phụ thuộc vào các thành phần khác.
+      Hoặc dùng display: flex; justify-content: center; cho chính ul đó. */
+}
+
+
+/* Icon Thông báo */
+.custom-bell-icon {
+    font-size: 1.25rem; /* Kích thước icon chuông */
+    color: rgba(255, 255, 255, 0.85);
+    position: relative;
+    top: 0; /* Reset lại top nếu đã có */
+}
+.custom-bell-icon:hover {
+    color: #ffffff;
+}
+.navbar-nav .nav-item.position-relative .nav-link {
+    padding-right: 0.5rem; /* Giảm padding phải của link chứa chuông để user avatar gần hơn */
+}
+
+
+/* Avatar người dùng */
+#navbarUserAvatar {
+    width: 30px; /* Kích thước avatar nhỏ hơn */
+    height: 30px;
+}
+.navbar-nav .nav-item .dropdown-toggle { /* Link chứa avatar và tên */
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.9rem;
+}
+.navbar-nav .nav-item .dropdown-toggle:hover {
+    color: #ffffff !important;
+}
+
+
+/* Điều chỉnh cho màn hình nhỏ (nếu cần) */
+@media (max-width: 991.98px) { /* lg breakpoint */
+    .search-form-custom {
+        width: 100%; /* Cho thanh tìm kiếm chiếm toàn bộ chiều rộng */
+        margin-bottom: 0.5rem; /* Thêm khoảng cách dưới trên mobile */
+        margin-top: 0.5rem; /* Thêm khoảng cách trên trên mobile */
+    }
+    #navbarNav .navbar-nav.mx-auto {
+        align-items: flex-start; /* Căn trái các mục nav trên mobile */
+    }
+    .navbar-nav .nav-item {
+        margin-right: 0; /* Bỏ margin ngang trên mobile */
+        margin-left: 0;
+    }
+}
+/*Logo*/
+.navbar-brand img { /* Hoặc #navbarLogo */
+    height: 35px; /* Giữ nguyên chiều cao mong muốn */
+    margin-left: 0; /* Đặt margin-left về 0 */
+    vertical-align: middle;
+}
+/*Logo*/
+.navbar-brand img { /* Hoặc #navbarLogo */
+    height: 35px;
+    margin-left: 15px; /* Ví dụ: khoảng đệm 15px */
+    vertical-align: middle;
+}
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+/* Nút Apply tùy chỉnh cho Filter & Sort */
+.btn-filter-apply-custom-red {
+    background-color: #990000; /* Màu đỏ đậm bạn chọn */
+    border-color: #800000;   /* Màu viền đỏ đậm hơn một chút */
+    color: #FFFFFF;          /* Chữ màu trắng */
+    /* Các thuộc tính cơ bản của nút (padding, font-size, border-radius)
+       sẽ được kế thừa từ class .btn và .btn-sm của Bootstrap.
+       Nếu bạn bỏ class .btn hoặc .btn-sm khỏi HTML, bạn cần định nghĩa chúng ở đây.
+       Ví dụ:
+       padding: 0.25rem 0.5rem;
+       font-size: 0.875rem;
+       border-radius: 0.2rem;
+       display: inline-block;
+       font-weight: 400;
+       line-height: 1.5;
+       text-align: center;
+       text-decoration: none;
+       vertical-align: middle;
+       cursor: pointer;
+       user-select: none;
+       transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    */
+}
+
+.btn-filter-apply-custom-red:hover {
+    background-color: #7A0000; /* Màu đỏ đậm hơn khi hover */
+    border-color: #600000;
+    color: #FFFFFF; /* Giữ chữ màu trắng */
+}
+
+.btn-filter-apply-custom-red:focus,
+.btn-filter-apply-custom-red.focus {
+    background-color: #7A0000; /* Giữ màu hover khi focus */
+    border-color: #600000;
+    color: #FFFFFF;
+    /* box-shadow: 0 0 0 0.25rem rgba(153, 0, 0, 0.5); */ /* Shadow tùy chỉnh */
+    /* Hoặc sử dụng shadow tương tự btn-danger của Bootstrap */
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.35); /* Giảm độ mờ của shadow một chút */
+}
+
+.btn-filter-apply-custom-red:active,
+.btn-filter-apply-custom-red.active {
+    background-color: #600000; /* Màu khi nút được nhấn (active) */
+    border-color: #400000;     /* Viền đậm hơn nữa */
+    color: #FFFFFF;
+    /* box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125); */ /* Shadow bên trong khi active */
+}
+
+/* Đảm bảo nút không bị ảnh hưởng bởi các style !important khác nếu có */
+.btn-filter-apply-custom-red {
+    background-image: none; /* Bỏ gradient nền nếu Bootstrap áp dụng */
+}
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+/* Trong static/css/style.css */
+
+/* ... các style hiện có của bạn ... */
+
+.alert-custom-light-pink {
+    color: #721c24; /* Màu chữ đỏ sẫm (màu chữ của alert-danger trong Bootstrap) */
+    background-color: #F8D7DA; /* Màu nền hồng nhạt bạn muốn */
+    border-color: #F5C6CB; /* Màu viền hồng nhạt hơn (màu viền của alert-danger) */
+    /* Các thuộc tính khác như padding, margin, border-radius sẽ được kế thừa từ class .alert */
+}
+
+/* (Tùy chọn) Nếu có link bên trong alert này và bạn muốn style nó */
+.alert-custom-light-pink .alert-link {
+    color: #491217; /* Màu link đậm hơn màu chữ một chút */
+    font-weight: bold;
+}
+/* Trong static/css/style.css */
+
+body {
+    padding-top: 45px; /* Hoặc giá trị chiều cao navbar của bạn */
+    font-family: 'Slab Serif ', 'Times New Roman', serif;
+    background-color: #E9ECEF; /* MÀU XÁM RẤT NHẠT */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main.container {
+    background-color: #FFFFFF; /* NỀN TRẮNG cho container chính chứa nội dung */
+    flex-grow: 1;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    /* Nếu bạn muốn container nội dung có viền hoặc bóng đổ như trong một số thiết kế */
+    /* border: 1px solid #dee2e6; */
+    /* border-radius: 0.3rem; */
+    /* box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); */
+}
+
+/* Header và Footer màu đỏ (bạn đã làm ở các bước trước) */
+.custom_navbar {
+    background-color: #990000 !important; /* Màu đỏ */
+    /* ... các style khác cho navbar ... */
+}
+
+.custom-footer {
+    background-color: #990000 !important; /* Màu đỏ */
+    color: #FFFFFF !important; /* Chữ trắng */
+    /* ... các style khác cho footer ... */
+}
+/* static/css/style.css */
+
+/* --- Body padding-top cần khớp với chiều cao navbar mới --- */
+body {
+    /* Điều chỉnh giá trị này cho phù hợp với chiều cao thực tế của navbar.
+       Navbar trong ảnh có vẻ cao khoảng 55-65px. */
+    padding-top: 60px; /* <<< ƯỚC TÍNH, CẦN KIỂM TRA VÀ ĐIỀU CHỈNH */
+    font-family: 'Slab Serif', 'Times New Roman', serif; /* Giữ nguyên font của bạn */
+    background-color: #f0f2f5; /* Giữ nguyên nền của bạn */
+}
+
+/* --- Header/Navbar Styling (Custom Red - Giống ảnh) --- */
+/* static/css/style.css */
+
+/* ... (các CSS đã có của bạn) ... */
+
+/* static/css/style.css */
+
+/* ... (các CSS đã có của bạn) ... */
+
+/* --- Header/Navbar Styling --- */
+/* static/css/style.css */
+
+/* ... (các CSS đã có của bạn) ... */
+
+/* --- Header/Navbar Styling --- */
+/* static/css/style.css */
+
+/* ... (các CSS đã có của bạn) ... */
+
+.main-header-custom-red {
+    background-color: #990000 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.main-header-custom-red .container-fluid {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    /* padding-left: 5px; */ /* Điều chỉnh nếu cần logo sát lề hơn */
+    /* padding-right: 5px; */
+}
+
+/* --- Logo styling --- */
+/* static/css/style.css */
+
+/* ... (các CSS đã có của bạn) ... */
+
+/* --- Logo styling --- */
+.main-header-logo-wrapper {
+    /* background-color: #ffffff; */ /* Đảm bảo dòng này đã được bỏ hoặc comment */
+    width: auto;
+    height: auto;
+    padding: 0 5px 0 10px; /* Giữ hoặc điều chỉnh padding cho vị trí */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.main-header-logo-wrapper img.main-header-logo-img {
+    /* Đặt chiều cao mong muốn cho logo mới.
+       Logo HANU này có vẻ hợp với chiều cao khoảng 40px-45px
+       để các chi tiết vẫn rõ ràng trên header 60px. */
+    height: 42px;  /* <<< THỬ NGHIỆM GIÁ TRỊ NÀY (ví dụ: 40px, 42px, 45px) */
+    /* width sẽ tự động điều chỉnh theo tỷ lệ nếu chỉ đặt height */
+    max-width: 100%;
+    max-height: 100%; /* Đảm bảo nó không vượt quá chiều cao của navbar */
+    object-fit: contain; /* Quan trọng để giữ tỷ lệ logo */
+    display: block;
+    /* (TÙY CHỌN) Nếu logo mới có nền đỏ giống hệt nền header,
+       và bạn muốn nó hòa vào nền header mà không có đường viền/padding nào
+       của wrapper, bạn có thể thử bỏ padding của wrapper: */
+    /* .main-header-logo-wrapper { padding: 0; } */
+    /* Tuy nhiên, một chút padding nhỏ (ví dụ 5px) có thể giúp logo
+       "dễ thở" hơn. */
+}
+
+/* ... (phần CSS còn lại của bạn) ... */
+
+/* Search wrapper and form styling */
+.main-header-search-wrapper {
+    /* flex-grow: 1; */ /* Bỏ hoặc giảm flex-grow nếu không muốn nó chiếm quá nhiều không gian */
+    max-width: 380px; /* Giảm max-width của ô search */
+    /* margin-left: 0; */ /* Bỏ margin-left nếu đã sát logo */
+    margin-right: 1rem; /* Khoảng cách với nav links */
+    position: relative;
+    flex-shrink: 0; /* Để nó không bị co lại quá nhiều */
+}
+
+.main-header-search-form .input-group {
+    border-radius: 20px;
+    background-color: #fff;
+    overflow: hidden;
+    border: 1px solid #ced4da;
+    height: 36px; /* Có thể giảm nhẹ chiều cao ô search */
+    display: flex;
+    align-items: center;
+}
+.main-header-search-form .search-icon-bg-custom-red .bi-search {
+    font-size: 0.9rem; /* Điều chỉnh icon search nếu cần */
+}
+.main-header-search-form .search-input-custom-red {
+    font-size: 0.9rem; /* Điều chỉnh chữ trong ô search */
+}
+.main-header-search-form .search-input-custom-red::placeholder {
+    font-size: 0.9rem; /* Điều chỉnh chữ placeholder */
+}
+
+/* Navigation items styling */
+.main-header-nav-items-custom-red {
+    /* margin-left: auto; */ /* Đã bỏ trong HTML, nó sẽ tự xếp sau search */
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; /* Ngăn co lại */
+}
+
+.main-header-nav-items-custom-red .nav-link {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-size: 0.9rem; /* Điều chỉnh kích thước chữ nav link */
+    font-weight: 500;
+    padding: 0.4rem 0.7rem !important; /* Điều chỉnh padding nav link */
+    margin-left: 0.4rem;
+    margin-right: 0.4rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+    white-space: nowrap; /* Ngăn các mục menu xuống dòng nếu không đủ chỗ */
+}
+
+/* User actions section (Notification bell and Avatar/Username) */
+.user-actions-section {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Đẩy cụm này về bên phải */
+}
+
+.user-actions-section .nav-item {
+    margin-left: 0.5rem; /* Khoảng cách giữa chuông và avatar */
+}
+
+.main-header-icon-custom-red {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.95);
+    vertical-align: middle;
+}
+.notification-badge-custom-red {
+    top: 6px !important; /* Điều chỉnh lại vị trí chấm thông báo */
+    left: 70% !important;
+}
+.main-header-avatar-custom-red {
+    width: 30px; /* Có thể giảm nhẹ avatar */
+    height: 30px;
+    background-color: #000000;
+    border: 1px solid #fff;
+}
+.main-header-username-custom-red {
+    font-size: 0.9rem; /* Điều chỉnh tên user */
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) { /* lg breakpoint, khi navbar bị thu gọn */
+    .main-header-search-wrapper {
+        width: 100%; /* Cho ô search chiếm full width khi thu gọn */
+        max-width: none;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .main-header-nav-items-custom-red {
+        width: 100%;
+        justify-content: flex-start; /* Căn trái các nav-link khi thu gọn */
+    }
+    .user-actions-section {
+        width: 100%;
+        justify-content: flex-start; /* Căn trái cụm user khi thu gọn */
+        margin-top: 0.5rem;
+    }
+    .user-actions-section .nav-item {
+        margin-left: 0;
+        margin-right: 0.75rem; /* Khoảng cách giữa các icon user */
+    }
 }

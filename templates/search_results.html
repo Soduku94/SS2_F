@@ -183,10 +183,7 @@
                              </select>
                              <small class="form-text text-muted">Chỉ áp dụng khi lọc theo Loại là 'Đề tài'.</small>
                          </div>
-                         <button type="submit" class="btn btn-primary btn-sm w-100">Áp dụng bộ lọc</button>
-                         {# Link bỏ lọc nên trỏ về search với chỉ từ khóa q #}
-                         <a href="{{ url_for('search_results', q=q) }}" class="btn btn-outline-secondary btn-sm w-100 mt-2">Bỏ lọc / Sắp xếp</a>
-                     </form>
+<button type="submit" class="btn btn-sm w-100 btn-filter-apply-custom-red">Áp dụng bộ lọc</button>                     </form>
                  </div>
              </div>
         </div>

@@ -1,0 +1,154 @@
+/* static/css/style.css */
+
+/* ... Các style hiện có của bạn ... */
+
+/* Navbar tổng thể */
+/* Trong static/css/style.css */
+
+/* ... các style khác ... */
+
+.custom_navbar {
+    background-color: #990000 !important;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.navbar-brand {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    margin-right: 1rem; /* Giữ khoảng cách với mục tiếp theo (thanh tìm kiếm) */
+    /* margin-left: 0; */ /* Không cần margin-left ở đây nếu bạn đặt cho img */
+}
+
+#navbarLogo { /* Hoặc .navbar-brand img nếu bạn không dùng ID */
+    height: 35px;   /* Chiều cao logo bạn đã chọn */
+    width: auto;    /* Để chiều rộng tự điều chỉnh */
+    margin-left: 0; /* Đặt lại về 0 để nó nằm ở đầu của .navbar-brand */
+                    /* Nếu .navbar-brand đã có padding-left, logo sẽ cách lề một chút */
+    vertical-align: middle;
+}
+
+/* Thanh tìm kiếm và các mục khác giữ nguyên hoặc điều chỉnh theo nhu cầu */
+/* ... */
+
+
+/* Thanh tìm kiếm tùy chỉnh */
+.search-form-custom {
+    width: 35%; /* Đặt chiều rộng cố định hoặc % cho thanh tìm kiếm */
+    min-width: 200px; /* Chiều rộng tối thiểu */
+    max-width: 400px; /* Chiều rộng tối đa */
+}
+
+.search-input-container {
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #ced4da; /* Màu icon nhạt hơn */
+}
+
+.search-input-container .form-control {
+    padding-left: 34px;
+    border-radius: 0.25rem; /* Bo góc nhẹ */
+    font-size: 0.875rem; /* Cỡ chữ placeholder và input */
+    background-color: #fff; /* Nền trắng cho ô tìm kiếm */
+    border: 1px solid #ced4da; /* Viền cho ô tìm kiếm */
+    color: #212529;
+}
+.search-input-container .form-control::placeholder {
+    color: #6c757d;
+}
+.search-input-container .form-control:focus {
+    background-color: #fff;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+
+/* Các mục điều hướng (Nav Links) */
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important; /* Màu chữ trắng hơi mờ */
+    font-size: 0.9rem; /* Cỡ chữ nhỏ hơn một chút cho nav-link */
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-weight: 500; /* Giảm độ đậm */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: #ffffff !important;
+}
+
+/* Căn giữa các nav-link nếu dùng mx-auto cho ul */
+/* Điều chỉnh lại nếu mx-auto không hoạt động như ý */
+#navbarNav .navbar-nav.mx-auto {
+   /* Có thể cần thêm flex-grow: 1 cho #navbarNav > ul.navbar-nav.mx-auto
+      để nó chiếm không gian và các item được căn giữa thực sự,
+      nhưng điều này còn phụ thuộc vào các thành phần khác.
+      Hoặc dùng display: flex; justify-content: center; cho chính ul đó. */
+}
+
+
+/* Icon Thông báo */
+.custom-bell-icon {
+    font-size: 1.25rem; /* Kích thước icon chuông */
+    color: rgba(255, 255, 255, 0.85);
+    position: relative;
+    top: 0; /* Reset lại top nếu đã có */
+}
+.custom-bell-icon:hover {
+    color: #ffffff;
+}
+.navbar-nav .nav-item.position-relative .nav-link {
+    padding-right: 0.5rem; /* Giảm padding phải của link chứa chuông để user avatar gần hơn */
+}
+
+
+/* Avatar người dùng */
+#navbarUserAvatar {
+    width: 30px; /* Kích thước avatar nhỏ hơn */
+    height: 30px;
+}
+.navbar-nav .nav-item .dropdown-toggle { /* Link chứa avatar và tên */
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.9rem;
+}
+.navbar-nav .nav-item .dropdown-toggle:hover {
+    color: #ffffff !important;
+}
+
+
+/* Điều chỉnh cho màn hình nhỏ (nếu cần) */
+@media (max-width: 991.98px) { /* lg breakpoint */
+    .search-form-custom {
+        width: 100%; /* Cho thanh tìm kiếm chiếm toàn bộ chiều rộng */
+        margin-bottom: 0.5rem; /* Thêm khoảng cách dưới trên mobile */
+        margin-top: 0.5rem; /* Thêm khoảng cách trên trên mobile */
+    }
+    #navbarNav .navbar-nav.mx-auto {
+        align-items: flex-start; /* Căn trái các mục nav trên mobile */
+    }
+    .navbar-nav .nav-item {
+        margin-right: 0; /* Bỏ margin ngang trên mobile */
+        margin-left: 0;
+    }
+}
+/*Logo*/
+.navbar-brand img { /* Hoặc #navbarLogo */
+    height: 35px; /* Giữ nguyên chiều cao mong muốn */
+    margin-left: 0; /* Đặt margin-left về 0 */
+    vertical-align: middle;
+}
+/*Logo*/
+.navbar-brand img { /* Hoặc #navbarLogo */
+    height: 35px;
+    margin-left: 15px; /* Ví dụ: khoảng đệm 15px */
+    vertical-align: middle;
+}
