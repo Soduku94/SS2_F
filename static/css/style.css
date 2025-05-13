@@ -5,7 +5,8 @@
 
 body {
     padding-top: 45px;
-     font-family: 'Bookman Old Style', Bookman, Georgia, Times, 'Times New Roman', serif
+     font-family: 'Slab Serif ', 'Times New Roman', serif;
+     background-color: #f0f2f5;
 
 }
 
@@ -33,6 +34,101 @@ body {
 }
 
 
+.custom_navbar{
+    background-color : #2E86AB !important;
+}
+.custom-navbar .navbar-brand,
+.custom-navbar .nav-link,
+.custom-navbar .navbar-toggler-icon { /* Màu cho icon của nút toggle */
+    color: rgba(255, 255, 255, 0.9) !important; /* Màu chữ trắng với chút trong suốt */
+}
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link:focus,
+.custom-navbar .navbar-brand:hover {
+    color: #ffffff !important; /* Màu chữ trắng hoàn toàn khi hover/focus */
+}
+
+/* Màu cho link active (nếu cần tùy chỉnh khác với Bootstrap) */
+.custom-navbar .nav-item .nav-link.active {
+    /* color: #your-active-link-color !important; */
+    /* font-weight: bold; */ /* Ví dụ */
+}
+
+/* Màu cho nút tìm kiếm outline (nếu bạn có) */
+.custom-navbar .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+.custom-navbar .btn-outline-light:hover {
+    border-color: #ffffff !important;
+    color: #000000 !important; /* Đổi màu chữ khi hover để dễ đọc trên nền trắng của nút */
+    background-color: #ffffff !important;
+}
+
+
+.custom-footer {
+    background-color: #2E86AB !important; /* Giống màu navbar */
+    color: rgba(255, 255, 255, 0.9) !important; /* Màu chữ tương tự navbar, hoặc dùng text-light của Bootstrap nếu bạn thấy phù hợp */
+}
+
+
+
+
+/*thêm icon kính lúp*/
+
+.search-input-container {
+    position: relative; /* Cần thiết để định vị icon tuyệt đối bên trong nó */
+    flex-grow: 1;       /* Giúp container này chiếm không gian như input cũ */
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 10px;         /* Khoảng cách từ mép trái của container */
+    top: 50%;           /* Căn giữa theo chiều dọc */
+    transform: translateY(-50%); /* Tinh chỉnh vị trí căn giữa dọc */
+    pointer-events: none; /* Quan trọng: Cho phép click "xuyên qua" icon vào input */
+    color: #6c757d;     /* Màu của icon, giống màu placeholder mặc định. Bạn có thể đổi màu này. */
+    /* z-index: 3; */   /* Thường không cần thiết nếu có pointer-events: none */
+}
+
+.search-input-container .form-control {
+    padding-left: 34px; /* Tăng padding trái của input để có không gian cho icon */
+                        /* Giá trị này nên là: left của icon + chiều rộng icon + một chút khoảng đệm */
+                        /* Ví dụ: 10px (left) + ~16px (icon width) + 8px (đệm) = 34px */
+}
+
+/*chỉnh sủa lại icon thông báo */
+.custom-bell-icon {
+    position: relative; /* Cho phép điều chỉnh vị trí tương đối */
+    top: 5px;           /* Di chuyển xuống 5px */
+
+}
+
+
+/*Logo*/
+.navbar-brand img {
+    height: 60px; /* Chiều cao logo */
+
+    margin-left: 114px; /*căn lê trái */
+}
+
+
+
+/* căn chỉnh chữ */
+.navbar-nav .nav-item a.nav-link.active {
+
+
+    /* Tăng kích thước chữ lên một chút: */
+    font-size: 1.3rem;  /* Hoặc thử 105%, 110%. Giá trị '1rem' thường là kích thước mặc định. */
+                       /* Bạn có thể điều chỉnh (ví dụ: 1.05rem, 1.15rem) cho đến khi vừa ý. */
+}
+
+
+
+
+
+
+
 /* Áp dụng hiệu ứng sticky cho cột lọc trên màn hình từ medium trở lên */
 @media (min-width: 768px) {
     /* 768px là breakpoint 'md' của Bootstrap 5 */
@@ -50,7 +146,26 @@ body {
         align-self: flex-start;}
 }
 
+/* Trong static/css/style.css */
+#searchResultsDropdown {
+    /* Giữ lại các style cũ của bạn */
+    width: auto; /* Cho phép nó co giãn theo nội dung */
+    min-width: 300px; /* Đặt chiều rộng tối thiểu nếu muốn */
+    max-width: 100%; /* Quan trọng: Giới hạn chiều rộng tối đa bằng 100% của thẻ cha trực tiếp của nó (thường là form hoặc search-input-container nếu bạn điều chỉnh HTML) */
+                               /* Hoặc bạn có thể đặt một giá trị cụ thể nếu biết trước, ví dụ: max-width: 400px; */
 
+    /* Các thuộc tính để xử lý text dài */
+    overflow-x: hidden; /* Ẩn thanh cuộn ngang nếu nội dung vẫn cố tràn */
+    white-space: normal; /* Cho phép text tự xuống dòng */
+}
+
+#searchResultsDropdown .dropdown-item { /* Áp dụng cho các item gợi ý */
+    white-space: normal; /* Đảm bảo text trong từng item cũng xuống dòng */
+    word-wrap: break-word; /* Ngắt từ nếu cần để tránh tràn */
+    /* Hoặc overflow-wrap: break-word; */
+    text-overflow: ellipsis; /* (Tùy chọn) Hiển thị ... nếu vẫn quá dài và bạn muốn ẩn bớt */
+    /* overflow: hidden; */ /* (Tùy chọn) Kết hợp với text-overflow */
+}
 
 
 
@@ -118,4 +233,760 @@ body {
 }
 .modal.show .modal-dialog {
     transform: none; /* Hoặc translate(0,0) */
+}
+/* --- Giao diện Trang Đăng Ký Tùy Chỉnh - Form bên phải, nền toàn màn hình --- */
+
+:root {
+    --register-header-height: 45px;
+    --register-footer-height: 40px;
+}
+/* --- Layout Đăng Ký (Form trái, Ảnh phải, Kế thừa Header/Footer) - Final --- */
+
+/* Body chung của trang web nên có padding-top để không bị navbar che */
+/* Ví dụ (đảm bảo giá trị này đúng với chiều cao navbar của bạn đã thu nhỏ): */
+/* body {
+    font-family: 'IBM Plex Sans', sans-serif; /* Font chung */
+/* padding-top: 42px; /* HOẶC CHIỀU CAO NAVBAR THỰC TẾ */
+/* background-color: #f8f9fa; /* Màu nền mặc định cho các trang khác nếu cần */
+/* } */
+
+/* Class tùy chọn cho body của trang đăng ký này nếu muốn style nền khác biệt */
+body.page-register-2col-final {
+    /* Không cần background-image ở đây vì row sẽ chiếm full và có cột ảnh */
+    /* background-color: #e9ecef; */ /* Màu nền rất nhạt nếu cần */
+}
+
+.register-main-container-2col-final {
+    width: 100%;
+    /* Container này sẽ nằm bên dưới header và trên footer của base.html */
+    /* Chiều cao sẽ được quyết định bởi row bên trong */
+}
+
+.register-main-container-2col-final .register-row-2col-final {
+    /* Tính chiều cao tối thiểu để lấp đầy không gian giữa header và footer.
+       Bạn CẦN ĐO chính xác chiều cao header (navbar) và footer của bạn.
+       Hoặc định nghĩa biến CSS --navbar-height và --footer-height-actual (chiều cao footer + padding của nó).
+       Ví dụ: nếu navbar cao 42px và footer (bao gồm padding) cao 58px:
+    */
+    min-height: calc(100vh - var(--navbar-height, 42px) - var(--footer-height-actual, 58px));
+    /* align-items-stretch làm các cột con cao bằng nhau */
+    /* g-0 bỏ gutter */
+}
+
+/* Cột Form bên trái */
+.register-form-section-2col-final {
+    background-color: #ffffff; /* Nền trắng cho cột form */
+    /* d-flex, flex-column, justify-content-center, align-items-center đã có trong HTML để căn form */
+    /* p-4 p-lg-5 trong HTML tạo padding */
+}
+
+.register-form-wrapper-2col-final {
+    width: 100%;
+    max-width: 400px; /* Giới hạn chiều rộng của nội dung form (nhỏ hơn chút so với ảnh mẫu) */
+}
+
+.register-brand-text-2col-final {
+    color: #343a40;
+    font-size: 0.9rem; /* Làm nhỏ hơn nếu có */
+}
+
+.register-title-2col-final {
+    font-weight: 600;
+    color: #212529;
+    font-size: 1.6rem; /* Cỡ chữ tiêu đề */
+    text-align: left; /* Căn trái tiêu đề */
+}
+/* Xóa subtitle theo yêu cầu */
+/* .register-subtitle-2col-final {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem !important;
+} */
+
+.register-label-2col-final {
+    font-size: 0.75rem; /* Label nhỏ hơn nữa */
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.2rem; /* Giảm khoảng cách dưới label */
+}
+
+.register-input-2col-final,
+.register-input-2col-final:focus {
+    border-radius: 0.25rem; /* Bo góc input */
+    border: 1px solid #ced4da;
+    padding: 0.45rem 0.7rem; /* Giảm padding input một chút */
+    font-size: 0.875rem; /* Font input nhỏ hơn chút */
+    color: #212529;
+    box-shadow: none;
+    background-color: #fff;
+}
+.register-input-2col-final::placeholder {
+    color: #adb5bd;
+    font-size: 0.8rem;
+}
+.form-select.register-input-2col-final {
+    color: #212529;
+}
+.form-select.register-input-2col-final:required:invalid {
+    color: #adb5bd;
+}
+.form-select.register-input-2col-final option {
+    color: #212529;
+}
+
+.password-toggle-icon-2col-final {
+    position: absolute;
+    top: calc(50% + 8px); /* Điều chỉnh lại vị trí sau khi label nhỏ hơn và input nhỏ hơn */
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.7rem;
+    font-weight: 600;
+    user-select: none;
+}
+
+.register-checkbox-2col-final {
+    border-color: #adb5bd;
+    transform: scale(0.9); /* Làm checkbox nhỏ hơn chút */
+    margin-right: 0.3rem;
+}
+.register-checkbox-label-2col-final,
+.register-checkbox-label-2col-final a {
+    font-size: 0.75rem;
+    color: #495057;
+    line-height: 1.3; /* Điều chỉnh nếu text bị lệch với checkbox */
+}
+.register-checkbox-label-2col-final a {
+    color: #000000; /* Màu đen cho link Terms/Policy */
+    text-decoration: underline; /* Gạch chân */
+    font-weight: 500;
+}
+.register-checkbox-label-2col-final a:hover {
+    text-decoration: underline;
+}
+
+.register-submit-btn-2col-final {
+    background-color: #990000; /* Màu đỏ */
+    border-color: #990000;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.55rem 0; /* Giảm padding nút */
+    font-size: 0.9rem; /* Giảm font nút */
+    border-radius: 0.25rem;
+    margin-top: 0.8rem; /* Giảm khoảng cách trên nút */
+}
+.register-submit-btn-2col-final:hover {
+    background-color: #990000;
+    border-color: #990000;
+}
+
+.register-login-link-2col-final,
+.register-login-link-2col-final a {
+    font-size: 0.8rem;
+    color: #495057;
+}
+.register-login-link-2col-final a {
+    color: #0d6efd; /* Màu link xanh mặc định của Bootstrap */
+    font-weight: 500;
+    text-decoration: none;
+}
+.register-login-link-2col-final a:hover {
+    text-decoration: underline;
+}
+
+/* Cột Ảnh Bên Phải */
+.register-image-col-2col-final {
+    background-image: url('/static/images/1.jpg'); /* <<< THAY ĐÚNG TÊN FILE ẢNH CỦA BẠN */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Điều chỉnh trên màn hình nhỏ */
+@media (max-width: 767.98px) { /* md breakpoint (khi cột ảnh bị ẩn) */
+    .register-main-container-2col-final .register-row-2col-final {
+        min-height: auto;
+    }
+    .register-form-col-2col-final {
+        padding: 2rem 1rem !important; /* Giảm padding ngang trên mobile */
+    }
+}
+.register-form-wrapper-2col {
+    width: 100%;
+    max-width: 420px; /* Giới hạn chiều rộng của chính nội dung form */
+}
+
+.register-brand-text-2col {
+    color: #495057; /* Màu cho brand text nếu có */
+    font-size: 1rem;
+}
+
+.register-title-2col {
+    font-weight: 600;
+    color: #212529;
+    font-size: 1.7rem;
+    /* text-align: left; đã có từ text-md-start trên div cha */
+}
+.register-subtitle-2col {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem !important;
+}
+
+.register-label-2col {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.register-input-2col,
+.register-input-2col:focus {
+    border-radius: 0.25rem; /* Bo góc input nhẹ */
+    border: 1px solid #adb5bd; /* Viền xám nhạt */
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: #212529;
+    box-shadow: none;
+    background-color: #fff;
+}
+.register-input-2col::placeholder {
+    color: #6c757d; /* Placeholder màu xám hơn */
+    font-size: 0.85rem;
+}
+.form-select.register-input-2col {
+    color: #212529;
+}
+.form-select.register-input-2col:required:invalid { /* Placeholder cho select */
+    color: #6c757d;
+}
+.form-select.register-input-2col option {
+    color: #212529;
+}
+
+.password-toggle-icon-2col {
+    position: absolute;
+    top: calc(50% + 9px); /* Điều chỉnh nếu label làm input bị đẩy xuống */
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 600;
+    user-select: none;
+}
+
+.register-checkbox-2col {
+    border-color: #adb5bd;
+}
+.register-checkbox-label-2col,
+.register-checkbox-label-2col a {
+    font-size: 0.75rem; /* Chữ điều khoản nhỏ hơn */
+    color: #495057;
+}
+.register-checkbox-label-2col a {
+    color: #990000; /* Màu đỏ cho link Terms/Policy */
+    text-decoration: none;
+    font-weight: 500;
+}
+.register-checkbox-label-2col a:hover {
+    text-decoration: underline;
+}
+
+.register-submit-btn-2col {
+    background-color: #990000; /* Màu đỏ */
+    border-color: #990000;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    border-radius: 0.25rem;
+    margin-top: 1rem;
+}
+.register-submit-btn-2col:hover {
+    background-color: #990000;
+    border-color: #990000;
+}
+
+.register-login-link-2col,
+.register-login-link-2col a {
+    font-size: 0.85rem;
+    color: #495057;
+}
+.register-login-link-2col a {
+    color: #990000; /* Màu đỏ cho link Sign Up */
+    font-weight: 500;
+    text-decoration: none;
+}
+.register-login-link-2col a:hover {
+    text-decoration: underline;
+}
+
+/* Cột Ảnh Bên Phải */
+.register-image-col-2col {
+    background-image: url('/static/images/1.jpg'); /* <<< THAY ĐÚNG TÊN FILE ẢNH CỦA BẠN */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Điều chỉnh trên màn hình nhỏ */
+@media (max-width: 767.98px) { /* md breakpoint (khi cột ảnh bị ẩn) */
+    .register-main-container-2col .register-row-2col {
+        min-height: auto; /* Cho phép nội dung tự co giãn chiều cao */
+    }
+    .register-form-col-2col {
+        padding: 2rem 1.5rem !important;
+    }
+}
+/* --- Layout Đăng Nhập (Form giữa, Nền ảnh, Giữ Header/Footer) - Centered V1 --- */
+
+/* Body chung của trang web nên có padding-top để không bị navbar che */
+/* Ví dụ (đảm bảo giá trị này đúng với chiều cao navbar của bạn đã thu nhỏ): */
+/* body {
+    font-family: 'IBM Plex Sans', sans-serif; /* Font chung */
+/* padding-top: 42px; /* HOẶC CHIỀU CAO NAVBAR THỰC TẾ */
+/* } */
+
+/* Body của trang login - Ảnh nền toàn màn hình */
+body.page-login-centered-v1 {
+    background-image: url('/static/images/1.jpg'); /* <<< THAY TÊN FILE ẢNH CỦA BẠN */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    /* padding-top sẽ được kế thừa từ body chung hoặc được set bởi navbar */
+}
+
+/* Container chính cho form login */
+.login-container-centered-v1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Căn giữa form theo chiều dọc */
+    align-items: center;     /* Căn giữa form theo chiều ngang */
+    /* Tính toán min-height để không bị header/footer che và form nằm giữa không gian còn lại.
+       Bạn CẦN ĐO chính xác chiều cao header (navbar) và footer của bạn.
+       Hoặc định nghĩa biến CSS --navbar-height và --footer-height-actual.
+       Ví dụ: nếu navbar cao 42px và footer (bao gồm padding) cao 58px:
+    */
+    min-height: calc(100vh - var(--navbar-height, 42px) - var(--footer-height-actual, 58px));
+    padding: 2rem 1rem; /* Padding trên dưới và trái phải cho container */
+    box-sizing: border-box;
+}
+
+/* Khung Form Đăng Nhập màu trắng, bo tròn */
+.login-form-wrapper-centered-v1 {
+    background-color: #ffffff;
+    padding: 2rem 2.5rem; /* Padding bên trong form */
+    border-radius: 0.75rem; /* Bo tròn góc nhiều hơn */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Bóng đổ mềm mại */
+    width: 100%;
+    max-width: 400px; /* Giới hạn chiều rộng form, nhỏ hơn chút so với ảnh mẫu */
+}
+
+.login-title-centered-v1 {
+    font-weight: 600;
+    color: #212529;
+    text-align: center;
+    font-size: 1.4rem; /* Cỡ chữ tiêu đề */
+}
+
+.login-label-centered-v1 {
+    font-size: 0.8rem; /* Label nhỏ hơn */
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.login-input-centered-v1,
+.login-input-centered-v1:focus {
+    border-radius: 0.25rem; /* Bo góc input nhẹ */
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: #212529;
+    box-shadow: none;
+}
+.login-input-centered-v1::placeholder {
+    color: #adb5bd;
+    font-size: 0.85rem;
+}
+
+.login-checkbox-centered-v1 {
+    border-color: #adb5bd;
+    transform: scale(0.9);
+}
+.login-checkbox-label-centered-v1 {
+    font-size: 0.8rem;
+    color: #495057;
+    padding-left: 0.2rem;
+}
+
+.login-submit-btn-centered-v1 {
+    background-color: #990000; /* Màu đỏ đậm */
+    border-color: #990000;
+    color: #ffffff;
+    font-weight: 500;
+    padding: 0.6rem 0;
+    font-size: 0.95rem;
+    border-radius: 0.25rem; /* Bo góc nút */
+    margin-top: 1rem;
+}
+.login-submit-btn-centered-v1:hover {
+    background-color: #990000;
+    border-color: #990000;
+}
+
+.login-links-centered-v1 {
+    font-size: 0.8rem;
+}
+.login-links-centered-v1 p {
+    margin-bottom: 0.4rem;
+}
+.login-links-centered-v1 a {
+    color: #990000; /* Màu đỏ cho link */
+    font-weight: 500;
+    text-decoration: none;
+}
+.login-links-centered-v1 a:hover {
+    text-decoration: underline;
+}
+/* --- Giao diện Trang "Ý tưởng của tôi" (Phong cách V3 - Final) --- */
+
+/* body.page-my-ideas-v3-final {
+    /* background-color: #f8f9fa; /* Nền chung nếu muốn, nhưng ảnh mẫu là nền trắng */
+/* } */
+
+.my-ideas-container-v3-final {
+    /* padding đã có từ .container mt-4 */
+}
+
+.my-ideas-header-bar-v3-final {
+    /* border-bottom đã có */
+}
+
+.my-ideas-page-title-v3-final {
+    font-weight: 600; /* Hoặc 700 nếu muốn đậm hơn */
+    color: #212529; /* Màu đen cho tiêu đề */
+    font-size: 2rem; /* Kích thước tiêu đề */
+    margin-bottom: 0 !important; /* Bỏ margin bottom của h1 để sát với border */
+}
+
+/* --- Style cho nút "Gửi ý tưởng mới" (theo image_5269c7.png) --- */
+
+.my-ideas-submit-btn-v3-final { /* Hoặc class đúng của nút bạn đang dùng */
+    background-color: #990000; /* Màu đỏ sẫm hơn một chút, giống ảnh */
+    border-color: #990000; /* Viền cùng màu */
+    color: #ffffff; /* Chữ màu trắng */
+    font-weight: 500;
+    padding: 0.5rem 1.25rem; /* Padding ngang nhiều hơn chút, dọc vừa phải */
+    font-size: 0.9rem;
+    border-radius: 20px; /* Bo tròn nhiều để thành hình viên thuốc */
+    display: inline-flex; /* Để icon và chữ căn giữa tốt hơn */
+    align-items: center;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.my-ideas-submit-btn-v3-final:hover,
+.my-ideas-submit-btn-v3-final:focus {
+    background-color: #990000; /* Màu đỏ sẫm hơn nữa khi hover/focus */
+    border-color: #990000;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(164, 30, 34, 0.3); /* Thêm hiệu ứng focus nhẹ */
+}
+
+/* Style cho icon bên trong nút */
+.my-ideas-submit-btn-v3-final .bi-plus-lg {
+    font-size: 1.1em; /* Kích thước icon */
+    margin-right: 0.5rem !important; /* Khoảng cách giữa icon và chữ, dùng !important nếu cần ghi đè Bootstrap */
+    font-weight: bold; /* Làm icon đậm hơn */
+    /* background-color: #fff; */ /* Nền trắng cho vòng tròn icon nếu muốn (tùy ý) */
+    /* color: #a41e22; */       /* Màu đỏ cho dấu cộng nếu nền icon trắng (tùy ý) */
+    /* border-radius: 50%; */  /* Bo tròn nền icon (tùy ý) */
+    /* padding: 0.1em 0.25em; */ /* Padding cho nền icon (tùy ý) */
+    /* display: inline-flex; */
+    /* align-items: center; */
+    /* justify-content: center; */
+}
+/* Style cho Tabs */
+.my-ideas-nav-tabs-v3-final {
+    border-bottom: 1px solid #dee2e6; /* Đường kẻ mảnh dưới tabs */
+    margin-bottom: 0; /* Sát với đường kẻ */
+}
+
+.my-ideas-nav-tabs-v3-final .my-ideas-nav-link-v3-final {
+    color: #6c757d; /* Màu chữ tab không active (xám) */
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem; /* Padding nhỏ hơn cho tab */
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-right: 0.5rem;
+    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.my-ideas-nav-tabs-v3-final .my-ideas-nav-link-v3-final.active {
+    color: #990000; /* Màu chữ tab active (đỏ) */
+    background-color: transparent;
+    border-color: #990000; /* Viền dưới màu đỏ khi active */
+    font-weight: 600;
+}
+
+.my-ideas-nav-tabs-v3-final .my-ideas-nav-link-v3-final:hover:not(.active) {
+    color: #343a40;
+    border-bottom-color: #adb5bd;
+}
+
+.my-ideas-nav-tabs-v3-final .my-ideas-nav-link-v3-final .badge {
+    font-size: 0.65em;
+    padding: 0.2em 0.4em;
+    vertical-align: middle;
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Nội dung Tabs */
+.my-ideas-tab-content-v3-final {
+    padding-top: 1.75rem; /* Khoảng cách trên cho nội dung tab */
+}
+
+/* Danh sách ý tưởng */
+.my-ideas-list-group-v3-final {
+    border: none; /* Bỏ viền của list-group */
+}
+
+.my-ideas-list-item-v3-final {
+    padding: 1rem 0;
+    background-color: transparent;
+    border-bottom: 1px solid #e9ecef; /* Viền mảnh giữa các item */
+}
+.my-ideas-list-item-v3-final:first-child {
+     border-top: none; /* Bỏ viền trên item đầu nếu tab đã có border bottom */
+}
+.my-ideas-list-item-v3-final:last-child {
+    border-bottom: none;
+}
+
+.idea-item-title-v3-final {
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 0.3rem !important;
+    font-size: 1rem;
+}
+
+.idea-item-meta-v3-final {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem !important;
+}
+
+.idea-item-status-v3-final {
+    font-size: 0.75rem;
+    padding: 0.3em 0.6em;
+    vertical-align: text-bottom;
+    font-weight: 500;
+    border-radius: 0.25rem; /* Bo tròn badge */
+}
+.status-pending-v3-final { background-color: #ffecb3; color: #6d5700 !important; border:1px solid #ffe082; } /* Vàng nhạt hơn */
+.status-approved-v3-final { background-color: #d1e7dd; color: #0f5132 !important; border:1px solid #badbcc;} /* Xanh lá nhạt */
+.status-rejected-v3-final { background-color: #f8d7da; color: #721c24 !important; border:1px solid #f5c2c7;} /* Đỏ nhạt */
+.status-reviewed-v3-final { background-color: #cff4fc; color: #055160 !important; border:1px solid #b6effb;} /* Xanh dương nhạt */
+.status-other-v3-final { background-color: #e9ecef; color: #495057 !important; border:1px solid #dee2e6;} /* Xám nhạt */
+
+.idea-item-feedback-v3-final {
+    font-size: 0.85rem;
+    background-color: #f8f9fa;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    margin-top: 0.75rem !important;
+    border-left: 3px solid #ced4da;
+}
+.idea-item-feedback-v3-final em strong {
+    color: #495057;
+}
+
+.idea-item-actions-v3-final .btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+.idea-item-actions-v3-final .btn-outline-secondary { /* Nút Xem/Sửa */
+    border-color: #adb5bd;
+    color: #495057;
+}
+.idea-item-actions-v3-final .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+
+/* Thông báo khi danh sách rỗng */
+.my-ideas-alert-empty-v3-final {
+    color: #990000; /* Chữ màu đỏ sẫm */
+    background-color: #f8d7da; /* Nền hồng nhạt (đỏ rất nhạt) */
+    border: 1px solid transparent; /* Bỏ viền mặc định của alert */
+    border-radius: 0.35rem; /* Bo góc */
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    text-align: left; /* Chữ căn trái */
+}
+/* --- Giao diện Trang "Gửi Ý tưởng Nghiên Cứu Mới" (Phong cách V2 - Giống image_5e562c.png) --- */
+
+body.page-form-layout { /* Class này có thể đã có, đảm bảo nền là xám nhạt hoặc trắng */
+    background-color: #f8f9fa; /* Nền xám rất nhạt cho không gian ngoài form */
+    /* padding-top đã được body chung lo từ navbar */
+}
+
+.formpage-container { /* Class này có thể đã có */
+    padding-bottom: 3rem;
+}
+
+/* Khung nền chính của form */
+.formpage-wrapper-v2 { /* Class mới cho wrapper này */
+    background-color: #f8d7da; /* Màu nền hồng nhạt (đỏ rất nhạt) */
+    border-radius: 0.75rem; /* Bo tròn góc */
+    padding: 2rem 2.5rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+}
+
+.formpage-title-v2 { /* Class mới */
+    color: #212529; /* Màu chữ đen cho tiêu đề */
+    font-weight: 600;
+    font-size: 1.7rem;
+}
+
+.formpage-label-v2 { /* Class mới */
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #212529; /* Màu label đen */
+    margin-bottom: 0.25rem;
+}
+
+/* Input, Select, Trix, Krajee file input - Nền trắng, viền xám */
+.formpage-input-v2, /* Class chung mới cho text input, select */
+.formpage-trix-v2.trix-content, /* Phần nội dung của Trix */
+/* Krajee: input tên file ("Select files...") */
+#ideaAttachmentInputFormpageV2+.file-input .file-caption-name,
+/* Krajee: nút browse - đã có class riêng formpage-krajee-browse-btn-v2 */
+#ideaAttachmentInputFormpageV2+.file-input .btn.formpage-krajee-browse-btn-v2
+{
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important;
+    color: #212529 !important;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    box-shadow: none !important;
+}
+.formpage-input-v2::placeholder {
+    color: #6c757d;
+}
+
+/* Focus state cho các input */
+.formpage-input-v2:focus,
+.formpage-trix-v2.trix-content:focus-within,
+#ideaAttachmentInputFormpageV2+.file-input .file-caption-name:focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Trix editor specific */
+.formpage-trix-v2 { /* Div bao ngoài của Trix */
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem;
+    min-height: 150px;
+    background-color: #fff;
+}
+.formpage-trix-v2 .trix-toolbar { /* Thanh công cụ của Trix */
+    background-color: #ffffff !important; /* Nền trắng cho toolbar */
+    border-bottom: 1px solid #dee2e6 !important;
+}
+.formpage-trix-v2 .trix-toolbar .trix-button {
+    background-color: transparent !important;
+    color: #212529 !important; /* Màu icon/chữ trên toolbar */
+}
+.formpage-trix-v2 .trix-toolbar .trix-button--active {
+    background-color: #e9ecef !important; /* Nền xám rất nhạt cho nút active */
+}
+.formpage-trix-v2 .trix-content {
+    /* Đã được style bởi .formpage-input-v2 */
+}
+
+
+/* Krajee File Input specific */
+/* Vùng kéo thả file */
+#ideaAttachmentInputFormpageV2+.file-input .file-drop-zone {
+    border: 2px dashed #ced4da !important; /* Viền nét đứt nhạt hơn */
+    background-color: #ffffff !important; /* Nền trắng */
+    border-radius: 0.25rem;
+    padding: 1.5rem 1rem;
+}
+#ideaAttachmentInputFormpageV2+.file-input .file-drop-zone-title {
+    color: #495057 !important;
+    font-size: 0.9rem !important;
+}
+/* Input hiển thị tên file đã chọn ("Select files...") */
+#ideaAttachmentInputFormpageV2+.file-input .file-caption-name {
+    border-right: none !important; /* Bỏ viền phải để liền với nút browse */
+}
+/* Nút "Browse..." */
+/* Krajee File Input specific */
+/* ... các style khác cho Krajee ... */
+
+/* Nút "Browse..." */
+#ideaAttachmentInputFormpage+.file-input .btn.formpage-krajee-browse-btn {
+    background-color: #c82333 !important; /* <<< MÀU ĐỎ ĐẬM */
+    border: 1px solid #c82333 !important; /* <<< VIỀN MÀU ĐỎ ĐẬM */
+    border-left: none !important;
+    color: #ffffff !important; /* <<< CHỮ MÀU TRẮNG */
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+/* (Tùy chọn) Style khi hover nút Browse */
+#ideaAttachmentInputFormpage+.file-input .btn.formpage-krajee-browse-btn:hover {
+    background-color: #aF1e2d !important;
+    border-color: #aF1e2d !important;
+    color: #ffffff !important;
+}
+/* Ẩn các nút không cần thiết của Krajee */
+#ideaAttachmentInputFormpageV2+.file-input .fileinput-upload-button,
+#ideaAttachmentInputFormpageV2+.file-input .fileinput-remove-button {
+    display: none !important;
+}
+
+
+.formpage-form-text-v2 { /* Chữ hướng dẫn cho select giảng viên */
+    font-size: 0.75rem;
+    color: #58151c; /* Màu đỏ sẫm */
+}
+
+.formpage-submit-btn-v2 {
+    background-color: #a41e22; /* Màu đỏ sẫm */
+    border-color: #a41e22;
+    color: #fff;
+    font-weight: 500;
+    padding: 0.6rem 0;
+    font-size: 1rem;
+    border-radius: 0.3rem;
+}
+.formpage-submit-btn-v2:hover {
+    background-color: #8c181c;
+    border-color: #8c181c;
+}
+
+.formpage-back-link-v2,
+.formpage-back-link-v2:hover {
+    color: #58151c; /* Màu đỏ sẫm */
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+.formpage-back-link-v2:hover {
+    text-decoration: underline;
 }
