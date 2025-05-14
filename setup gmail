@@ -1,0 +1,15 @@
+
+ trong .env
+ SECRET_KEY=**** đây là secret key để chayj
+
+
+
+# Thông tin email của bạn
+EMAIL_USER=A@gmail.com
+EMAIL_PASS=16 pin pass
+
+
+cái này cần có 1 tài khoản gmail đươc xác thực 2 bước và có MẬT KHẨU ỨNG DỤNG tạo key cho MÔI TRƯỜNG CHẠY
+>>>> đây là 1 tín năng phát triển thêm
+ Xem hướng dẫn của Google về cách tạo App Password:
+ https://support.google.com/accounts/answer/185833?authuser=1
