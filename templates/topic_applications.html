@@ -1,27 +1,41 @@
 {% extends "base.html" %}
-{% block title %}Đơn đăng ký: {{ topic.title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %} {# title = "Applications for: [Topic Title]" #}
 
 {% block content %}
 <div class="container mt-4">
-    {# --- Tiêu đề trang và tên đề tài --- #}
-    <h2>Đơn Đăng ký cho Đề tài:</h2>
-    <h3 class="text-primary mb-4">{{ topic.title }}</h3>
+    {# --- Header Trang và Thông tin Đề tài --- #}
+    <div class="page-header mb-3 border-bottom">
+        <h1 class="h3">Review Applications for Topic:</h1>
+        <h2 class="h4 text-primary">{{ topic.title }}</h2>
+        {# Thêm thông tin tóm tắt về đề tài nếu muốn #}
+        <p class="small text-muted">
+            Status:
+            {% if topic.status == 'recruiting' %} <span class="badge bg-success">Recruiting Students</span>
+            {% elif topic.status == 'pending' %} <span class="badge bg-warning text-dark">Pending Approval</span>
+            {% elif topic.status == 'closed' %} <span class="badge bg-secondary">Closed</span>
+            {% elif topic.status == 'working_on' %} <span class="badge bg-info">In Progress</span>
+            {% elif topic.status == 'published' %} <span class="badge bg-light text-dark border">Published</span>
+            {% else %} <span class="badge bg-dark">{{ topic.status | title }}</span>
+            {% endif %}
+            {# | <i class="bi bi-people-fill"></i> X/Y slots filled (nếu có thông tin) #}
+        </p>
+    </div>
 
     {# === Phần Tabs === #}
-    <ul class="nav nav-tabs mb-3" id="applicationStatusTabs" role="tablist">
+    <ul class="nav nav-pills nav-fill mb-3" id="applicationStatusTabs" role="tablist"> {# nav-pills nav-fill cho giao diện khác #}
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-tab-pane" type="button" role="tab" aria-controls="pending-tab-pane" aria-selected="true">
-                Chờ duyệt <span class="badge bg-secondary">{{ pending_apps|length }}</span>
+                <i class="bi bi-hourglass-split me-1"></i>Pending <span class="badge bg-warning text-dark ms-1">{{ pending_apps|length }}</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved-tab-pane" type="button" role="tab" aria-controls="approved-tab-pane" aria-selected="false">
-                Đã duyệt <span class="badge bg-success">{{ approved_apps|length }}</span>
+                <i class="bi bi-check-circle-fill me-1"></i>Approved <span class="badge bg-success ms-1">{{ approved_apps|length }}</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected-tab-pane" type="button" role="tab" aria-controls="rejected-tab-pane" aria-selected="false">
-                Đã từ chối <span class="badge bg-danger">{{ rejected_apps|length }}</span>
+                <i class="bi bi-x-circle-fill me-1"></i>Rejected <span class="badge bg-danger ms-1">{{ rejected_apps|length }}</span>
             </button>
         </li>
     </ul>
@@ -32,126 +46,185 @@
 
         {# --- Nội dung Tab Chờ duyệt --- #}
         <div class="tab-pane fade show active" id="pending-tab-pane" role="tabpanel" aria-labelledby="pending-tab" tabindex="0">
-            <h4 class="mb-3">Danh sách chờ duyệt</h4>
             {% if pending_apps %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" style="width: 5%;">#</th>
-                                <th scope="col" style="width: 20%;">Sinh viên</th>
-                                <th scope="col" style="width: 15%;">MSSV</th>
-                                <th scope="col" style="width: 15%;">Lớp</th>
-                                <th scope="col" style="width: 15%;">Ngày ĐK</th>
-                                <th scope="col" style="width: 20%;">Lời nhắn</th>
-                                <th scope="col" style="width: 10%; min-width: 130px;">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for app in pending_apps %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ app.student.full_name if app.student else 'N/A' }}</td>
-                                <td>{{ app.student.student_id if app.student else 'N/A' }}</td>
-                                <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
-                                <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
-                                <td>
-                                    {% if app.message %}
-                                        <span title="{{ app.message }}">{{ app.message | truncate(40, True, '...') }}</span>
-                                    {% else %}
-                                        <em class="text-muted small">(Không có)</em>
-                                    {% endif %}
-                                </td>
-                                <td class="text-nowrap">
-                                    <form action="{{ url_for('update_application_status', application_id=app.id) }}" method="POST" class="d-inline">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" name="status" value="accepted" class="btn btn-success btn-sm me-1" title="Chấp thuận đơn đăng ký này">
-                                            <i class="bi bi-check-lg"></i> <span class="d-none d-md-inline">Duyệt</span>
-                                        </button>
-                                        <button type="submit" name="status" value="rejected" class="btn btn-danger btn-sm" title="Từ chối đơn đăng ký này">
-                                            <i class="bi bi-x-lg"></i> <span class="d-none d-md-inline">Từ chối</span>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light-subtle"><h5 class="mb-0">Pending Applications</h5></div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" style="width: 5%;">#</th>
+                                    <th scope="col" style="width: 25%;">Student</th>
+                                    <th scope="col" style="width: 15%;">Class</th>
+                                    <th scope="col" style="width: 15%;">Applied On</th>
+                                    <th scope="col">Message</th>
+                                    <th scope="col" class="text-center" style="width: 15%; min-width: 140px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in pending_apps %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% set student = app.student %}
+                                            {% if student %}
+                                                {% set image_filename = student.image_file if student.image_file else 'default.jpg' %}
+                                                {% set image_folder = 'user_pics' if student.image_file and not student.image_file.startswith('default') else 'profile_pics' %}
+                                                {% if image_folder == 'profile_pics' %}
+                                                    {% if student.gender == 'female' %} {% set image_filename = 'default_female.jpg' %}
+                                                    {% elif student.gender == 'male' %} {% set image_filename = 'default_male.jpg' %}
+                                                    {% else %} {% set image_filename = 'default.jpg' %} {% endif %}
+                                                {% endif %}
+                                                {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
+                                                <img src="{{ avatar_url }}" alt="{{ student.full_name }}" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                                <div>
+                                                    <span class="fw-semibold">{{ student.full_name }}</span>
+                                                    <small class="d-block text-muted">{{ student.student_id or 'N/A' }}</small>
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
+                                    <td><small>{{ app.application_date.strftime('%d/%m/%y %H:%M') }}</small></td>
+                                    <td>
+                                        {% if app.message %}
+                                            <span title="{{ app.message }}" data-bs-toggle="tooltip" data-bs-placement="top">{{ app.message | truncate(50, True, '...') }}</span>
+                                        {% else %}
+                                            <em class="text-muted small">(No message)</em>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center text-nowrap">
+                                        <form action="{{ url_for('update_application_status', application_id=app.id) }}" method="POST" class="d-inline-block me-1">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" name="status" value="accepted" class="btn btn-success btn-sm" title="Approve this application">
+                                                <i class="bi bi-check-lg"></i> <span class="d-none d-md-inline">Approve</span>
+                                            </button>
+                                        </form>
+                                        <form action="{{ url_for('update_application_status', application_id=app.id) }}" method="POST" class="d-inline-block">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" name="status" value="rejected" class="btn btn-danger btn-sm" title="Reject this application">
+                                                <i class="bi bi-x-lg"></i> <span class="d-none d-md-inline">Reject</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% else %}
-                <div class="alert alert-info">Không có đơn đăng ký nào đang chờ duyệt.</div>
+                <div class="alert alert-info">No pending applications for this topic.</div>
             {% endif %}
         </div>
         {# --- Kết thúc Tab Chờ duyệt --- #}
 
-        {# --- Nội dung Tab Đã duyệt --- #}
+        {# --- Nội dung Tab Đã duyệt (Tương tự, chỉ hiển thị thông tin) --- #}
         <div class="tab-pane fade" id="approved-tab-pane" role="tabpanel" aria-labelledby="approved-tab" tabindex="0">
-            <h4 class="mb-3">Danh sách đã duyệt</h4>
-             {% if approved_apps %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered table-striped table-sm align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" style="width: 5%;">#</th>
-                                <th scope="col" style="width: 25%;">Sinh viên</th>
-                                <th scope="col" style="width: 20%;">MSSV</th>
-                                <th scope="col" style="width: 20%;">Lớp</th>
-                                <th scope="col" style="width: 15%;">Ngày ĐK</th>
-                                <th scope="col" style="width: 15%;">Ngày duyệt</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for app in approved_apps %}
-                             <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ app.student.full_name if app.student else 'N/A' }}</td>
-                                <td>{{ app.student.student_id if app.student else 'N/A' }}</td>
-                                <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
-                                <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
-                                <td>{{ app.processed_date.strftime('%d/%m/%Y %H:%M') if app.processed_date else 'N/A' }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            {% if approved_apps %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light-subtle"><h5 class="mb-0">Approved Applications</h5></div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped table-sm align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" style="width: 5%;">#</th>
+                                    <th scope="col" style="width: 30%;">Student</th>
+                                    <th scope="col" style="width: 20%;">Class</th>
+                                    <th scope="col" style="width: 20%;">Applied On</th>
+                                    <th scope="col" style="width: 25%;">Processed On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in approved_apps %}
+                                 <tr>
+                                    <td>{{ loop.index }}</td>
+                                     <td>
+                                        <div class="d-flex align-items-center">
+                                            {% set student = app.student %}
+                                            {% if student %}
+                                                {% set image_filename = student.image_file if student.image_file else 'default.jpg' %}
+                                                {% set image_folder = 'user_pics' if student.image_file and not student.image_file.startswith('default') else 'profile_pics' %}
+                                                {% if image_folder == 'profile_pics' %}
+                                                    {% if student.gender == 'female' %} {% set image_filename = 'default_female.jpg' %}
+                                                    {% elif student.gender == 'male' %} {% set image_filename = 'default_male.jpg' %}
+                                                    {% else %} {% set image_filename = 'default.jpg' %} {% endif %}
+                                                {% endif %}
+                                                {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
+                                                <img src="{{ avatar_url }}" alt="{{ student.full_name }}" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                                <div>
+                                                    <span class="fw-semibold">{{ student.full_name }}</span>
+                                                    <small class="d-block text-muted">{{ student.student_id or 'N/A' }}</small>
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
+                                    <td><small>{{ app.application_date.strftime('%d/%m/%y %H:%M') }}</small></td>
+                                    <td><small>{{ app.processed_date.strftime('%d/%m/%y %H:%M') if app.processed_date else 'N/A' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
              {% else %}
-                <div class="alert alert-info">Chưa có đơn đăng ký nào được duyệt.</div>
+                <div class="alert alert-info">No applications have been approved for this topic yet.</div>
              {% endif %}
         </div>
         {# --- Kết thúc Tab Đã duyệt --- #}
 
-        {# --- Nội dung Tab Đã từ chối --- #}
+        {# --- Nội dung Tab Đã từ chối (Tương tự Tab Đã duyệt) --- #}
         <div class="tab-pane fade" id="rejected-tab-pane" role="tabpanel" aria-labelledby="rejected-tab" tabindex="0">
-             <h4 class="mb-3">Danh sách đã từ chối</h4>
-             {% if rejected_apps %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered table-striped table-sm align-middle">
-                       <thead class="table-light">
-                            <tr>
-                                <th scope="col" style="width: 5%;">#</th>
-                                <th scope="col" style="width: 25%;">Sinh viên</th>
-                                <th scope="col" style="width: 20%;">MSSV</th>
-                                <th scope="col" style="width: 20%;">Lớp</th>
-                                <th scope="col" style="width: 15%;">Ngày ĐK</th>
-                                <th scope="col" style="width: 15%;">Ngày từ chối</th>
-                            </tr>
-                        </thead>
-                         <tbody>
-                            {% for app in rejected_apps %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ app.student.full_name if app.student else 'N/A' }}</td>
-                                <td>{{ app.student.student_id if app.student else 'N/A' }}</td>
-                                <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
-                                <td>{{ app.application_date.strftime('%d/%m/%Y %H:%M') }}</td>
-                                <td>{{ app.processed_date.strftime('%d/%m/%Y %H:%M') if app.processed_date else 'N/A' }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            {% if rejected_apps %}
+                 <div class="card shadow-sm">
+                    <div class="card-header bg-light-subtle"><h5 class="mb-0">Rejected Applications</h5></div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped table-sm align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" style="width: 5%;">#</th>
+                                    <th scope="col" style="width: 30%;">Student</th>
+                                    <th scope="col" style="width: 20%;">Class</th>
+                                    <th scope="col" style="width: 20%;">Applied On</th>
+                                    <th scope="col" style="width: 25%;">Processed On</th>
+                                </tr>
+                            </thead>
+                             <tbody>
+                                {% for app in rejected_apps %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% set student = app.student %}
+                                            {% if student %}
+                                                {# ... logic avatar ... #}
+                                                <img src="..." alt="{{ student.full_name }}" class="rounded-circle me-2" width="32" height="32">
+                                                <div>
+                                                    <span class="fw-semibold">{{ student.full_name }}</span>
+                                                    <small class="d-block text-muted">{{ student.student_id or 'N/A' }}</small>
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ app.student.class_name if app.student else 'N/A' }}</td>
+                                    <td><small>{{ app.application_date.strftime('%d/%m/%y %H:%M') }}</small></td>
+                                    <td><small>{{ app.processed_date.strftime('%d/%m/%y %H:%M') if app.processed_date else 'N/A' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
              {% else %}
-                <div class="alert alert-info">Không có đơn đăng ký nào bị từ chối.</div>
+                <div class="alert alert-info">No applications have been rejected for this topic yet.</div>
              {% endif %}
         </div>
         {# --- Kết thúc Tab Đã từ chối --- #}
@@ -159,11 +232,22 @@
     </div>
     {# === Kết thúc Tab Content === #}
 
-    <div class="mt-4">
+    <div class="mt-4 text-center">
         <a href="{{ url_for('view_post', post_id=topic.id) }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Quay lại Chi tiết Đề tài
+            <i class="bi bi-arrow-left-circle"></i> Back to Topic Details
         </a>
     </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // Kích hoạt tooltip của Bootstrap (nếu bạn dùng data-bs-toggle="tooltip" cho lời nhắn)
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
 {% endblock %}

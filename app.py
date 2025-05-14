@@ -1721,8 +1721,9 @@ def view_topic_applications(post_id):
         applications = []
         flash("Lỗi khi tải danh sách đơn đăng ký.", "danger")
 
-    return render_template('topic_applications.html',  # <<< Tên file template mới
+    return render_template('topic_applications.html',
                            title=f"Đơn đăng ký: {post.title}",
+                           topic=post,
                            post=post,
                            applications=applications)
 
