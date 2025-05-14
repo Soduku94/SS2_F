@@ -1693,9 +1693,6 @@ def my_posts():
                            like_counts=like_counts,           # <<< Truyền dict số lượt like
                            user_liked_posts=user_liked_posts) # <<< Truyền set các post đã like
 
-    # Phần chạy ứng dụng
-
-if __name__ == '__main__': app.run(debug=True)
 
 
 @app.route('/post/<int:post_id>/applications')
@@ -1796,7 +1793,7 @@ def update_application_status(application_id):
 # === START: THÊM CÁC ROUTE CHO TRANG SHOWCASE CÔNG KHAI ===
 
 # --- Route hiển thị danh sách Showcase ---
-@app.route('/showcase')
+@app.route('/showcase', endpoint='view_all_showcase_items_explicit')
 def showcase():
     # Lấy tham số trang và bộ lọc
     page = request.args.get('page', 1, type=int)
@@ -2012,3 +2009,10 @@ def my_applications():
         return render_template('my_applications.html',
                                title='Đề tài Đã Đăng ký',
                                applications_pagination=pagination)
+
+
+
+
+    # Phần chạy ứng dụng
+
+if __name__ == '__main__': app.run(debug=True)

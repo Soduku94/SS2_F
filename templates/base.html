@@ -18,12 +18,14 @@
 {# templates/base.html #}
 
 {# templates/base.html #}
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red"> {# Đã có class main-header-custom-red #}
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red">
+    {# Đã có class main-header-custom-red #}
     <div class="container-fluid">
         {# LOGO - Bọc trong div có nền trắng riêng #}
         <a class="navbar-brand main-header-logo-wrapper" href="{{ url_for('home') }}">
             {# Thay 'logo_fit_hanoi.png' bằng tên file logo chính xác của bạn trong static/logo_pics/ #}
-            <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo" class="main-header-logo-img">
+            <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo"
+                 class="main-header-logo-img">
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavCustomRed"
@@ -34,11 +36,13 @@
         <div class="collapse navbar-collapse" id="navbarNavCustomRed">
             {# Ô TÌM KIẾM - Đặt ở giữa #}
             <div class="mx-auto main-header-search-wrapper">
-                <form class="d-flex main-header-search-form" role="search" method="GET" action="{{ url_for('search_results') }}">
+                <form class="d-flex main-header-search-form" role="search" method="GET"
+                      action="{{ url_for('search_results') }}">
                     <div class="input-group">
                         {# Icon kính lúp bên trái input #}
                         <span class="input-group-text search-icon-bg-custom-red"><i class="bi bi-search"></i></span>
-                        <input class="form-control search-input-custom-red" type="search" placeholder="Search" {# Đổi placeholder #}
+                        <input class="form-control search-input-custom-red" type="search" placeholder="Search"
+                                {# Đổi placeholder #}
                                aria-label="Search" name="q" id="navbarSearchInputCustomRed" autocomplete="off"
                                value="{{ request.args.get('q', '') }}">
                         {# Bỏ nút "Tìm kiếm" text ở đây nếu ảnh không có #}
@@ -53,12 +57,12 @@
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         {# Đổi tên link "FIT Researches" thành "Dashboard" hoặc route tương ứng #}
-                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
+                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
+                           aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"
-                           href="{{ url_for('showcase') }}">Featured Works</a>
-                    </li>
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"></a>
+                        <a href="{{ url_for('view_all_showcase_items_explicit') }}">Featured Works</a></li>
 
                     {# Các link này sẽ hiển thị tùy theo vai trò người dùng (student/lecturer) #}
                     {# Sinh viên sẽ thấy "Registered Topics" và "My Ideas" #}
@@ -74,10 +78,12 @@
                     {% elif current_user.role == 'lecturer' %}
                         {# Giảng viên có thể có các link khác, ví dụ: #}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'my_posts' %}active{% endif %}" href="{{ url_for('my_posts') }}">My Posts</a>
+                            <a class="nav-link {% if request.endpoint == 'my_posts' %}active{% endif %}"
+                               href="{{ url_for('my_posts') }}">My Posts</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}" href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
+                            <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}"
+                               href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
                         </li>
                     {% endif %}
 
@@ -95,32 +101,42 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                           id="navbarDropdownUserLinkCustomRed" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           id="navbarDropdownUserLinkCustomRed" role="button" data-bs-toggle="dropdown"
+                           aria-expanded="false">
                             {# Logic lấy avatar giữ nguyên #}
                             {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
                             {% set image_folder = 'user_pics' %}
                             {% if image_filename.startswith('default') %}
                                 {% set image_folder = 'profile_pics' %}
                                 {% if current_user.gender == 'female' %}{% set image_filename = 'default_female.jpg' %}
-                                {% elif current_user.gender == 'male' %}{% set image_filename = 'default_male.jpg' %}
+                                    {% elif current_user.gender == 'male' %}{% set image_filename = 'default_male.jpg' %}
                                 {% else %}{% set image_filename = 'default.jpg' %}{% endif %}
                             {% endif %}
                             {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
-                            <img src="{{ avatar_url }}" alt="Avatar" class="rounded-circle me-1 main-header-avatar-custom-red">
+                            <img src="{{ avatar_url }}" alt="Avatar"
+                                 class="rounded-circle me-1 main-header-avatar-custom-red">
                             <span class="main-header-username-custom-red">{{ current_user.full_name }}</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end main-header-dropdown-custom-red" aria-labelledby="navbarDropdownUserLinkCustomRed">
+                        <ul class="dropdown-menu dropdown-menu-end main-header-dropdown-custom-red"
+                            aria-labelledby="navbarDropdownUserLinkCustomRed">
                             <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile</a></li>
                             {# Các mục dropdown khác giữ nguyên hoặc tùy chỉnh #}
                             {% if current_user.is_authenticated and current_user.role == 'admin' %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a>
+                                </li>
                             {% endif %}
                             {% if current_user.is_authenticated and current_user.role == 'lecturer' and 'my_posts' in app.view_functions %}
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li><a class="dropdown-item" href="{{ url_for('my_posts') }}">My Posts</a></li>
                             {% endif %}
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a></li>
                         </ul>
                     </li>
@@ -176,19 +192,19 @@
                         console.log("Flash Message:", {{ category | tojson | safe }}, {{ message | tojson | safe }});
 
                         {% if category == 'auth' %}
-                        { // <<< THÊM KHỐI MỞ ĐỂ TẠO SCOPE MỚI
-                            const toastId = 'flash-toast-auth-{{ loop.index }}'; // toastId giờ đây an toàn trong scope này
-                            let bgClass = 'text-bg-info';
+                            { // <<< THÊM KHỐI MỞ ĐỂ TẠO SCOPE MỚI
+                                const toastId = 'flash-toast-auth-{{ loop.index }}'; // toastId giờ đây an toàn trong scope này
+                                let bgClass = 'text-bg-info';
 
-                            const lowerMessage = {{ message | tojson | safe }}.toLowerCase();
+                                const lowerMessage = {{ message | tojson | safe }}.toLowerCase();
 
-                            if (lowerMessage.includes('thất bại') || lowerMessage.includes('không đúng') || lowerMessage.includes('failed') || lowerMessage.includes('incorrect')) {
-                                bgClass = 'text-bg-danger';
-                            } else if (lowerMessage.includes('thành công') || lowerMessage.includes('success')) {
-                                bgClass = 'text-bg-success';
-                            }
+                                if (lowerMessage.includes('thất bại') || lowerMessage.includes('không đúng') || lowerMessage.includes('failed') || lowerMessage.includes('incorrect')) {
+                                    bgClass = 'text-bg-danger';
+                                } else if (lowerMessage.includes('thành công') || lowerMessage.includes('success')) {
+                                    bgClass = 'text-bg-success';
+                                }
 
-                            const toastHTML = `
+                                const toastHTML = `
                             <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
                               <div class="d-flex">
                                 <div class="toast-body">
@@ -198,16 +214,16 @@
                               </div>
                             </div>`;
 
-                            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-                            const toastElement = document.getElementById(toastId);
-                            if (toastElement) {
-                                const toast = new bootstrap.Toast(toastElement);
-                                toast.show();
-                                toastElement.addEventListener('hidden.bs.toast', function () {
-                                    toastElement.remove();
-                                });
-                            }
-                        } // <<< THÊM KHỐI ĐÓNG
+                                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                                const toastElement = document.getElementById(toastId);
+                                if (toastElement) {
+                                    const toast = new bootstrap.Toast(toastElement);
+                                    toast.show();
+                                    toastElement.addEventListener('hidden.bs.toast', function () {
+                                        toastElement.remove();
+                                    });
+                                }
+                            } // <<< THÊM KHỐI ĐÓNG
                         {% endif %}
                     {% endfor %}
                 } else {
