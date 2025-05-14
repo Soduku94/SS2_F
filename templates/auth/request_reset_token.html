@@ -1,0 +1,47 @@
+{% extends "login/login_base.html" %} {# Hoặc base.html tùy theo layout bạn muốn #}
+{# {% from "_form_macros.html" import render_field %} # Bỏ comment nếu bạn có và muốn dùng macro #}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="login-container-v3"> {# Giữ lại style container của trang login nếu muốn #}
+        <div class="login-form-wrapper-v3" style="max-width: 500px;">
+            <h2 class="login-title-v3 mb-3">{{ title }}</h2>
+            <p class="text-muted mb-4 small">Enter the email address associated with your account, and we'll send you a
+                link to reset your password.</p>
+
+            {# Hiển thị flash messages ngay trên form này nếu cần #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'info' else 'primary' }} alert-dismissible fade show"
+                             role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}  
+
+            <form method="POST" action="{{ url_for('request_password_reset') }}" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label login-label-v3") }}
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control login-input-v3 is-invalid", placeholder="your.email@example.com") }}
+                        <div class="invalid-feedback">{% for error in form.email.errors %}<span>{{ error }}</span>
+                            <br>{% endfor %}</div>
+                    {% else %}
+                        {{ form.email(class="form-control login-input-v3", placeholder="your.email@example.com") }}
+                    {% endif %}
+                </div>
+                <div class="d-grid mt-4">
+                    {{ form.submit(class="btn login-submit-btn-v3") }}
+                </div>
+            </form>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('login') }}" class="small">Back to Login</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
