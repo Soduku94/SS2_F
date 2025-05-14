@@ -1128,29 +1128,29 @@ def submit_idea():
             idea_id_to_assign = idea.id
 
             # >>>>>>>>>>>>>>>>>> START: THÊM CODE XỬ LÝ TAGS Ở ĐÂY >>>>>>>>>>>>>>>>>>
-            tags_string = form.tags.data
-            post_tags_objects = []  # List để giữ các đối tượng Tag
-            if tags_string:
-                # Tách chuỗi thành list tên tag, xóa khoảng trắng, chuyển về chữ thường
-                tag_names = [name.strip().lower() for name in tags_string.split(',') if name.strip()]
-                if tag_names:
-                    # Lấy các tag đã tồn tại trong DB ứng với các tên trong list
-                    existing_tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
-                    # Tạo một map để truy cập nhanh tag đã có theo tên
-                    existing_tags_map = {tag.name: tag for tag in existing_tags}
-
-                    for name in tag_names:
-                        tag = existing_tags_map.get(name)  # Lấy tag từ map nếu có
-                        if not tag:
-                            # Nếu tag chưa có trong DB, tạo mới và add vào session
-                            tag = Tag(name=name)
-                            db.session.add(tag)
-                        # Thêm tag (dù mới hay cũ) vào list cho bài post này
-                        post_tags_objects.append(tag)
-
-            # Gán danh sách các đối tượng Tag vào relationship của post
-            # SQLAlchemy sẽ tự xử lý việc thêm vào bảng liên kết post_tags khi commit
-            post.tags = post_tags_objects
+            # tags_string = form.tags.data
+            # post_tags_objects = []  # List để giữ các đối tượng Tag
+            # if tags_string:
+            #     # Tách chuỗi thành list tên tag, xóa khoảng trắng, chuyển về chữ thường
+            #     tag_names = [name.strip().lower() for name in tags_string.split(',') if name.strip()]
+            #     if tag_names:
+            #         # Lấy các tag đã tồn tại trong DB ứng với các tên trong list
+            #         existing_tags = Tag.query.filter(Tag.name.in_(tag_names)).all()
+            #         # Tạo một map để truy cập nhanh tag đã có theo tên
+            #         existing_tags_map = {tag.name: tag for tag in existing_tags}
+            #
+            #         for name in tag_names:
+            #             tag = existing_tags_map.get(name)  # Lấy tag từ map nếu có
+            #             if not tag:
+            #                 # Nếu tag chưa có trong DB, tạo mới và add vào session
+            #                 tag = Tag(name=name)
+            #                 db.session.add(tag)
+            #             # Thêm tag (dù mới hay cũ) vào list cho bài post này
+            #             post_tags_objects.append(tag)
+            #
+            # # Gán danh sách các đối tượng Tag vào relationship của post
+            # # SQLAlchemy sẽ tự xử lý việc thêm vào bảng liên kết post_tags khi commit
+            # post.tags = post_tags_objects
 
             # Xử lý file attachments nếu có ID
             if form.attachments.data and form.attachments.data[0].filename != '':
