@@ -128,7 +128,7 @@
                                 <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a>
                                 </li>
                             {% endif %}
-                            {% if current_user.is_authenticated and current_user.role == 'lecturer' and 'my_posts' in app.view_functions %}
+                            {% if current_user.is_authenticated and current_user.role == 'lecturer' and 'my_posts'  %}
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
