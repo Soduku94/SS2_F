@@ -95,6 +95,7 @@ app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')  # Lấy từ biến 
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USER')  # Hoặc một địa chỉ "no-reply"
 
 mail = Mail(app)  # Khởi tạo extension Mail
+mail.init_app(app)
 
 # --- CẬP NHẬT/THÊM ĐƯỜNG DẪN ẢNH ---
 # Thư mục cho ảnh mặc định (đã có)
@@ -2063,7 +2064,7 @@ def request_password_reset():  # Tên hàm mới -> endpoint 'request_password_r
 
 
 @app.route("/reset_password/<token>", methods=['GET', 'POST'])  # URL vẫn giữ <token>
-def reset_token(token):  # <<< ĐỔI TÊN HÀM THÀNH reset_token
+def reset_token(token):
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     user = User.verify_reset_password_token(token)
@@ -2089,6 +2090,43 @@ def reset_token(token):  # <<< ĐỔI TÊN HÀM THÀNH reset_token
                            title='Reset Your Password',
                            form=form,
                            token=token)
+
+
+def send_password_reset_email(user):
+    token = user.get_reset_password_token()  # Hàm này nằm trong model User của bạn
+
+    msg_title = "Password Reset Request - FIT Research Connect"
+    # Lấy sender từ config, có thể thiết lập tên hiển thị
+    sender_config = current_app.config.get('MAIL_DEFAULT_SENDER')
+    if not sender_config:  # Fallback nếu MAIL_DEFAULT_SENDER không được đặt
+        sender_config = ('FIT Research Connect', current_app.config.get('MAIL_USERNAME'))
+
+    msg = Message(msg_title,
+                  sender=sender_config,
+                  recipients=[user.email])
+
+    # Link trong email PHẢI trỏ đến hàm xử lý token, ví dụ 'reset_password_with_token'
+    reset_url = url_for('reset_token', token=token, _external=True)
+
+    msg.body = f'''To reset your password for FIT Research Connect, please visit the following link:
+{reset_url}
+
+If you did not make this request, then simply ignore this email and no changes will be made.
+This link is valid for 30 minutes.
+
+Sincerely,
+The FIT Research Connect Team
+'''
+    # Nếu bạn muốn dùng template HTML cho email:
+    # msg.html = render_template('email/reset_password_email.html', user=user, token=token, reset_url=reset_url)
+
+    try:
+        mail.send(msg)
+        app.logger.info(f"Password reset email successfully sent to {user.email}")
+        return True
+    except Exception as e:
+        app.logger.error(f"Failed to send password reset email to {user.email}: {str(e)}", exc_info=True)
+        return False
 
 
 # Phần chạy ứng dụng
