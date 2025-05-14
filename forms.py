@@ -9,6 +9,9 @@ from wtforms.validators import (DataRequired, Length, Email, EqualTo,
 from flask_login import current_user
 from models import User  # Assuming User model is correctly placed and importable
 
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
+
 
 class LoginForm(FlaskForm):
     """Form for user login."""
@@ -302,3 +305,19 @@ class AcademicWorkForm(FlaskForm):
 
     is_published = BooleanField('Make this work publicly visible on the Showcase page?')
     submit = SubmitField('Save Work')
+
+
+class RequestPasswordResetForm(FlaskForm):
+    email = StringField('Enter your account email',
+                        validators=[DataRequired(message="Please enter your email."),
+                                    Email(message="Invalid email address.")])
+    submit = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password',
+                             validators=[DataRequired(message="Please enter a new password."),
+                                         Length(min=6, message="Password must be at least 6 characters long.")])
+    confirm_password = PasswordField('Confirm New Password',
+                                     validators=[DataRequired(message="Please confirm your new password."),
+                                                 EqualTo('password', message='Passwords do not match.')])
+    submit = SubmitField('Reset Password')

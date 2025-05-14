@@ -17,6 +17,7 @@ from flask_login import current_user
 from sqlalchemy import func
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.orm import joinedload
+from flask_mail import Mail, Message # Import Mail và Message
 
 from PIL import Image
 from functools import wraps
@@ -88,6 +89,16 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # db = SQLAlchemy(metadata=metadata) -> nên đặt trong extensions.py
 # db = SQLAlchemy() # Nếu không dùng Naming Convention ngay
 # <<< THÊM PHẦN NÀY CHO THƯ MỤC ẢNH PROFILE >>>
+
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587 # Hoặc 465 nếu dùng SSL
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False # Đặt là True nếu MAIL_PORT là 465
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER') # Lấy từ biến môi trường
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS') # Lấy từ biến môi trường
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USER') # Hoặc một địa chỉ "no-reply"
+
+mail = Mail(app) # Khởi tạo extension Mail
 
 
 # --- CẬP NHẬT/THÊM ĐƯỜNG DẪN ẢNH ---
@@ -189,7 +200,7 @@ def login():
         else:
             flash('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.', 'auth')
             print("DEBUG: Flashed 'Login Failed' message.")
-    return render_template('login.html', title='Đăng nhập', form=form)
+    return render_template('login.html', title='LogIn ', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -2010,6 +2021,52 @@ def my_applications():
                                title='Đề tài Đã Đăng ký',
                                applications_pagination=pagination)
 
+
+def send_password_reset_email(user):
+    token = user.get_reset_password_token() # Sẽ định nghĩa hàm này trong model User
+
+    msg = Message('Password Reset Request for FIT Research Connect',
+                  sender=current_app.config['MAIL_DEFAULT_SENDER'], # Hoặc địa chỉ cụ thể
+                  recipients=[user.email])
+    msg.body = f'''To reset your password, visit the following link:
+{url_for('reset_token', token=token, _external=True)}
+
+If you did not make this request then simply ignore this email and no changes will be made.
+This link will expire in 1 hour.
+'''
+    # msg.html = render_template('email/reset_password_email.html', user=user, token=token) # Nếu bạn muốn email HTML
+    try:
+        mail.send(msg)
+        return True
+    except Exception as e:
+        app.logger.error(f"Failed to send password reset email to {user.email}: {e}")
+        return False
+
+@app.route("/reset_password_request", methods=['GET', 'POST'])
+def reset_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))  # Hoặc dashboard
+        form = RequestPasswordResetForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            if user:
+                if send_password_reset_email(user):
+
+                    flash(
+                        'An email has been sent with instructions to reset your password. Please check your inbox (and spam folder).',
+                        'info')
+                else:
+
+                    flash(
+                        'There was an error sending the password reset email. Please try again later or contact support.',
+                        'danger')
+            else:
+
+                flash('No account found with that email address. Please check your email or register for an account.',
+                      'warning')
+            return redirect(url_for('login'))  # Luôn redirect về login để tránh lộ thông tin email có tồn tại hay không
+
+        return render_template('reset_password.html', title='Request Password Reset', form=form)
 
 
 

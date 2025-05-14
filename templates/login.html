@@ -61,7 +61,7 @@
                     {{ form.remember(class="form-check-input login-checkbox-centered-v1") }}
                     {{ form.remember.label(class="form-check-label login-checkbox-label-centered-v1") }}
                 </div>
-                <a href="#" class="login-link-centered-v1 small">Forgot your password?</a>
+                <a href="{{ url_for('reset_password_request ') }}" class="login-link-centered-v1 small">Forgot your password?</a>
             </div>
 
 

@@ -1,0 +1,37 @@
+{% extends "login/login_base.html" %}
+{% from "_form_macros.html" import render_field %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="login-container-v3">
+    <div class="login-form-wrapper-v3" style="max-width: 500px;">
+        <h2 class="login-title-v3 mb-4">{{ title }}</h2>
+        <p class="text-muted mb-3 small">Please enter your new password below.</p>
+        <form method="POST" action="{{ url_for('reset_token', token=token) }}" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.password.label(class="form-label login-label-v3") }}
+                {% if form.password.errors %}
+                    {{ form.password(class="form-control login-input-v3 is-invalid", placeholder="New password") }}
+                    <div class="invalid-feedback">{% for error in form.password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% else %}
+                    {{ form.password(class="form-control login-input-v3", placeholder="New password") }}
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.confirm_password.label(class="form-label login-label-v3") }}
+                {% if form.confirm_password.errors %}
+                    {{ form.confirm_password(class="form-control login-input-v3 is-invalid", placeholder="Confirm new password") }}
+                    <div class="invalid-feedback">{% for error in form.confirm_password.errors %}<span>{{ error }}</span><br>{% endfor %}</div>
+                {% else %}
+                    {{ form.confirm_password(class="form-control login-input-v3", placeholder="Confirm new password") }}
+                {% endif %}
+            </div>
+            <div class="d-grid">
+                {{ form.submit(class="btn login-submit-btn-v3") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
