@@ -1695,8 +1695,7 @@ def my_posts():
 
     # Phần chạy ứng dụng
 
-    if __name__ == '__main__':
-        app.run(debug=True)
+if __name__ == '__main__': app.run(debug=True)
 
 
 @app.route('/post/<int:post_id>/applications')
