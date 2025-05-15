@@ -287,7 +287,7 @@ class AcademicWorkLike(db.Model):
 
     # --- Relationships ---
     # Liên kết đến người dùng
-    user = db.relationship('User', backref=db.backref('showcase_likes', lazy='dynamic', cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('showcase_likes', lazy='dynamic'))
     # Liên kết đến công trình
     academic_work = db.relationship('AcademicWork', backref=db.backref('likes', lazy='dynamic', cascade='all, delete-orphan'))
 

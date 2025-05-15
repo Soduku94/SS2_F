@@ -2,12 +2,12 @@
 
 {% block title %}Login - FIT Research Connect{% endblock %}
 
-{# Thêm class riêng cho body của trang login để style ảnh nền #}
+
 {% block body_attributes %}class="page-login-v3"{% endblock %} {# Sử dụng class mới hoặc class cũ nếu muốn đồng bộ #}
 
 {% block content %}
-<div class="login-container-v3"> {# Container để căn giữa form #}
-    <div class="login-form-wrapper-v3"> {# Khung trắng chứa form #}
+<div class="login-container-v3">
+    <div class="login-form-wrapper-v3">
         <h2 class="login-title-v3 mb-4">Log in to FIT Research Connect</h2>
 
         {# Flash messages sẽ được hiển thị bởi base.html nếu có #}
@@ -45,7 +45,7 @@
             </div>
 
             <div class="d-grid">
-                {{ form.submit(class="btn login-submit-btn-v3") }} {# Nút submit sẽ được style bằng CSS #}
+                {{ form.submit(class="btn login-submit-btn-v3") }}
             </div>
         </form>
 
@@ -57,8 +57,8 @@
                 <a href="reset_password">Forgot your password?</a>
             </p>
         </div>
-    </div> {# End login-form-wrapper-v3 #}
-</div> {# End login-container-v3 #}
+    </div>
+</div> }
 {% endblock %}
 
 {% block scripts %}{{ super() }}{% endblock %}

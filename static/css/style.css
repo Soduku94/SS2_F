@@ -274,8 +274,7 @@ body.page-register-2col-final {
        Hoặc định nghĩa biến CSS --navbar-height và --footer-height-actual (chiều cao footer + padding của nó).
        Ví dụ: nếu navbar cao 42px và footer (bao gồm padding) cao 58px:
     */
-    min-height: calc(100vh - var(--navbar-height, 42px) - var(--footer-height-actual, 58px));
-    /* align-items-stretch làm các cột con cao bằng nhau */
+
     /* g-0 bỏ gutter */
 }
 
@@ -566,20 +565,7 @@ body.page-login-centered-v1 {
 }
 
 /* Container chính cho form login */
-.login-container-centered-v1 {
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Căn giữa form theo chiều dọc */
-    align-items: center;     /* Căn giữa form theo chiều ngang */
-    /* Tính toán min-height để không bị header/footer che và form nằm giữa không gian còn lại.
-       Bạn CẦN ĐO chính xác chiều cao header (navbar) và footer của bạn.
-       Hoặc định nghĩa biến CSS --navbar-height và --footer-height-actual.
-       Ví dụ: nếu navbar cao 42px và footer (bao gồm padding) cao 58px:
-    */
-    min-height: calc(100vh - var(--navbar-height, 42px) - var(--footer-height-actual, 58px));
-    padding: 2rem 1rem; /* Padding trên dưới và trái phải cho container */
-    box-sizing: border-box;
-}
+
 
 /* Khung Form Đăng Nhập màu trắng, bo tròn */
 .login-form-wrapper-centered-v1 {
@@ -1669,3 +1655,307 @@ body {
         margin-right: 0.75rem; /* Khoảng cách giữa các icon user */
     }
 }
+
+
+
+
+
+/* static/css/style.css */
+
+/* Navbar chính */
+.main-header-custom {
+    background-color: #800000 !important; /* MÀU ĐỎ SẪM - Ví dụ, thay bằng mã màu của bạn */
+    padding-top: .4rem;
+    padding-bottom: .4rem;
+    /* border-bottom: 3px solid #600000; */ /* Tùy chọn: Đường viền dưới đậm hơn */
+}
+
+/* Logo */
+
+.main-header-logo {
+    height: 38px;
+    width: auto;
+}
+
+/* Ô Tìm kiếm */
+.main-header-search-container {
+    max-width: 500px; /* Giới hạn chiều rộng */
+    width: 100%;
+    position: relative; /* Cho dropdown gợi ý */
+}
+.main-header-search-form .input-group {
+    border-radius: 25px; /* Bo tròn mạnh */
+    overflow: hidden;
+    background-color: #ffffff;
+    /* border: 1px solid rgba(255,255,255,0.3); */ /* Viền nhẹ nếu cần */
+}
+.main-header-search-form .input-group-text.main-header-search-icon-bg {
+    background-color: transparent;
+    border: none;
+    color: #6c757d;
+    padding-left: 0.85rem; /* Đẩy icon vào chút */
+    padding-right: 0.5rem;
+}
+.main-header-search-form .form-control.main-header-search-input {
+    background-color: transparent;
+    border: none;
+    color: #212529;
+    padding-left: 0; /* Vì icon đã có padding riêng */
+    font-size: 0.9rem;
+    height: calc(1.5em + .75rem + 2px); /* Giữ chiều cao chuẩn của input Bootstrap */
+}
+.main-header-search-form .form-control.main-header-search-input::placeholder {
+    color: #868e96;
+}
+.main-header-search-form .form-control.main-header-search-input:focus {
+    box-shadow: none;
+    /* background-color: #f8f9fa; /* Nền hơi đổi khi focus (tùy chọn) */
+}
+.main-header-search-dropdown { /* Dropdown gợi ý */
+    width: 100%; /* Theo parent của nó là .main-header-search-container */
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    border: 1px solid rgba(0,0,0,.1);
+    border-top: none;
+}
+
+
+/* Các Link Điều hướng và User Avatar */
+.main-header-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+.main-header-nav .nav-link:hover,
+.main-header-nav .nav-link:focus {
+    color: #ffffff !important;
+    background-color: rgba(255,255,255,0.1);
+}
+.main-header-nav .nav-link.active.fw-semibold { /* Class active giờ nên có fw-semibold */
+    color: #ffffff !important;
+    background-color: rgba(0,0,0,0.15);
+    font-weight: 600 !important;
+}
+
+/* Icon thông báo */
+.main-header-icon-link i.bi-bell-fill {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    transition: color 0.2s ease-in-out;
+}
+.main-header-icon-link:hover i.bi-bell-fill {
+    color: #ffffff;
+}
+.main-header-notification-badge {
+    background-color: #ffc107 !important; /* Màu vàng cho badge thông báo */
+    color: #000000 !important;
+    padding: .25em .45em !important;
+    font-size: .6em !important;
+    border: 1px solid #fff !important;
+}
+
+
+/* Avatar và Tên người dùng */
+.main-header-user-toggle {
+    padding-top: 0.25rem !important; /* Giảm padding cho user toggle nếu cần */
+    padding-bottom: 0.25rem !important;
+}
+.main-header-avatar-img {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(255,255,255,0.6);
+}
+.main-header-username {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.95);
+    margin-left: 0.3rem;
+}
+
+/* Dropdown menu của user */
+.main-header-user-dropdown .dropdown-item {
+    font-size: 0.9rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+}
+.main-header-user-dropdown .dropdown-item i {
+    width: 22px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Body padding để không bị navbar che */
+body {
+    padding-top: 60px; /* BẠN CẦN ĐIỀU CHỈNH GIÁ TRỊ NÀY DỰA TRÊN CHIỀU CAO THỰC TẾ CỦA NAVBAR */
+}
+
+/* Responsive cho ô tìm kiếm trên màn hình nhỏ hơn lg (sẽ xuống dòng) */
+@media (max-width: 991.98px) {
+    .main-header-search-container {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        max-width: none; /* Cho phép chiếm full width khi xuống dòng */
+    }
+    .main-header-nav { /* Đẩy các nav items sang trái khi navbar thu gọn */
+        margin-left: 0 !important;
+    }
+}
+
+
+
+
+
+
+/* static/css/login.css hoặc style.css */
+
+/* Áp dụng cho body của trang login nếu bạn dùng class page-login-horizontal */
+body.page-login-horizontal {
+    /* Không cần background ở đây nếu bạn muốn container-fluid chiếm toàn bộ */
+    /* Hoặc đặt một màu nền trung tính nếu cần */
+    background-color: #f0f2f5; /* Màu nền chung nếu có phần lộ ra ngoài */
+    overflow: hidden; /* Tránh thanh cuộn không mong muốn trên toàn trang */
+}
+
+.login-main-container-horizontal {
+    /* Không cần padding ở đây vì row g-0 sẽ loại bỏ gutter */
+}
+
+.login-info-panel-horizontal {
+    /* NỀN GRADIENT NHƯ TRONG HÌNH ẢNH CỦA BẠN */
+    /* Ví dụ một gradient tím-cam, bạn cần điều chỉnh mã màu cho chính xác */
+    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff8c00 100%); /* Example gradient */
+    /* Hoặc dùng ảnh nền: */
+    /* background-image: url('/static/images/your-login-banner.jpg'); */
+    background-size: cover;
+    background-position: center;
+    display: flex; /* Đã có trong HTML */
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* Căn giữa text trong phần này */
+}
+
+.login-info-panel-horizontal h1 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.login-info-panel-horizontal p.lead {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.login-form-panel-horizontal {
+    background-color: #ffffff; /* Nền trắng cho form */
+    display: flex; /* Đã có trong HTML */
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form-wrapper-horizontal {
+    /* width và max-width đã có trong HTML */
+}
+
+.login-title-centered-v1 { /* Giữ lại tên class cũ hoặc đổi mới */
+    font-weight: 600;
+    color: #333; /* Màu tiêu đề form */
+}
+
+.login-input-horizontal, /* Đổi tên class cho input nếu muốn */
+.login-input-horizontal:focus {
+    border-radius: 0.5rem; /* Bo tròn mạnh hơn */
+    border: 1px solid #e0e0e0;
+    padding-top: 0.75rem; /* Tăng padding */
+    padding-bottom: 0.75rem;
+    font-size: 0.9rem;
+    background-color: #f8f9fa; /* Nền input hơi xám */
+    box-shadow: none;
+}
+.login-input-horizontal::placeholder {
+    color: #adb5bd;
+}
+
+.login-checkbox-label-horizontal,
+.login-link-horizontal {
+    color: #555;
+    font-weight: 500;
+}
+.login-link-horizontal:hover {
+    color: #0d6efd; /* Màu primary của Bootstrap */
+}
+
+.login-submit-btn-horizontal { /* Đổi tên class cho nút submit */
+    background-image: linear-gradient(to right, #667eea, #764ba2); /* Ví dụ gradient cho nút */
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    border-radius: 0.5rem; /* Bo tròn mạnh */
+    transition: opacity 0.2s ease;
+}
+.login-submit-btn-horizontal:hover {
+    opacity: 0.9;
+    color: #ffffff;
+}
+
+.login-register-link-horizontal a {
+    color: #667eea; /* Màu link nổi bật */
+    font-weight: 600;
+}
+
+
+/* static/css/style.css hoặc login.css */
+
+
+
+.login-checkbox-label-split,
+.login-link-split {
+    color: #555;
+    font-size: 0.85rem;
+}
+.login-link-split:hover {
+    color: #0d6efd;
+}
+
+.login-submit-btn-split.btn-lg {
+    background-color: #5e72e4; /* Ví dụ: màu xanh dương/tím (thay bằng màu nút LOGIN trong hình) */
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+    font-size: 0.95rem;
+    border-radius: 0.3rem;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.login-submit-btn-split.btn-lg:hover {
+    background-color: #4d5fc1;
+    color: #ffffff;
+    box-shadow: 0 4px 15px -5px rgba(94, 114, 228, 0.7);
+}
+
+.login-register-link-split a {
+    color: #5e72e4;
+    font-weight: 600;
+}
+.login-register-link-split a:hover {
+    color: #4d5fc1;
+}
+
+
+
+.main-header-logo-container {
+    background-color: #ffffff; /* Nền trắng */
+    padding: 5px 10px;
+    border-radius: 5px;     /* Hiện tại đang bo tròn góc */
+    /* border: 2px solid #ffffff; */ /* Viền trắng có thể đã có */
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+

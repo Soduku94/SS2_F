@@ -1694,40 +1694,72 @@ def my_posts():
                            user_liked_posts=user_liked_posts)  # <<< Truyền set các post đã like
 
 
+# app.py (trong hàm view_topic_applications)
+
 @app.route('/post/<int:post_id>/applications')
 @login_required
 def view_topic_applications(post_id):
-    # Lấy thông tin bài đăng/đề tài
-    post = Post.query.get_or_404(post_id)
+    topic = Post.query.options(joinedload(Post.author)).get_or_404(post_id)
 
-    # --- Kiểm tra quyền ---
-    # Chỉ tác giả của bài đăng (hoặc Admin nếu muốn) mới xem được đơn đăng ký
-    if post.author != current_user:  # and current_user.role != 'admin':
-        abort(403)  # Báo lỗi không có quyền truy cập
+    if topic.author != current_user and current_user.role != 'admin':
+        abort(403)
 
-    # --- Kiểm tra loại bài đăng ---
-    # Đảm bảo đây là đề tài mới cho phép đăng ký
-    if post.post_type != 'topic':
-        flash('Chức năng này chỉ áp dụng cho Đề tài Nghiên cứu.', 'warning')
-        return redirect(url_for('view_post', post_id=post.id))  # Quay lại trang post
+    if topic.post_type != 'topic':
+        flash('This function is only applicable to Research Topics.', 'warning')
+        return redirect(url_for('view_post', post_id=topic.id))
 
-    # --- Lấy danh sách đơn đăng ký ---
-    # Sử dụng relationship 'applications' từ Post model (được tạo bởi backref)
-    # Sắp xếp theo ngày đăng ký, mới nhất trước hoặc cũ nhất trước tùy bạn chọn
+    current_filter_status = request.args.get('status_filter', 'pending', type=str).lower()  # Mặc định là pending
+    page = request.args.get('page', 1, type=int)
+    PER_PAGE = 10
+
+    base_query = TopicApplication.query.filter_by(post_id=topic.id) \
+        .options(joinedload(TopicApplication.student)) \
+        .order_by(TopicApplication.application_date.desc())
+
+    query_to_paginate = base_query
+    if current_filter_status == 'pending':
+        query_to_paginate = base_query.filter(TopicApplication.status == 'pending')
+    elif current_filter_status == 'accepted':
+        query_to_paginate = base_query.filter(TopicApplication.status == 'accepted')
+    elif current_filter_status == 'rejected':
+        query_to_paginate = base_query.filter(TopicApplication.status == 'rejected')
+    # Nếu 'all', query_to_paginate là base_query (chứa tất cả)
+
+    # Thực hiện phân trang trực tiếp bằng SQLAlchemy
+    pagination_object = None  # Khởi tạo
+    display_apps = []
     try:
-        applications = post.applications.order_by(TopicApplication.application_date.asc()).all()
+        pagination_object = query_to_paginate.paginate(page=page, per_page=PER_PAGE, error_out=False)
+        display_apps = pagination_object.items
     except Exception as e:
-        print(f"Lỗi khi query applications cho post {post.id}: {e}")
-        applications = []
-        flash("Lỗi khi tải danh sách đơn đăng ký.", "danger")
+        app.logger.error(f"Error paginating applications for topic {topic.id}: {e}", exc_info=True)
+        flash("Error loading applications list.", "danger")
 
-    return render_template('topic_applications.html',
-                           title=f"Đơn đăng ký: {post.title}",
-                           topic=post,
-                           post=post,
-                           applications=applications)
+    # Lấy số lượng cho các nút filter
+    all_applications_count = 0
+    pending_apps_count = 0
+    approved_apps_count = 0
+    rejected_apps_count = 0
+    try:
+        all_applications_count = TopicApplication.query.filter_by(post_id=topic.id).count()
+        pending_apps_count = TopicApplication.query.filter_by(post_id=topic.id, status='pending').count()
+        approved_apps_count = TopicApplication.query.filter_by(post_id=topic.id, status='accepted').count()
+        rejected_apps_count = TopicApplication.query.filter_by(post_id=topic.id, status='rejected').count()
+    except Exception as e:
+        app.logger.error(f"Error counting applications for topic {topic.id}: {e}")
 
-
+    return render_template(
+        'topic_applications.html',
+        title=f"Applications for: {topic.title}",
+        topic=topic,
+        display_apps=display_apps,  # Danh sách để lặp và hiển thị
+        pagination=pagination_object,  # ĐỐI TƯỢNG PAGINATION TỪ SQLAlchemy
+        all_applications_count=all_applications_count,
+        pending_apps_count=pending_apps_count,
+        approved_apps_count=approved_apps_count,
+        rejected_apps_count=rejected_apps_count,
+        current_filter_status=current_filter_status
+    )
 @app.route('/application/<int:application_id>/update_status', methods=['POST'])
 @login_required
 def update_application_status(application_id):
@@ -2012,7 +2044,8 @@ def my_applications():
     return render_template('my_applications.html',
                            title='Đề tài Đã Đăng ký',
                            applications_pagination=pagination)
-def send_password_reset_email(user): # ĐỊNH NGHĨA HÀM NÀY Ở ĐÂY
+
+def send_password_reset_email(user):  # ĐỊNH NGHĨA HÀM NÀY Ở ĐÂY
     token = user.get_reset_password_token()
     msg_title = "Password Reset Request - FIT Research Connect"
     sender_email = current_app.config.get('MAIL_DEFAULT_SENDER', 'noreply@example.com')
@@ -2032,9 +2065,9 @@ This link is valid for 30 minutes.
         app.logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
         return False
 
+
 # Bây giờ mới đến các route sử dụng hàm trên
 @app.route("/request_password_reset", methods=['GET', 'POST'])
-
 @app.route("/request_password_reset", methods=['GET', 'POST'])  # URL mới cho việc yêu cầu
 def request_password_reset():  # Tên hàm mới -> endpoint 'request_password_reset'
     if current_user.is_authenticated:
