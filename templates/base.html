@@ -59,8 +59,9 @@
                            aria-current="page" href="{{ url_for('dashboard') }}">FIT Researches</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('showcase') %}active{% endif %}"></a>
-                        <a href="{{ url_for('view_all_showcase_items_explicit') }}">Featured Works</a></li>
+                        <a class="nav-link {% if request.path.startswith('/showcase') %}active{% endif %}"
+                           href="{{ url_for('view_all_showcase_items_explicit') }}">Featured Works</a>
+                    </li>
 
                     {# Các link này sẽ hiển thị tùy theo vai trò người dùng (student/lecturer) #}
                     {# Sinh viên sẽ thấy "Registered Topics" và "My Ideas" #}
