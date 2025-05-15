@@ -1117,18 +1117,11 @@ body {
     /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Bỏ bóng đổ nếu không muốn */
 }
 
-.main-header-logo-wrapper {
-    background-color: #ffffff; /* Nền trắng cho dải logo */
-    padding: 0.5rem 0.75rem; /* Padding cho logo */
-    margin-left: -12px; /* Kéo logo sát lề trái của container-fluid (Bootstrap mặc định có padding cho container-fluid) */
-    margin-right: 1rem; /* Khoảng cách với ô tìm kiếm */
-    height: 100%; /* Cho nền trắng cao bằng navbar (cần navbar có chiều cao cố định hoặc dùng flex) */
-    display: flex;
-    align-items: center;
-}
+
 .main-header-logo-wrapper img.main-header-logo-img {
     height: 38px; /* Điều chỉnh chiều cao logo */
     max-width: 90px;
+
 }
 
 .main-header-search-wrapper {
@@ -1262,12 +1255,7 @@ body {
     padding-bottom: 0.5rem;
 }
 
-.navbar-brand {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    margin-right: 1rem; /* Giữ khoảng cách với mục tiếp theo (thanh tìm kiếm) */
-    /* margin-left: 0; */ /* Không cần margin-left ở đây nếu bạn đặt cho img */
-}
+
 
 #navbarLogo { /* Hoặc .navbar-brand img nếu bạn không dùng ID */
     height: 35px;   /* Chiều cao logo bạn đã chọn */
@@ -1560,43 +1548,23 @@ body {
     /* padding-right: 5px; */
 }
 
-/* --- Logo styling --- */
-/* static/css/style.css */
 
-/* ... (các CSS đã có của bạn) ... */
-
-/* --- Logo styling --- */
 .main-header-logo-wrapper {
-    /* background-color: #ffffff; */ /* Đảm bảo dòng này đã được bỏ hoặc comment */
+
     width: auto;
     height: auto;
-    padding: 0 5px 0 10px; /* Giữ hoặc điều chỉnh padding cho vị trí */
+    padding: 0px 5px 0px 10px; /* Giữ hoặc điều chỉnh padding cho vị trí */
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 10px;
+    margin-right: 0;
     flex-shrink: 0;
 }
 
-.main-header-logo-wrapper img.main-header-logo-img {
-    /* Đặt chiều cao mong muốn cho logo mới.
-       Logo HANU này có vẻ hợp với chiều cao khoảng 40px-45px
-       để các chi tiết vẫn rõ ràng trên header 60px. */
-    height: 42px;  /* <<< THỬ NGHIỆM GIÁ TRỊ NÀY (ví dụ: 40px, 42px, 45px) */
-    /* width sẽ tự động điều chỉnh theo tỷ lệ nếu chỉ đặt height */
-    max-width: 100%;
-    max-height: 100%; /* Đảm bảo nó không vượt quá chiều cao của navbar */
-    object-fit: contain; /* Quan trọng để giữ tỷ lệ logo */
-    display: block;
-    /* (TÙY CHỌN) Nếu logo mới có nền đỏ giống hệt nền header,
-       và bạn muốn nó hòa vào nền header mà không có đường viền/padding nào
-       của wrapper, bạn có thể thử bỏ padding của wrapper: */
-    /* .main-header-logo-wrapper { padding: 0; } */
-    /* Tuy nhiên, một chút padding nhỏ (ví dụ 5px) có thể giúp logo
-       "dễ thở" hơn. */
-}
 
-/* ... (phần CSS còn lại của bạn) ... */
+
+
+
 
 /* Search wrapper and form styling */
 .main-header-search-wrapper {

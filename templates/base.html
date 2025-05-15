@@ -20,7 +20,7 @@
 {# templates/base.html #}
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red"> {# Đã có class main-header-custom-red #}
     <div class="container-fluid">
-        {# LOGO - Bọc trong div có nền trắng riêng #}
+
         <a class="navbar-brand main-header-logo-wrapper" href="{{ url_for('home') }}">
             {# Thay 'logo_fit_hanoi.png' bằng tên file logo chính xác của bạn trong static/logo_pics/ #}
             <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo" class="main-header-logo-img">
@@ -41,8 +41,6 @@
                         <input class="form-control search-input-custom-red" type="search" placeholder="Search" {# Đổi placeholder #}
                                aria-label="Search" name="q" id="navbarSearchInputCustomRed" autocomplete="off"
                                value="{{ request.args.get('q', '') }}">
-                        {# Bỏ nút "Tìm kiếm" text ở đây nếu ảnh không có #}
-                        {# <button class="btn search-button-custom-red" type="submit">Tìm kiếm</button> #}
                     </div>
                 </form>
                 <div class="dropdown-menu search-results-dropdown-custom-red" id="searchResultsDropdownCustomRed"></div>
