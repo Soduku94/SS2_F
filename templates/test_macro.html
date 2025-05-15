@@ -1,0 +1,20 @@
+{# D:\SS2_F\templates\test_macro.html #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Macro Page</title>
+</head>
+<body>
+    <h1>Testing Macro Import</h1>
+
+    {# Dòng này sẽ gây lỗi nếu _form_macros.html không tồn tại hoặc sai đường dẫn #}
+    {# {% from "_form_macros.html" import render_field %} #}
+
+    <p>If you see this, test_macro.html was found and rendered.</p>
+
+    {# Nếu bạn muốn test cả việc import macro, hãy đảm bảo _form_macros.html tồn tại và bỏ comment dòng from ở trên #}
+    {# Sau đó bạn có thể thử gọi macro nếu nó có một trường giả để render #}
+
+</body>
+</html>

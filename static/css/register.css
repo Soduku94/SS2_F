@@ -20,7 +20,6 @@ body.page-register-v3 {
     /* min-vh-75 để row có chiều cao tối thiểu, có thể điều chỉnh */
     /* align-items-stretch để các cột con có chiều cao bằng nhau */
     background-color: #fff; /* Nền trắng cho cả khu vực 2 cột */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Thêm bóng đổ nhẹ */
     border-radius: 0.5rem; /* Bo góc cho cả khối */
     overflow: hidden; /* Đảm bảo bo góc áp dụng cho ảnh nền cột phải */
 }

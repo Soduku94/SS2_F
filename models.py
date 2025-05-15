@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from extensions import db, bcrypt  # Import từ extensions
 from flask_login import UserMixin
 from sqlalchemy import Date
+from flask import current_app
+from itsdangerous import URLSafeTimedSerializer as Serializer
 
 # --- Bảng liên kết ---
 # Bảng liên kết Giảng viên nhận Ý tưởng của Sinh viên
@@ -76,6 +78,24 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         """Kiểm tra password hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
+
+
+
+    #  pasword
+    def get_reset_password_token(self, expires_sec=3600):  # Token có hiệu lực 1 giờ
+        s = Serializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+
+    @staticmethod
+    def verify_reset_password_token(token, expires_sec=3600):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token, max_age=expires_sec)
+            user_id = data.get('user_id')
+        except Exception as e:  # Bắt các lỗi của itsdangerous (SignatureExpired, BadSignature, etc.)
+            current_app.logger.warning(f"Password reset token verification failed: {e}")
+            return None
+        return User.query.get(user_id)
 
     def __repr__(self):
         return f"User('{self.full_name}', '{self.email}', '{self.role}')"
