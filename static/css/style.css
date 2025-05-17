@@ -266,8 +266,8 @@ body {
     /* Ví dụ (đảm bảo giá trị này đúng với chiều cao navbar của bạn đã thu nhỏ): */
     /* body {
         font-family: 'IBM Plex Sans', sans-serif; /* Font chung */
-    /* padding-top: 42px; /* HOẶC CHIỀU CAO NAVBAR THỰC TẾ */
-    /* background-color: #f8f9fa; /* Màu nền mặc định cho các trang khác nếu cần */
+    /* padding-top: 42px; !* HOẶC CHIỀU CAO NAVBAR THỰC TẾ */
+    /* background-color: #f8f9fa; !* Màu nền mặc định cho các trang khác nếu cần */
     /* } */
 
     /* Class tùy chọn cho body của trang đăng ký này nếu muốn style nền khác biệt */
@@ -596,7 +596,7 @@ body {
     /* Ví dụ (đảm bảo giá trị này đúng với chiều cao navbar của bạn đã thu nhỏ): */
     /* body {
         font-family: 'IBM Plex Sans', sans-serif; /* Font chung */
-    /* padding-top: 42px; /* HOẶC CHIỀU CAO NAVBAR THỰC TẾ */
+    /* padding-top: 42px; !* HOẶC CHIỀU CAO NAVBAR THỰC TẾ */
     /* } */
 
     /* Body của trang login - Ảnh nền toàn màn hình */
@@ -701,7 +701,7 @@ body {
     /* --- Giao diện Trang "Ý tưởng của tôi" (Phong cách V3 - Final) --- */
 
     /* body.page-my-ideas-v3-final {
-        /* background-color: #f8f9fa; /* Nền chung nếu muốn, nhưng ảnh mẫu là nền trắng */
+        /* background-color: #f8f9fa; !* Nền chung nếu muốn, nhưng ảnh mẫu là nền trắng */
     /* } */
 
     .my-ideas-container-v3-final {
@@ -1883,7 +1883,7 @@ body {
 
     .main-header-search-form .form-control.main-header-search-input:focus {
         box-shadow: none;
-        /* background-color: #f8f9fa; /* Nền hơi đổi khi focus (tùy chọn) */
+        /* background-color: #f8f9fa; !* Nền hơi đổi khi focus (tùy chọn) */
     }
 
     .main-header-search-dropdown { /* Dropdown gợi ý */
@@ -2148,3 +2148,213 @@ body {
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
+/* day là phân css header*/
+@media (max-width: 991.98px) { /* Hoặc breakpoint navbar-expand-lg của bạn */
+    .main-header-custom-red .navbar-collapse.show {
+        background-color: #990000 !important; /* CÙNG MÀU VỚI NAVBAR CHÍNH */
+        /* Thêm chút padding nếu các mục dính sát vào nhau */
+        /* padding-top: 0.5rem; */
+        /* padding-bottom: 0.5rem; */
+    }
+
+    /* Các nav-link đã có màu trắng nên có thể không cần thêm gì,
+       nhưng đảm bảo không có style nào khác ghi đè chúng trên mobile */
+    .main-header-custom-red .navbar-collapse.show .main-header-nav-items-custom-red .nav-link {
+        /* Có thể thêm padding hoặc border-bottom với màu tương phản nhẹ nếu muốn */
+        /* border-bottom: 1px solid rgba(255,255,255,0.2) !important; */
+        /* padding: 0.75rem 1rem !important; */
+    }
+    /* .main-header-custom-red .navbar-collapse.show .main-header-nav-items-custom-red .nav-item:last-child .nav-link {
+        border-bottom: none !important;
+    } */
+
+    /* Đảm bảo các icon và tên user vẫn là màu trắng/sáng */
+    .main-header-custom-red .navbar-collapse.show .main-header-username-custom-red,
+    .main-header-custom-red .navbar-collapse.show .main-header-icon-custom-red {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+     /* Dropdown con của user cũng nên có nền tối nếu menu chính nền tối */
+    .main-header-custom-red .navbar-collapse.show .dropdown-menu.main-header-dropdown-custom-red {
+        background-color: #800000; /* Nền tối hơn chút cho dropdown con */
+    }
+    .main-header-custom-red .navbar-collapse.show .dropdown-menu.main-header-dropdown-custom-red .dropdown-item {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+     .main-header-custom-red .navbar-collapse.show .dropdown-menu.main-header-dropdown-custom-red .dropdown-item:hover {
+        background-color: #700000;
+        color: #ffffff !important;
+    }
+
+}
+
+
+/*card chung */
+.item-card {
+    /* Có thể thêm border-left màu sắc tùy theo loại/trạng thái nếu muốn */
+    /* border-left: 5px solid transparent; */
+    transition: box-shadow 0.2s ease-in-out;
+}
+.item-card:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.10)!important; /* Tăng nhẹ shadow khi hover */
+}
+
+.item-card-header .item-title {
+    font-size: 1.15rem; /* Điều chỉnh kích thước tiêu đề */
+}
+
+.item-card-header .badge {
+    font-size: 0.75em; /* Kích thước badge nhỏ hơn chút */
+    margin-bottom: 0.25rem; /* Để các badge không dính vào nhau nếu xuống dòng */
+}
+
+.item-meta p {
+    margin-bottom: 0.25rem !important;
+}
+
+.attachment-link-condensed i {
+    color: #6c757d; /* Màu icon paperclip */
+}
+.blockquote-sm {
+    font-size: 0.9em;
+}
+
+
+
+/* === Custom Button Styles for FIT Research Connect === */
+
+/* --- Brand Primary Button (Red) --- */
+.btn-fit-primary {
+  background-color: #990000;
+  border-color: #800000;
+  color: #ffffff;
+}
+.btn-fit-primary:hover,
+.btn-fit-primary:focus,
+.btn-fit-primary.focus,
+.btn-fit-primary:active,
+.btn-fit-primary.active {
+  background-color: #7A0000;
+  border-color: #600000;
+  color: #ffffff;
+}
+.btn-fit-primary:focus, .btn-fit-primary.focus {
+  box-shadow: 0 0 0 0.25rem rgba(153, 0, 0, 0.4);
+}
+
+/* --- Brand Outline Primary Button (Red Outline) --- */
+.btn-fit-outline-primary {
+  color: #990000;
+  border-color: #990000;
+}
+.btn-fit-outline-primary:hover,
+.btn-fit-outline-primary:focus,
+.btn-fit-outline-primary.focus,
+.btn-fit-outline-primary:active,
+.btn-fit-outline-primary.active {
+  background-color: #990000;
+  border-color: #990000;
+  color: #ffffff;
+}
+.btn-fit-outline-primary:focus, .btn-fit-outline-primary.focus {
+  box-shadow: 0 0 0 0.25rem rgba(153, 0, 0, 0.3);
+}
+
+/* --- Brand Secondary Button (Gray - optional, you can use Bootstrap's .btn-secondary) --- */
+.btn-fit-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: #ffffff;
+}
+.btn-fit-secondary:hover,
+.btn-fit-secondary:focus,
+.btn-fit-secondary.focus,
+.btn-fit-secondary:active,
+.btn-fit-secondary.active {
+  background-color: #5a6268;
+  border-color: #545b62;
+  color: #ffffff;
+}
+.btn-fit-secondary:focus, .btn-fit-secondary.focus {
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5);
+}
+
+/* --- Brand Danger Button (Slightly different red or your main red) --- */
+.btn-fit-danger {
+  background-color: #DC3545; /* Bootstrap's danger red */
+  border-color: #DC3545;
+  color: #ffffff;
+}
+.btn-fit-danger:hover,
+.btn-fit-danger:focus,
+.btn-fit-danger.focus,
+.btn-fit-danger:active,
+.btn-fit-danger.active {
+  background-color: #c82333;
+  border-color: #bd2130;
+  color: #ffffff;
+}
+.btn-fit-danger:focus, .btn-fit-danger.focus {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.5);
+}
+
+/* --- Brand Success Button (Bootstrap's green) --- */
+.btn-fit-success {
+  background-color: #198754;
+  border-color: #198754;
+  color: #ffffff;
+}
+.btn-fit-success:hover,
+.btn-fit-success:focus,
+.btn-fit-success.focus,
+.btn-fit-success:active,
+.btn-fit-success.active {
+  background-color: #157347;
+  border-color: #146c43;
+  color: #ffffff;
+}
+.btn-fit-success:focus, .btn-fit-success.focus {
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.5);
+}
+
+
+/* --- Custom Like Button States (using brand colors) --- */
+.btn-like-custom { /* Base for like button, not liked state */
+  color: #990000;
+  border-color: #990000;
+  background-color: transparent;
+}
+.btn-like-custom:hover, .btn-like-custom:focus {
+  color: #ffffff;
+  background-color: #990000;
+  border-color: #990000;
+}
+
+.btn-liked-custom { /* Liked state */
+  color: #ffffff;
+  background-color: #990000;
+  border-color: #800000;
+}
+.btn-liked-custom:hover, .btn-liked-custom:focus {
+  color: #ffffff;
+  background-color: #7A0000;
+  border-color: #600000;
+}
+
+/* --- Pagination Active State --- */
+.pagination .page-item.active .page-link {
+    background-color: #990000;
+    border-color: #800000;
+    color: #ffffff;
+}
+.pagination .page-link {
+    color: #990000; /* Màu cho số trang không active */
+}
+.pagination .page-link:hover {
+    color: #7A0000;
+    background-color: #f0f0f0; /* Nền khi hover số trang */
+    border-color: #ddd;
+}
+.pagination .page-item.disabled .page-link {
+    color: #6c757d; /* Màu cho nút disabled */
+}

@@ -18,44 +18,132 @@
 
 
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top main-header-custom-red">
-    {# Đã có class main-header-custom-red #}
+    {# Hoặc class nền đỏ tùy chỉnh của bạn #}
     <div class="container-fluid">
 
-        <a class="navbar-brand main-header-logo-wrapper" href="{{ url_for('home') }}">
-            {# Thay 'logo_fit_hanoi.png' bằng tên file logo chính xác của bạn trong static/logo_pics/ #}
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
             <img src="{{ url_for('static', filename='logo_pics/logo.png') }}" alt="FIT Research Connect Logo"
-                 class="main-header-logo-img">
+                 class="main-header-logo-img me-2" style="height: 35px;"> {# Thêm class me-2 để có khoảng cách nhỏ #}
+            <span>FIT Research Connect</span>
         </a>
-        <a class="navbar-brand main-header-logo-wrapper" href="{{ url_for('home') }}">
-            <p>FIT Research Connect</p>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavCustomRed"
-                aria-controls="navbarNavCustomRed" aria-expanded="false" aria-label="Toggle navigation">
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarNavCustomRed">
-            {# Ô TÌM KIẾM - Đặt ở giữa #}
-            <div class="mx-auto main-header-search-wrapper">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <div class="search-bar-wrapper-mobile mx-auto my-2 my-lg-0" style="width: 100%;">
                 <form class="d-flex main-header-search-form" role="search" method="GET"
                       action="{{ url_for('search_results') }}">
                     <div class="input-group">
-                        {# Icon kính lúp bên trái input #}
                         <span class="input-group-text search-icon-bg-custom-red"><i class="bi bi-search"></i></span>
                         <input class="form-control search-input-custom-red" type="search" placeholder="Search"
-                                {# Đổi placeholder #}
                                aria-label="Search" name="q" id="navbarSearchInputCustomRed" autocomplete="off"
                                value="{{ request.args.get('q', '') }}">
                     </div>
                 </form>
-                <div class="dropdown-menu search-results-dropdown-custom-red" id="searchResultsDropdownCustomRed"></div>
             </div>
 
-            {# CÁC LINK ĐIỀU HƯỚNG VÀ USER AVATAR - Đẩy sang phải #}
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center main-header-nav-items-custom-red">
+            <div class="mobile-columns-container d-lg-none pt-2"> {# pt-2 để có khoảng cách với search bar #}
+                <div class="d-flex justify-content-between"> {# Container flex cho 2 cột #}
+
+                    <ul class="navbar-nav flex-column mobile-nav-links-column">
+                        {% if current_user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
+                                   aria-current="page" href="{{ url_for('dashboard') }}">Home Page</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path.startswith('/showcase') %}active{% endif %}"
+                                   href="{{ url_for('view_all_showcase_items_explicit') }}">Featured Works</a>
+                            </li>
+                            {# Các link tùy theo vai trò #}
+                            {% if current_user.role == 'student' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'my_applications' %}active{% endif %}"
+                                       href="{{ url_for('my_applications') }}">Registered Topics</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'my_ideas' %}active{% endif %}"
+                                       href="{{ url_for('my_ideas') }}">My Ideas</a>
+                                </li>
+                            {% elif current_user.role == 'lecturer' %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'my_posts' %}active{% endif %}"
+                                       href="{{ url_for('my_posts') }}">My Posts</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}"
+                                       href="{{ url_for('view_pending_ideas') }}">Student Ideas</a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            {# Nếu có link cho người chưa đăng nhập ở đây #}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+                        {% endif %}
+                    </ul>
+
+                    <ul class="navbar-nav flex-column align-items-end mobile-user-actions-column">
+                        {# align-items-end để các mục trong cột này căn phải #}
+                        {% if current_user.is_authenticated %}
+                            <li class="nav-item position-relative">
+                                <a class="nav-link" href="{{ url_for('notifications') }}" title="Notifications">
+                                    <i class="bi bi-bell-fill main-header-icon-custom-red"></i>
+                                    {% if unread_count > 0 %} {# unread_count cần được truyền vào template #}
+                                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                <span class="visually-hidden">New notifications</span>
+                            </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                                   id="navbarDropdownUserLinkMobile" role="button" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
+                                    {% set image_folder = 'user_pics' %}
+                                    {% if image_filename.startswith('default') %}
+                                        {% set image_folder = 'profile_pics' %}
+                                        {% if current_user.gender == 'female' %}
+                                            {% set image_filename = 'default_female.jpg' %}
+                                            {% elif current_user.gender == 'male' %}{% set image_filename = 'default_male.jpg' %}
+                                        {% else %}{% set image_filename = 'default.jpg' %}{% endif %}
+                                    {% endif %}
+                                    {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
+                                    <img src="{{ avatar_url }}" alt="Avatar"
+                                         class="rounded-circle me-1 main-header-avatar-custom-red"
+                                         style="width:30px; height:30px;">
+                                    <span class="main-header-username-custom-red">{{ current_user.full_name }}</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end main-header-dropdown-custom-red"
+                                    aria-labelledby="navbarDropdownUserLinkMobile">
+                                    <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile</a></li>
+                                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin
+                                            Dashboard</a></li>
+                                    {% endif %}
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center main-header-nav-items-custom-red d-none d-lg-flex">
+                {# SAO CHÉP TOÀN BỘ CÁC <li class="nav-item">...</li> CHO DESKTOP VÀO ĐÂY #}
+                {# Bao gồm 4 link điều hướng chính, icon chuông, và avatar/user dropdown như cách nó hiển thị đúng trên desktop #}
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        {# Đổi tên link "FIT Researches" thành "Dashboard" hoặc route tương ứng #}
                         <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
                            aria-current="page" href="{{ url_for('dashboard') }}">Home Page</a>
                     </li>
@@ -63,9 +151,7 @@
                         <a class="nav-link {% if request.path.startswith('/showcase') %}active{% endif %}"
                            href="{{ url_for('view_all_showcase_items_explicit') }}">Featured Works</a>
                     </li>
-
-                    {# Các link này sẽ hiển thị tùy theo vai trò người dùng (student/lecturer) #}
-                    {# Sinh viên sẽ thấy "Registered Topics" và "My Ideas" #}
+                    {# ... (các link khác cho student/lecturer) ... #}
                     {% if current_user.role == 'student' %}
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'my_applications' %}active{% endif %}"
@@ -76,7 +162,6 @@
                                href="{{ url_for('my_ideas') }}">My Ideas</a>
                         </li>
                     {% elif current_user.role == 'lecturer' %}
-                        {# Giảng viên có thể có các link khác, ví dụ: #}
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'my_posts' %}active{% endif %}"
                                href="{{ url_for('my_posts') }}">My Posts</a>
@@ -87,23 +172,22 @@
                         </li>
                     {% endif %}
 
-                    {# Thông báo và User Avatar #}
                     <li class="nav-item position-relative me-2">
                         <a class="nav-link d-flex align-items-center" href="{{ url_for('notifications') }}"
                            title="Notifications">
                             <i class="bi bi-bell-fill main-header-icon-custom-red"></i>
                             {% if current_user.is_authenticated and unread_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-white border border-light rounded-circle notification-badge-custom-red">
-                                    <span class="visually-hidden">New notifications</span>
-                                </span>
+                                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <span class="visually-hidden">New notifications</span>
+                    </span>
                             {% endif %}
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                           id="navbarDropdownUserLinkCustomRed" role="button" data-bs-toggle="dropdown"
+                           id="navbarDropdownUserLinkDesktop" role="button" data-bs-toggle="dropdown"
                            aria-expanded="false">
-                            {# Logic lấy avatar giữ nguyên #}
+
                             {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
                             {% set image_folder = 'user_pics' %}
                             {% if image_filename.startswith('default') %}
@@ -114,25 +198,20 @@
                             {% endif %}
                             {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
                             <img src="{{ avatar_url }}" alt="Avatar"
-                                 class="rounded-circle me-1 main-header-avatar-custom-red">
+                                 class="rounded-circle me-1 main-header-avatar-custom-red"
+                                 style="width:30px; height:30px;">
                             <span class="main-header-username-custom-red">{{ current_user.full_name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end main-header-dropdown-custom-red"
-                            aria-labelledby="navbarDropdownUserLinkCustomRed">
+                            aria-labelledby="navbarDropdownUserLinkDesktop">
+                            {# ... (Copy y hệt các mục trong dropdown user cho desktop) ... #}
                             <li><a class="dropdown-item" href="{{ url_for('account') }}">Profile</a></li>
-                            {# Các mục dropdown khác giữ nguyên hoặc tùy chỉnh #}
                             {% if current_user.is_authenticated and current_user.role == 'admin' %}
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="{{ url_for('admin.index') }}">Admin Dashboard</a>
                                 </li>
-                            {% endif %}
-                            {% if current_user.is_authenticated and current_user.role == 'lecturer' and 'my_posts' %}
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="{{ url_for('my_posts') }}">My Posts</a></li>
                             {% endif %}
                             <li>
                                 <hr class="dropdown-divider">
@@ -141,15 +220,12 @@
                         </ul>
                     </li>
                 {% else %}
-                    {# Các mục cho người dùng chưa đăng nhập (nếu có) #}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
                 {% endif %}
             </ul>
+
+
         </div>
     </div>
 </nav>
