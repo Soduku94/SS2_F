@@ -5,13 +5,13 @@
     <div class="container mt-4">
         <h1 class="mb-4">{{ list_title }}</h1> {# Example: "Pending Ideas" or "Responded Ideas" #}
         {# Tabs to switch between Pending and Responded can be added here later #}
-        <div class="nav nav-tabs mb-3">
-            <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %}"
-               href="{{ url_for('view_pending_ideas') }}">Pending Review</a>
-            <a class="nav-link {% if request.endpoint == 'view_responded_ideas' %}active{% endif %}"
-               href="{{ url_for('view_responded_ideas') }}">Responded</a>
-            {# Other filters can be added here #}
-        </div>
+     <div class="nav nav-tabs mb-3">
+    <a class="nav-link {% if request.endpoint == 'view_pending_ideas' %}active{% endif %} tab-pending-custom-color"
+       href="{{ url_for('view_pending_ideas') }}">Pending Review</a>
+    <a class="nav-link {% if request.endpoint == 'view_responded_ideas' %}active{% endif %} tab-responded-custom-color"
+       href="{{ url_for('view_responded_ideas') }}">Responded</a>
+    {# Other filters can be added here #}
+</div>
 
         {% if ideas_pagination and ideas_pagination.items %}
             <div class="table-responsive shadow-sm rounded">
@@ -94,9 +94,9 @@
                 </table>
             </div>
         {% else %}
-            <div class="alert alert-info" role="alert">
-                Currently, there are no ideas matching this filter/view.
-            </div>
+             <div class="alert alert-custom-no-ideas-view" role="alert">
+        Currently, there are no ideas matching this filter/view.
+    </div>
         {% endif %}
 
         {# --- Pagination (Ensure url_for uses the correct current endpoint) --- #}
@@ -128,4 +128,5 @@
         {# --- End Pagination --- #}
 
     </div>
+
 {% endblock %}

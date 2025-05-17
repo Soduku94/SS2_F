@@ -7,9 +7,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10"> {# Cột rộng hơn một chút #}
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white"> {# Header nổi bật hơn #}
-                    <h2 class="mb-0 h4"><i class="bi bi-person-plus-fill me-2"></i>{{ title or "Create New User" }}</h2>
-                </div>
+           <div class="card-header card-header-custom-red text-white">
+    <h2 class="mb-0 h4"><i class="bi bi-person-plus-fill me-2"></i>{{ title or " Tạo người dùng mới " }}</h2>
+</div>
                 <div class="card-body p-4"> {# Tăng padding #}
                     <form method="POST" action="" novalidate>
                         {{ form.hidden_tag() }} {# CSRF token #}
@@ -100,10 +100,9 @@
                             </div>
                         </fieldset>
 
-                        <div class="mt-4 d-flex justify-content-end border-top pt-3">
-                             <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary me-2">Cancel</a>
-                             {{ form.submit(class="btn btn-primary px-4") }} {# Nút submit với text từ form, ví dụ "Create User" #}
-                        </div>
+                      <div class="mt-4 d-flex justify-content-end border-top pt-3">
+<a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary text-cancel-black-on-outline me-2">Cancel</a>     {{ form.submit(class="btn btn-custom-create-user-red px-4") }}
+</div>
                     </form>
                 </div> {# End card-body #}
             </div> {# End card #}

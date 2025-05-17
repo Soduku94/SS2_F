@@ -128,10 +128,10 @@ def list_users():
     PER_PAGE = 20
     if active_tab == 'student':
         query = User.query.filter_by(role='student')
-        list_title = "Danh sách Sinh viên"
+        list_title = "Danh sách sinh viên"
     else: # Tab 'staff'
         query = User.query.filter(User.role != 'student')
-        list_title = "Danh sách Giảng viên & Admin"
+        list_title = "Danh sách giảng viên & admin"
         active_tab = 'staff'
     if search_query:
         search_term = f"%{search_query}%"
@@ -139,7 +139,7 @@ def list_users():
     query = query.order_by(User.full_name.asc())
     pagination = query.paginate(page=page, per_page=PER_PAGE, error_out=False)
     return render_template('admin/users_list.html', # Đảm bảo đúng tên template
-                           title="Quản lý Người dùng",
+                           title="Quản lý người dùng",
                            users_pagination=pagination,
                            search_query=search_query,
                            active_tab=active_tab,
@@ -167,7 +167,8 @@ def create_user():
         except Exception as e:
             db.session.rollback()
             flash(f'Lỗi khi tạo người dùng: {e}', 'danger')
-    return render_template('admin/create_user.html', title='Tạo Người dùng Mới', form=form) # Đảm bảo đúng tên template
+    return render_template('admin/create_user.html', legend=' Tạo người dùng mới ', form=form)
+
 
 # --- Route sửa người dùng ---
 @admin_bp.route('/users/<int:user_id>/edit', methods=['GET', 'POST'])
@@ -235,7 +236,7 @@ def list_posts():
     pagination = Post.query.join(User, Post.user_id == User.id)\
                            .order_by(Post.date_posted.desc())\
                            .paginate(page=page, per_page=PER_PAGE, error_out=False)
-    return render_template('admin/posts_list.html', title="Quản lý Bài đăng & Đề tài", posts_pagination=pagination) # Đảm bảo đúng tên template
+    return render_template('admin/posts_list.html', title="Quản lý bài đăng & đề tài", posts_pagination=pagination) # Đảm bảo đúng tên template
 
 # --- Route xóa bài đăng (Admin) ---
 @admin_bp.route('/posts/<int:post_id>/delete', methods=['POST'])
