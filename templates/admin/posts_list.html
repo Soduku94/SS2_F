@@ -99,9 +99,9 @@
                 </tbody>
             </table>
         </div>
-    {% else %}
-        <div class="alert alert-info">Chưa có bài đăng nào trong hệ thống.</div>
-    {% endif %}
+{% else %}
+    <div class="alert alert-custom-no-posts-admin">Chưa có bài đăng nào trong hệ thống.</div>
+{% endif %}
 
     {# --- Phân Trang --- #}
     {% if posts_pagination and posts_pagination.pages > 1 %}

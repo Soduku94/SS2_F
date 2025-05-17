@@ -75,15 +75,15 @@
             {# --- CỘT PHẢI: MEDIA, LINKS & PUBLISHING OPTIONS --- #}
             <div class="col-lg-4">
                 {# Card 1: Hành động (Sticky) #}
-                 <div class="card shadow-sm mb-4 position-sticky" style="top: 20px;">
-                    <div class="card-header"><h5 class="mb-0">Actions</h5></div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            {{ form.submit(class="btn btn-primary btn-lg") }}
-                            <a href="{{ url_for('admin.list_academic_works') }}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </div>
-                </div>
+                <div class="card shadow-sm mb-4 position-sticky" style="top: 20px;">
+    <div class="card-header"><h5 class="mb-0">Actions</h5></div>
+    <div class="card-body">
+        <div class="d-grid gap-2">
+            {{ form.submit(class="btn btn-custom-save-work-red btn-lg") }} {# << ĐÃ SỬA CLASS #}
+            <a href="{{ url_for('admin.list_academic_works') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </div>
+</div>
 
                 {# Card 2: Media & Links #}
                 <div class="card shadow-sm mb-4">

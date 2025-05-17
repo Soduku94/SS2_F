@@ -1221,8 +1221,8 @@ def submit_idea():
     # Đảm bảo choices vẫn còn nếu validation fail ở POST
     if request.method == 'POST' and not form.validate_on_submit():
         print("Form validation errors (submit_idea):", form.errors)
-        # Choices đã được đặt ở đầu hàm nên vẫn còn
-    return render_template('submit_idea.html', title='Gửi Ý tưởng Mới', form=form)
+
+    return render_template('submit_idea.html', title='Gửi ý tưởng mới', form=form)
 
 
 @app.route('/idea_uploads/<path:filename>')
@@ -1327,9 +1327,9 @@ def view_pending_ideas():
         .paginate(page=page, per_page=PER_PAGE, error_out=False)
 
     return render_template('view_ideas_list.html',  # Đảm bảo đúng tên template
-                           title='Ý tưởng Chờ Duyệt',
+                           title='Ý tưởng chờ duyệt',
                            ideas_pagination=pagination,
-                           list_title='Danh sách Ý tưởng Chờ Duyệt',
+                           list_title='Danh sách ý tưởng chờ duyệt',
                            active_tab='pending')  # Truyền tab nếu template dùng tabs
 
 
@@ -1466,9 +1466,9 @@ def view_responded_ideas():
 
     # Render template
     return render_template('view_ideas_list.html',  # Dùng chung template
-                           title='Ý tưởng Đã Phản hồi',
+                           title='Ý tưởng đã phản hồi',
                            ideas_pagination=pagination,
-                           list_title='Danh sách Ý tưởng Đã Phản hồi',
+                           list_title='Danh sách ý tưởng đã phản hồi',
                            active_tab='responded')  # Truyền tab nếu template dùng tabs
 
 
@@ -1876,7 +1876,7 @@ def showcase():
 
     # --- Render template, truyền cả carousel_items và items_pagination ---
     return render_template('showcase_list.html',
-                           title="Công trình Tiêu biểu",
+                           title="Công trình tiêu biểu",
                            carousel_items=carousel_items,  # <<< TRUYỀN BIẾN NÀY
                            items_pagination=items_pagination,  # <<< Biến cũ cho lưới
                            distinct_types=[t[0] for t in distinct_types],
@@ -2034,7 +2034,7 @@ def my_applications():
 
     # CẦN TẠO TEMPLATE: 'my_applications.html'
     return render_template('my_applications.html',
-                           title='Đề tài Đã Đăng ký',
+                           title='Đề tài đã đăng ký',
                            applications_pagination=pagination)
 
 def send_password_reset_email(user):  # ĐỊNH NGHĨA HÀM NÀY Ở ĐÂY

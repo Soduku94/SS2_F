@@ -136,7 +136,10 @@
             {# --- Kết thúc Phân Trang --- #}
 
         {% else %}
-            <div class="alert alert-info mt-3">You have not registered for any topics yet.</div>
-        {% endif %}
+{% if applications_pagination and applications_pagination.items %}
+
+{% else %}
+    <div class="alert alert-custom-no-topics mt-3">You have not registered for any topics yet.</div>
+{% endif %}        {% endif %}
     </div>
 {% endblock %}

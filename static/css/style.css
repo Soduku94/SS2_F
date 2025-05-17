@@ -861,8 +861,8 @@ body {
 
     .status-rejected-v3-final {
         background-color: #f8d7da;
-        color: #721c24 !important;
-        border: 1px solid #f5c2c7;
+        color: #990000 !important;
+        border: 1px solid #f8d7da;
     }
 
     /* Đỏ nhạt */
@@ -1601,7 +1601,7 @@ body {
     .alert-custom-light-pink {
         color: #721c24; /* Màu chữ đỏ sẫm (màu chữ của alert-danger trong Bootstrap) */
         background-color: #F8D7DA; /* Màu nền hồng nhạt bạn muốn */
-        border-color: #F5C6CB; /* Màu viền hồng nhạt hơn (màu viền của alert-danger) */
+        border-color: #F8D7DA; /* Màu viền hồng nhạt hơn (màu viền của alert-danger) */
         /* Các thuộc tính khác như padding, margin, border-radius sẽ được kế thừa từ class .alert */
     }
 
@@ -1832,7 +1832,7 @@ body {
     /* Navbar chính */
 
     .main-header-custom {
-        background-color: #800000 !important; /* MÀU ĐỎ SẪM - Ví dụ, thay bằng mã màu của bạn */
+        background-color: #990000 !important; /* MÀU ĐỎ SẪM - Ví dụ, thay bằng mã màu của bạn */
         padding-top: .4rem;
         padding-bottom: .4rem;
         /* border-bottom: 3px solid #600000; */ /* Tùy chọn: Đường viền dưới đậm hơn */
@@ -1999,10 +1999,9 @@ body {
     /* Áp dụng cho body của trang login nếu bạn dùng class page-login-horizontal */
 
     body.page-login-horizontal {
-        /* Không cần background ở đây nếu bạn muốn container-fluid chiếm toàn bộ */
-        /* Hoặc đặt một màu nền trung tính nếu cần */
-        background-color: #f0f2f5; /* Màu nền chung nếu có phần lộ ra ngoài */
-        overflow: hidden; /* Tránh thanh cuộn không mong muốn trên toàn trang */
+
+        background-color: #f0f2f5;
+        overflow: hidden;
     }
 
     .login-main-container-horizontal {
@@ -2010,17 +2009,13 @@ body {
     }
 
     .login-info-panel-horizontal {
-        /* NỀN GRADIENT NHƯ TRONG HÌNH ẢNH CỦA BẠN */
-        /* Ví dụ một gradient tím-cam, bạn cần điều chỉnh mã màu cho chính xác */
         background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff8c00 100%); /* Example gradient */
-        /* Hoặc dùng ảnh nền: */
-        /* background-image: url('/static/images/your-login-banner.jpg'); */
         background-size: cover;
         background-position: center;
         display: flex; /* Đã có trong HTML */
         align-items: center;
         justify-content: center;
-        text-align: center; /* Căn giữa text trong phần này */
+        text-align: center;
     }
 
     .login-info-panel-horizontal h1 {
@@ -2035,8 +2030,8 @@ body {
     }
 
     .login-form-panel-horizontal {
-        background-color: #ffffff; /* Nền trắng cho form */
-        display: flex; /* Đã có trong HTML */
+        background-color: #ffffff;
+        display: flex;
         align-items: center;
         justify-content: center;
     }
@@ -2139,12 +2134,303 @@ body {
 
 
     .main-header-logo-container {
-        background-color: #ffffff; /* Nền trắng */
+        background-color: #ffffff;
         padding: 5px 10px;
-        border-radius: 5px; /* Hiện tại đang bo tròn góc */
-        /* border: 2px solid #ffffff; */ /* Viền trắng có thể đã có */
+        border-radius: 5px;
+
         display: inline-flex;
         align-items: center;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
+
+.alert-custom-no-notifications {
+    color: #990000;
+    background-color: #F8D7DA;
+    border-color: #F8D7DA;
+}
+
+.alert-custom-no-notifications .alert-link {
+    color: #f0f0f0;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.alert-custom-no-notifications .alert-link:hover {
+    color: #ffffff;
+}
+.submit-idea-back-link-v5-style {
+    color: #990000;
+    text-decoration: none;
+}
+
+.submit-idea-back-link-v5-style:hover {
+    color: #990000;
+    text-decoration: underline;
+}
+
+
+.alert-custom-no-topics {
+    color: #990000;
+    background-color: #f8d7da;
+    border-color: #f8d7da;
+}
+
+.alert-custom-no-topics .alert-link {
+    color: #f8f9fa;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.alert-custom-no-topics .alert-link:hover {
+    color: #ffffff;
+}
+
+.btn-custom-edit-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+}
+.btn-custom-edit-red:hover,
+.btn-custom-edit-red:focus,
+.btn-custom-edit-red:active {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    box-shadow: none !important;
+}
+
+.btn-custom-save-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+}
+
+.btn-custom-save-red:hover,
+.btn-custom-save-red:focus,
+.btn-custom-save-red:active {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.text-cancel-red {
+    color: #990000 !important;
+    text-decoration: none;
+}
+
+.text-cancel-red:hover {
+    color: #990000 !important;
+    text-decoration: underline;
+}
+
+.btn-custom-add-user-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    text-decoration: none;
+}
+
+.btn-custom-add-user-red:hover {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+}
+
+.btn-custom-add-user-red .bi {
+    margin-right: 0.35rem;
+}
+.nav-tabs .nav-link.text-custom-tab-student-red {
+    color: #990000;
+}
+
+.nav-tabs .nav-link.text-custom-tab-student-red.active {
+    color: #990000;
+
+}
+
+.nav-tabs .nav-link.text-custom-tab-student-red:hover {
+    color: #990000;
+}
+
+
+.nav-tabs .nav-link.text-custom-tab-red {
+    color: #990000;
+}
+
+.nav-tabs .nav-link.text-custom-tab-red.active {
+    color: #990000;
+
+}
+
+.nav-tabs .nav-link.text-custom-tab-red:hover {
+    color: #990000;
+
+}
+.card-header-custom-red {
+    background-color: #990000 !important;
+}
+/* Trong static/css/style.css */
+
+.btn-custom-create-user-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important; /* Hoặc #990000 */
+    color: #ffffff !important;
+    /* Các thuộc tính khác như padding, font-size sẽ được kế thừa từ .btn và .px-4 */
+}
+
+.btn-custom-create-user-red:hover,
+.btn-custom-create-user-red:focus,
+.btn-custom-create-user-red:active {
+    background-color: #990000 !important; /* Màu đỏ đậm hơn khi tương tác */
+    border-color: #990000 !important;
+    color: #ffffff !important;
+    box-shadow: none !important; /* Tùy chọn: bỏ box-shadow nếu có */
+}
+/* Thêm vào cuối file static/css/style.css */
+
+.alert-custom-no-posts-admin {
+    color: #990000; /* Màu chữ trắng để dễ đọc trên nền đỏ */
+    background-color: #f8d7da; /* Màu nền đỏ bạn yêu cầu */
+    border-color: #f8d7da; /* Màu viền đậm hơn một chút (tùy chọn) */
+    padding: 1rem; /* Giữ padding chuẩn của .alert */
+    margin-top: 1rem; /* Giữ margin top nếu cần */
+    border-radius: 0.25rem; /* Bo góc chuẩn của .alert */
+}
+
+/* (Tùy chọn) Nếu bạn có link bên trong alert này */
+.alert-custom-no-posts-admin .alert-link {
+    color: #f8f9fa; /* Màu link sáng hơn */
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.alert-custom-no-posts-admin .alert-link:hover {
+    color: #ffffff;
+}
+/* Nút "Add New Academic Work" màu đỏ */
+.btn-custom-add-work-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important; /* Hoặc #990000 */
+    color: #ffffff !important;
+}
+
+.btn-custom-add-work-red:hover,
+.btn-custom-add-work-red:focus,
+.btn-custom-add-work-red:active {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+}
+/* Nút "Filter" màu đỏ */
+.btn-custom-filter-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important; /* Hoặc #990000 */
+    color: #ffffff !important;
+}
+
+.btn-custom-filter-red:hover,
+.btn-custom-filter-red:focus,
+.btn-custom-filter-red:active {
+    background-color: #990000 !important;
+    border-color: #990000 !important;
+    color: #ffffff !important;
+}
+.alert-custom-no-ideas-view {
+    color: #990000; /* Màu chữ trắng để dễ đọc trên nền đỏ */
+    background-color: #f8d7da; /* Màu nền đỏ bạn yêu cầu */
+    border-color: #f8d7da; /* Màu viền đậm hơn một chút (tùy chọn) */
+    padding: 1rem; /* Giữ padding chuẩn của .alert */
+    margin-top: 1rem; /* Giữ margin top nếu cần */
+    border-radius: 0.25rem; /* Bo góc chuẩn của .alert */
+}
+
+/* (Tùy chọn) Nếu bạn có link bên trong alert này */
+.alert-custom-no-ideas-view .alert-link {
+    color: #f8f9fa; /* Màu link sáng hơn */
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.alert-custom-no-ideas-view .alert-link:hover {
+    color: #ffffff;
+}
+/* Trong static/css/style.css */
+
+/* Định nghĩa màu mặc định cho tab "Responded" */
+.nav-tabs .nav-link.tab-responded-custom-color {
+    color: #990000; /* Màu đỏ khi không active */
+}
+
+/* Khi tab "Responded" active, nó sẽ theo style active mặc định của Bootstrap hoặc bạn có thể tùy chỉnh */
+.nav-tabs .nav-link.tab-responded-custom-color.active {
+    color: #495057; /* Ví dụ: màu chữ đậm hơn khi active (màu mặc định của Bootstrap cho nav-link active) */
+    /* Hoặc một màu khác bạn muốn cho trạng thái active */
+    /* border-color: #dee2e6 #dee2e6 #fff; /* Border mặc định của Bootstrap khi active */
+}
+
+/* (Tùy chọn) Khi hover vào tab "Responded" không active */
+.nav-tabs .nav-link.tab-responded-custom-color:not(.active):hover {
+    color: #7a0000; /* Màu đỏ đậm hơn khi hover */
+    /* border-color: #e9ecef #e9ecef #ddd; /* Điều chỉnh border khi hover nếu cần */
+}
+
+
+.nav-tabs .nav-link.tab-pending-custom-color {
+    color: #990000;
+}
+.nav-tabs .nav-link.tab-pending-custom-color.active {
+    color: #495057;
+}
+.nav-tabs .nav-link.tab-pending-custom-color:not(.active):hover {
+    color: #990000;
+}
+/* Trong static/css/style.css */
+
+.btn-custom-save-work-red {
+    background-color: #990000 !important;
+    border-color: #990000 !important; /* Hoặc #990000 nếu muốn viền cùng màu */
+    color: #ffffff !important;
+    /* Các thuộc tính khác như padding, font-size sẽ được kế thừa từ .btn và .btn-lg */
+}
+
+.btn-custom-save-work-red:hover,
+.btn-custom-save-work-red:focus,
+.btn-custom-save-work-red:active {
+    background-color: #990000 !important; /* Màu đỏ đậm hơn khi tương tác */
+    border-color: #990000 !important;
+    color: #ffffff !important;
+    box-shadow: none !important; /* Tùy chọn: bỏ box-shadow mặc định của Bootstrap nếu có */
+}
+/* Trong static/css/style.css */
+
+/* Định nghĩa màu mặc định cho các tab tùy chỉnh khi không active */
+.nav-tabs .nav-link.tab-pending-custom-color,
+.nav-tabs .nav-link.tab-responded-custom-color {
+    color: #990000; /* Màu đỏ khi không active */
+}
+
+/* Khi tab "Pending Review" active */
+.nav-tabs .nav-link.tab-pending-custom-color.active {
+    color: #495057; /* Màu chữ Bootstrap mặc định cho nav-link active */
+    /* border-color: #dee2e6 #dee2e6 #fff; */ /* Điều chỉnh border nếu cần */
+}
+
+/* Khi tab "Responded" active */
+.nav-tabs .nav-link.tab-responded-custom-color.active {
+    color: #495057; /* Màu chữ Bootstrap mặc định cho nav-link active */
+    /* border-color: #dee2e6 #dee2e6 #fff; */ /* Điều chỉnh border nếu cần */
+}
+
+/* (Tùy chọn) Khi hover vào các tab tùy chỉnh không active */
+.nav-tabs .nav-link.tab-pending-custom-color:not(.active):hover,
+.nav-tabs .nav-link.tab-responded-custom-color:not(.active):hover {
+    color: #990000; /* Màu đỏ đậm hơn khi hover */
+    /* border-color: #e9ecef #e9ecef #ddd; */ /* Điều chỉnh border khi hover nếu cần */
+}

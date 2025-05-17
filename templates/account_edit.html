@@ -123,15 +123,15 @@
 
                         </fieldset>
                         <div class="d-grid mt-3">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#confirmUpdateModal">
-                                Save Changes
-                            </button>
-                        </div>
+    <button type="button" class="btn btn-custom-save-red" data-bs-toggle="modal"
+            data-bs-target="#confirmUpdateModal">
+        Save Changes
+    </button>
+</div>
                     </form>
                     <div class="mt-3 text-center">
-                        <a href="{{ url_for('account') }}">Cancel</a>
-                    </div>
+    <a href="{{ url_for('account') }}" class="text-cancel-red">Cancel</a>
+</div>
                 </div>
                 {# End card-body #}
             </div>
