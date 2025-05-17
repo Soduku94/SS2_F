@@ -26,7 +26,7 @@
                                 {% endif %}
                             {% endif %}
                             {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
-                            <img class="rounded-circle img-thumbnail" src="{{ avatar_url }}" alt="Profile Picture" width="150" height="150" style="object-fit: cover;">
+                            <img class="rounded-circle img-thumbnail" src="{{ avatar_url }}" alt="Profile Picture" width="150" height="150" style="object-fit: contain;">
                         </div>
                         <div class="col-md-5">
                             <h3 class="mb-1">{{ current_user.full_name }}</h3>

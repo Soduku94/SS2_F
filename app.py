@@ -75,16 +75,8 @@ UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # (Tùy chọn) Giới hạn kích thước file upload
-# app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# --- Khởi tạo Extensions ---
-# Naming convention được định nghĩa và truyền vào khi tạo db trong extensions.py
-# Nếu bạn chưa làm vậy, hãy làm theo hướng dẫn cũ hoặc bỏ metadata=metadata ở dưới
-# convention = { ... }
-# metadata = MetaData(naming_convention=convention)
-# db = SQLAlchemy(metadata=metadata) -> nên đặt trong extensions.py
-# db = SQLAlchemy() # Nếu không dùng Naming Convention ngay
-# <<< THÊM PHẦN NÀY CHO THƯ MỤC ẢNH PROFILE >>>
 
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587  # Hoặc 465 nếu dùng SSL
@@ -2066,10 +2058,8 @@ This link is valid for 30 minutes.
         return False
 
 
-# Bây giờ mới đến các route sử dụng hàm trên
-@app.route("/request_password_reset", methods=['GET', 'POST'])
 @app.route("/request_password_reset", methods=['GET', 'POST'])  # URL mới cho việc yêu cầu
-def request_password_reset():  # Tên hàm mới -> endpoint 'request_password_reset'
+def request_password_reset():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))  # Hoặc home
 
