@@ -69,7 +69,7 @@
                      <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-fill"></i> Edit</a>
 
                      {# 3. Delete Button (Modal Trigger) #}
-                     <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}"><i class="bi bi-trash-fill"></i> Delete</button>
+                     <button type="button" class="btn btn-sm btn-fit-outline-dange" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}"><i class="bi bi-trash-fill"></i> Delete</button>
 
                      {# 4. Like Button (Display like count, Lecturer can also like their own posts?) #}
                      <div class="d-inline-block post-like-button-container">
@@ -114,7 +114,7 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                                 <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    <button type="submit" class="btn btn-fit-danger btn-sm">Delete</button>
                                 </form>
                             </div>
                         </div>

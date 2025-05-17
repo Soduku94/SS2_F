@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput@5.5.2/css/fileinput.min.css">
     <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 
 
     <title>{% block title %}FIT Research Connect{% endblock %}</title>
@@ -574,6 +575,242 @@
 
     });
 </script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Khai báo các biến cho phần crop ảnh ---
+        const avatarUploadInput = document.getElementById('avatarUploadInput');
+        const imageToCropElement = document.getElementById('imageToCrop');
+        const avatarCropArea = document.getElementById('avatarCropArea');
+        const avatarCropPlaceholder = document.getElementById('avatarCropPlaceholder');
+        const cropAndUploadButton = document.getElementById('cropAndUploadButton');
+        let cropper; // Khai báo cropper ở đây để dùng chung
+
+        // --- Khai báo biến cho Modal ---
+        const avatarModalElement = document.getElementById('avatarUploadModal');
+        let avatarModal; // Khai báo ở đây, sẽ khởi tạo sau khi kiểm tra element
+
+        if (avatarModalElement) {
+            avatarModal = new bootstrap.Modal(avatarModalElement);
+        } else {
+            console.error('Modal element #avatarUploadModal not found!');
+            // Nếu modal không tìm thấy, có thể vô hiệu hóa các nút liên quan hoặc không làm gì cả
+            if (cropAndUploadButton) cropAndUploadButton.disabled = true;
+            // Nút useDefaultAvatarButton sẽ được kiểm tra sau
+            // return; // Không nên return ở đây nếu còn code khác trong DOMContentLoaded
+        }
+
+        // --- Xử lý chọn file và khởi tạo Cropper ---
+        if (avatarUploadInput && imageToCropElement && avatarCropArea && avatarCropPlaceholder && cropAndUploadButton) {
+            avatarUploadInput.addEventListener('change', function (event) {
+                const files = event.target.files;
+                if (files && files.length > 0) {
+                    const file = files[0];
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('File is too large. Maximum size is 2MB.');
+                        avatarUploadInput.value = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imageToCropElement.src = e.target.result;
+                        avatarCropArea.style.display = 'block';
+                        avatarCropPlaceholder.style.display = 'none';
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        cropper = new Cropper(imageToCropElement, {
+                            aspectRatio: 1 / 1, viewMode: 1, dragMode: 'move',
+                            background: false, autoCropArea: 0.9, responsive: true,
+                            checkOrientation: true, guides: false,
+                        });
+                        cropAndUploadButton.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    avatarCropArea.style.display = 'none';
+                    avatarCropPlaceholder.style.display = 'block';
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+                    cropAndUploadButton.disabled = true;
+                }
+            });
+        } else {
+            console.warn("One or more elements for avatar cropping are missing.");
+        }
+
+        // --- Xử lý nút "Save Picture" (Crop và Upload) ---
+        if (cropAndUploadButton) {
+            cropAndUploadButton.addEventListener('click', function () {
+                if (!cropper) {
+                    alert('Please select an image first.');
+                    return;
+                }
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+                const croppedCanvas = cropper.getCroppedCanvas({
+                    width: 250, height: 250, imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
+                });
+                croppedCanvas.toBlob(function (blob) {
+                    const formData = new FormData();
+                    let originalFileName = avatarUploadInput.files[0].name;
+                    let fileExtension = originalFileName.slice((originalFileName.lastIndexOf(".") - 1 >>> 0) + 2);
+                    if (!['png', 'jpg', 'jpeg', 'gif'].includes(fileExtension.toLowerCase())) {
+                        fileExtension = 'png';
+                    }
+                    formData.append('cropped_avatar', blob, `avatar.${fileExtension}`);
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    fetch("{{ url_for('upload_cropped_avatar_route') }}", {
+                        method: 'POST', headers: {'X-CSRFToken': csrfToken}, body: formData
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(errData => {
+                                    throw errData;
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                const timestamp = new Date().getTime();
+                                const newAvatarSrc = data.new_avatar_url + '?t=' + timestamp;
+                                const profileAvatar = document.querySelector('.profile-page-avatar');
+                                if (profileAvatar) profileAvatar.src = newAvatarSrc;
+                                const navbarAvatar = document.querySelector('.main-header-avatar-custom-red');
+                                if (navbarAvatar) navbarAvatar.src = newAvatarSrc;
+
+                                if (avatarModal) avatarModal.hide(); // Sử dụng biến avatarModal đã khai báo ở scope ngoài
+                                showSimpleToast('Avatar updated successfully!', 'success');
+                            } else {
+                                alert('Error updating avatar: ' + (data.message || 'Unknown error'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Upload error details:', error);
+                            let errorMessage = 'An error occurred during upload.';
+                            if (error && error.message) {
+                                errorMessage = error.message;
+                            }
+                            alert(errorMessage);
+                        })
+                        .finally(() => {
+                            cropAndUploadButton.disabled = false;
+                            cropAndUploadButton.innerHTML = 'Save Picture';
+                        });
+                }, avatarUploadInput.files[0].type || 'image/png');
+            });
+        }
+
+        // --- Xử lý sự kiện khi modal đóng ---
+        if (avatarModalElement) { // Chỉ thêm listener nếu modal element tồn tại
+            avatarModalElement.addEventListener('hidden.bs.modal', function () {
+                if (avatarUploadInput) avatarUploadInput.value = '';
+                if (imageToCropElement) imageToCropElement.src = '#';
+                if (avatarCropArea) avatarCropArea.style.display = 'none';
+                if (avatarCropPlaceholder) avatarCropPlaceholder.style.display = 'block';
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                if (cropAndUploadButton) {
+                    cropAndUploadButton.disabled = true;
+                    cropAndUploadButton.innerHTML = 'Save Picture';
+                }
+            });
+        }
+
+
+        // --- Xử lý nút "Use Default Avatar" ---
+        const useDefaultAvatarButton = document.getElementById('useDefaultAvatarButton');
+        if (useDefaultAvatarButton) { // Kiểm tra nút có tồn tại không
+            useDefaultAvatarButton.addEventListener('click', function () {
+                if (!confirm('Are you sure you want to use the default avatar? Your current custom avatar will be removed.')) {
+                    return;
+                }
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Resetting...';
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                fetch("{{ url_for('set_default_avatar_route') }}", {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': csrfToken, 'Content-Type': 'application/json'},
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errData => {
+                                throw errData;
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const timestamp = new Date().getTime();
+                            const newAvatarSrc = data.new_avatar_url + '?t=' + timestamp;
+                            const profileAvatar = document.querySelector('.profile-page-avatar');
+                            if (profileAvatar) profileAvatar.src = newAvatarSrc;
+                            const navbarAvatar = document.querySelector('.main-header-avatar-custom-red');
+                            if (navbarAvatar) navbarAvatar.src = newAvatarSrc;
+
+                            if (avatarModal) avatarModal.hide(); // Giờ có thể truy cập avatarModal
+                            showSimpleToast('Avatar reset to default successfully!', 'success');
+                        } else {
+                            alert('Error: ' + (data.message || 'Could not reset avatar.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Reset to default avatar error:', error);
+                        let errorMessage = 'An error occurred while resetting avatar.';
+                        if (error && error.message) {
+                            errorMessage = error.message;
+                        }
+                        alert(errorMessage);
+                    })
+                    .finally(() => {
+                        useDefaultAvatarButton.disabled = false;
+                        useDefaultAvatarButton.innerHTML = 'Use Default Avatar';
+                    });
+            });
+        } else {
+            // console.warn("Button #useDefaultAvatarButton not found."); // Bỏ comment nếu muốn debug
+        }
+
+        // --- Hàm helper để hiển thị toast đơn giản ---
+        function showSimpleToast(message, type = 'info') { // Hàm này giờ cũng nằm trong DOMContentLoaded
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                console.warn("Toast container (.toast-container) not found. Cannot show toast message.");
+                return;
+            }
+            let bgColor = 'text-bg-info'; // Bootstrap 5 dùng text-bg-*
+            if (type === 'success') bgColor = 'text-bg-success';
+            if (type === 'danger') bgColor = 'text-bg-danger';
+
+            const toastId = 'simpleToast-' + Date.now();
+            const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center ${bgColor} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+              <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+            </div>`;
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+            if (toastElement) {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+                toastElement.addEventListener('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
+            }
+        }
+    });
+</script>
+
+
 <script src="/static/js/jsAll.js" defer></script>
 
 
@@ -588,6 +825,7 @@
 </footer>
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
     <script src="https://unpkg.com/@yaireo/tagify/dist/tagify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 </div>
 <script src="{{ url_for('static', filename='js/jsAll.js') }}"></script>

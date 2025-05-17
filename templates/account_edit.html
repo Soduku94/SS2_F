@@ -95,31 +95,13 @@
 
                             {# --- Ảnh đại diện (Toàn chiều rộng) --- #}
                             <hr>
-                            <div class="mb-3">
-                                {{ form.picture.label(class="form-label") }} {# Label: "Profile Picture" #}
-                                {{ form.picture(class="form-control") }}
-                                {% if form.picture.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.picture.errors %}<span>{{ error }}</span><br>{% endfor %}
-                                    </div>
-                                {% endif %}
-                                <small class="form-text text-muted">Select a new image file (jpg, png, jpeg, gif) to
-                                    update your profile picture.</small>
-                            </div>
+
                             {# === KHỐI DIV CHO TRƯỜNG PICTURE === #}
                             <hr>
 
 
                             {# --- THÊM CHECKBOX XÓA ẢNH --- #}
-                            {# Chỉ hiển thị nếu người dùng có ảnh tùy chỉnh (không phải default) #}
-                            {% if current_user.image_file and not current_user.image_file.startswith('default') %}
-                                <div class="mb-3 form-check">
-                                    {{ form.delete_picture(class="form-check-input") }}
-                                    {{ form.delete_picture.label(class="form-check-label") }}
-                                    {# Label: "Remove current profile picture and use default" #}
-                                </div>
-                            {% endif %}
-                            {# --- KẾT THÚC CHECKBOX XÓA ẢNH --- #}
+
 
                         </fieldset>
                         <div class="d-grid mt-3">

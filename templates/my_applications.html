@@ -7,18 +7,11 @@
         <h1 class="mb-4">{{ title }}</h1>
         <hr class="mb-4">
 
-        {# --- Hàng Tiêu đề Cột (Visual Header Row) --- #}
-        <div class="d-none d-md-flex text-muted small fw-semibold align-items-center px-2 py-1 mb-2 border-bottom">
-            <div style="width: 50px; flex-shrink: 0;">#</div>
-            <div class="flex-grow-1">Topic Title</div>
-            {# Điều chỉnh chiều rộng cột Status ở header cho phù hợp với vị trí mong muốn của badge #}
-            <div style="width: 180px; flex-shrink: 0;" class="text-center">Status</div>
-            <div style="width: 40px; flex-shrink: 0;"></div>
-            {# Khoảng trống cho icon mũi tên của accordion #}
-        </div>
+
+
 
         {% if applications_pagination and applications_pagination.items %}
-            <div class="accordion shadow-sm" id="registeredTopicsAccordion">
+
                 {% for app in applications_pagination.items %}
                     <div class="card mb-3 shadow-sm item-card">
                         <div class="card-body">
@@ -72,18 +65,14 @@
                                 <a href="{{ url_for('view_post', post_id=app.post_id) }}"
                                    class="btn btn-sm btn-outline-primary"><i class="bi bi-journal-text"></i> Xem đề tài</a>
                                 {% if app.status == 'pending' %}
-                                    <button type="button" class="btn btn-sm btn-outline-danger withdraw-application-btn"
-                                            data-application-id="{{ app.id }}"
-                                            data-withdraw-url="{{ url_for('withdraw_application', application_id=app.id) }}">
-                                        <i class="bi bi-x-lg"></i> Hủy đăng ký
-                                    </button>
+
                                 {% endif %}
                                 {# --- end item_actions --- #}
                             </div>
                         </div>
                     </div>
                 {% endfor %}
-            </div>
+
 
             {# --- Phân trang --- #}
             {% if applications_pagination and applications_pagination.pages > 1 %}

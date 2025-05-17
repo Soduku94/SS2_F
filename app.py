@@ -853,6 +853,126 @@ def save_picture(form_picture, old_picture_filename=None):
 
 # --- KẾT THÚC HÀM ---
 
+
+
+
+
+def save_cropped_avatar(file_storage):  # <--- ĐỊNH NGHĨA HÀM NÀY TRƯỚC
+    """Lưu ảnh avatar đã được crop từ client."""
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(file_storage.filename)
+    if not f_ext:
+        f_ext = '.png'
+    picture_fn = random_hex + f_ext
+    user_pics_dir = current_app.config.get('USER_PICS_FOLDER',
+                                           os.path.join(current_app.root_path, 'static', 'user_pics'))
+    picture_path = os.path.join(user_pics_dir, picture_fn)
+
+    old_picture = current_user.image_file
+    if old_picture and not old_picture.startswith('default'):
+        try:
+            old_picture_path = os.path.join(user_pics_dir, old_picture)
+            if os.path.exists(old_picture_path):
+                os.remove(old_picture_path)
+        except Exception as e:
+            current_app.logger.error(f"Lỗi khi xóa ảnh cũ {old_picture}: {e}")
+    try:
+        file_storage.save(picture_path)
+        return picture_fn
+    except Exception as e:
+        current_app.logger.error(f"Lỗi khi lưu ảnh cropped avatar: {e}", exc_info=True)
+        return None
+
+
+
+
+
+
+
+
+
+@app.route('/upload-cropped-avatar', methods=['POST'])  # Endpoint sẽ là 'upload_cropped_avatar_route' (tên hàm)
+@login_required
+def upload_cropped_avatar_route():  # Tên hàm này sẽ là endpoint
+    if 'cropped_avatar' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No image file found in request.'}), 400
+
+    file = request.files['cropped_avatar']
+    if file.filename == '':
+        return jsonify({'status': 'error', 'message': 'No selected file.'}), 400
+
+    if file:
+        filename = save_cropped_avatar(file)
+        if filename:
+            current_user.image_file = filename
+            try:
+                db.session.commit()
+                # Tạo URL đầy đủ cho ảnh mới để JS có thể cập nhật src
+                new_avatar_url = url_for('static', filename=f'user_pics/{filename}',
+                                         _external=False)  # Bỏ _external=True nếu không cần URL tuyệt đối
+                return jsonify({'status': 'success', 'message': 'Avatar updated!', 'new_avatar_url': new_avatar_url})
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Lỗi DB khi cập nhật avatar: {e}", exc_info=True)
+                return jsonify({'status': 'error', 'message': 'Database error updating avatar.'}), 500
+        else:
+            return jsonify({'status': 'error', 'message': 'Could not save image.'}), 500
+
+    return jsonify({'status': 'error', 'message': 'Invalid file or request.'}), 400
+
+
+
+
+
+@app.route('/account/set-default-avatar', methods=['POST'])
+@login_required
+def set_default_avatar_route():
+    old_picture = current_user.image_file
+    user_pics_dir = current_app.config.get('USER_PICS_FOLDER', os.path.join(current_app.root_path, 'static', 'user_pics'))
+
+    # Chỉ xóa file vật lý nếu đó không phải là một trong các file mặc định
+    # và file đó thực sự tồn tại trong thư mục user_pics
+    default_image_names = ['default.jpg', 'default_male.jpg', 'default_female.jpg']
+    if old_picture and old_picture not in default_image_names:
+        try:
+            old_picture_path = os.path.join(user_pics_dir, old_picture)
+            if os.path.exists(old_picture_path):
+                os.remove(old_picture_path)
+                current_app.logger.info(f"User {current_user.id} removed custom avatar: {old_picture}")
+        except Exception as e:
+            current_app.logger.error(f"Lỗi khi xóa ảnh cũ {old_picture} khi đặt lại mặc định: {e}")
+            # Không nên chặn nếu xóa file lỗi, vẫn tiếp tục cập nhật DB
+
+    # Cập nhật image_file trong DB về 'default.jpg'
+    # Logic chọn default_male/female sẽ được xử lý ở template khi hiển thị
+    current_user.image_file = 'default.jpg'
+    try:
+        db.session.commit()
+        # Xác định URL ảnh mặc định thực tế dựa trên giới tính (nếu có) để JS cập nhật
+        default_avatar_filename = 'default.jpg'
+        if current_user.gender == 'female':
+            default_avatar_filename = 'default_female.jpg'
+        elif current_user.gender == 'male':
+            default_avatar_filename = 'default_male.jpg'
+
+        new_avatar_url = url_for('static', filename=f'profile_pics/{default_avatar_filename}')
+        return jsonify({'status': 'success', 'message': 'Avatar reset to default.', 'new_avatar_url': new_avatar_url})
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Lỗi DB khi đặt lại avatar mặc định: {e}", exc_info=True)
+        return jsonify({'status': 'error', 'message': 'Database error while resetting avatar.'}), 500
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/account/edit', methods=['GET', 'POST'])
 @login_required
 def account_edit():
@@ -909,13 +1029,7 @@ def account_edit():
     return render_template('account_edit.html', title='Chỉnh sửa Thông tin', form=form)
 
 
-# --- STUDENT INTEREST ROUTES ---
-# app.py
-# Import thêm jsonify nếu chưa có ở đầu file
-from flask import jsonify
 
-
-# Import các model, db, current_user, login_required, abort, request, Post, etc.
 
 
 @app.route('/application/<int:application_id>/withdraw', methods=['POST'])

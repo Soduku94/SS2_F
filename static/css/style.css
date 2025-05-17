@@ -2358,3 +2358,56 @@ body {
 .pagination .page-item.disabled .page-link {
     color: #6c757d; /* Màu cho nút disabled */
 }
+
+
+
+/* Trong style.css */
+.avatar-wrapper {
+    position: relative;
+    display: inline-block; /* Hoặc block tùy theo layout */
+    /* Kích thước của wrapper nên bằng kích thước avatar để nút edit định vị đúng */
+}
+
+.profile-page-avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: cover; /* QUAN TRỌNG */
+    /* border-radius: 50%; đã có từ .rounded-circle */
+    background-color: #f0f0f0; /* Màu nền nhẹ phòng khi ảnh chưa tải */
+}
+
+.avatar-edit-button {
+    position: absolute;
+    bottom: 5px;  /* Điều chỉnh cho vừa mắt */
+    right: 5px;   /* Điều chỉnh cho vừa mắt */
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #adb5bd;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease;
+}
+.avatar-edit-button:hover {
+    background-color: rgba(248, 249, 250, 1);
+}
+.avatar-edit-button i {
+    font-size: 0.85rem;
+    color: #343a40;
+}
+
+/* CSS cho Cropper.js (nếu cần ghi đè hoặc thêm) */
+/* Ví dụ: đảm bảo ảnh trong vùng crop hiển thị đúng */
+#avatarCropArea img {
+    display: block;
+    max-width: 100%; /* Important for Cropper.js */
+}
+
+/* CSS cho vùng crop của Cropper.js (bạn có thể không cần cái này nếu hài lòng với mặc định) */
+.cropper-view-box,
+.cropper-face {
+  border-radius: 50%; /* Làm cho khung crop trực quan cũng tròn */
+}

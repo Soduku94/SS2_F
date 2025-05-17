@@ -2,120 +2,186 @@
 {% block title %}Account Information{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        {# Sử dụng một cột rộng hơn cho nội dung chính #}
-        <div class="col-lg-9 col-xl-8">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            {# Sử dụng một cột rộng hơn cho nội dung chính #}
+            <div class="col-lg-9 col-xl-8">
 
-            {# --- 1. Card Header Hồ Sơ --- #}
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
-                            {# Logic lấy avatar giữ nguyên #}
-                            {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
-                            {% set image_folder = 'user_pics' %}
-                            {% if image_filename.startswith('default') %}
-                                {% set image_folder = 'profile_pics' %}
-                                {% if current_user.gender == 'female' %}
-                                    {% set image_filename = 'default_female.jpg' %}
-                                {% elif current_user.gender == 'male' %}
-                                    {% set image_filename = 'default_male.jpg' %}
-                                {% else %}
-                                    {% set image_filename = 'default.jpg' %}
-                                {% endif %}
-                            {% endif %}
-                            {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
-                            <img class="rounded-circle img-thumbnail" src="{{ avatar_url }}" alt="Profile Picture" width="150" height="150" style="object-fit: contain;">
-                        </div>
-                        <div class="col-md-5">
-                            <h3 class="mb-1">{{ current_user.full_name }}</h3>
-                            <p class="text-muted mb-1">
-                                {% if current_user.role == 'student' %}
-                                    Student {% if current_user.class_name %}({{ current_user.class_name }}){% endif %}
-                                {% elif current_user.role == 'lecturer' %}
-                                    Lecturer
-                                {% elif current_user.role == 'admin' %}
-                                    Administrator
-                                {% else %}
-                                    User
-                                {% endif %}
-                            </p>
-                            <p class="text-muted small mb-0"><i class="bi bi-envelope-fill me-1"></i>{{ current_user.email }}</p>
-                        </div>
-                        <div class="col-md-4 text-center text-md-end mt-3 mt-md-0">
-                            <a href="{{ url_for('account_edit') }}" class="btn btn-fit-primary btn-sm mb-2 d-block w-100">
-                                <i class="bi bi-pencil-square"></i> Edit Information
-                            </a>
-                            <a href="{{ url_for('change_password') }}" class="btn btn-outline-secondary btn-sm d-block w-100">
-                                <i class="bi bi-key-fill"></i> Change Password
-                            </a>
+                {# --- 1. Card Header Hồ Sơ --- #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">
+                                {# Container cho avatar và nút edit #}
+                                <div class="avatar-wrapper"
+                                     style="position: relative; display: inline-block; width: 150px; height: 150px;">
+                                    {# Đặt kích thước cho wrapper nếu cần #}
+                                    {% set image_filename = current_user.image_file if current_user.image_file else 'default.jpg' %}
+                                    {% set image_folder = 'user_pics' %}
+                                    {% if image_filename.startswith('default') %}
+                                        {% set image_folder = 'profile_pics' %}
+                                        {% if current_user.gender == 'female' %}
+                                            {% set image_filename = 'default_female.jpg' %}
+                                            {% elif current_user.gender == 'male' %}{% set image_filename = 'default_male.jpg' %}
+                                        {% else %}{% set image_filename = 'default.jpg' %}{% endif %}
+                                    {% endif %}
+                                    {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}
+
+                                    {# Class profile-page-avatar sẽ được định nghĩa trong CSS #}
+                                    <img class="rounded-circle img-thumbnail profile-page-avatar" src="{{ avatar_url }}"
+                                         alt="Profile Picture">
+
+                                    {# Nút Bút chì để mở Modal #}
+                                    <button type="button" class="btn btn-light btn-sm rounded-circle avatar-edit-button"
+                                            data-bs-toggle="modal" data-bs-target="#avatarUploadModal"
+                                            title="Change profile picture">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <h3 class="mb-1">{{ current_user.full_name }}</h3>
+                                <p class="text-muted mb-1">
+                                    {% if current_user.role == 'student' %}
+                                        Student {% if current_user.class_name %}({{ current_user.class_name }})
+                                    {% endif %}
+                                    {% elif current_user.role == 'lecturer' %}
+                                        Lecturer
+                                    {% elif current_user.role == 'admin' %}
+                                        Administrator
+                                    {% else %}
+                                        User
+                                    {% endif %}
+                                </p>
+                                <p class="text-muted small mb-0"><i
+                                        class="bi bi-envelope-fill me-1"></i>{{ current_user.email }}</p>
+                            </div>
+                            <div class="col-md-4 text-center text-md-end mt-3 mt-md-0">
+                                <a href="{{ url_for('account_edit') }}"
+                                   class="btn btn-fit-primary btn-sm mb-2 d-block w-100">
+                                    <i class="bi bi-pencil-square"></i> Edit Information
+                                </a>
+                                <a href="{{ url_for('change_password') }}"
+                                   class="btn btn-outline-secondary btn-sm d-block w-100">
+                                    <i class="bi bi-key-fill"></i> Change Password
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {# --- 2. Card Thông tin Cá nhân --- #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">Date of Birth:</dt>
+                            <dd class="col-sm-8">{{ current_user.date_of_birth.strftime('%d/%m/%Y') if current_user.date_of_birth else 'Not updated yet' }}</dd>
+
+                            <dt class="col-sm-4">Gender:</dt>
+                            <dd class="col-sm-8">
+                                {% if current_user.gender == 'male' %} Male
+                                {% elif current_user.gender == 'female' %} Female
+                                {% else %} Not updated yet
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-4">Phone:</dt>
+                            <dd class="col-sm-8">{{ current_user.phone_number or 'Not updated yet' }}</dd>
+
+                            <dt class="col-sm-4">Alternative Contact Email:</dt>
+                            <dd class="col-sm-8">{{ current_user.contact_email or 'Not updated yet' }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {# --- 3. Card Thông tin Học vấn (Chỉ cho Sinh viên) --- #}
+                {% if current_user.role == 'student' %}
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Academic Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Student ID:</dt>
+                                <dd class="col-sm-8">{{ current_user.student_id or 'Not updated yet' }}</dd>
+                                <dt class="col-sm-4">Class:</dt>
+                                <dd class="col-sm-8">{{ current_user.class_name or 'Not updated yet' }}</dd>
+                                <dt class="col-sm-4">Cohort:</dt>
+                                <dd class="col-sm-8">{{ cohort or 'N/A' }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {# --- 4. Card Giới thiệu Bản thân --- #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">About Me</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if current_user.about_me %}
+                            <p class="text-muted" style="white-space: pre-wrap;">{{ current_user.about_me }}</p>
+                        {% else %}
+                            <p class="text-muted"><i>Not updated yet...</i></p>
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
+            {# End col-lg-9 #}
+        </div>
+        {# End row #}
+    </div> {# End container #}
 
-            {# --- 2. Card Thông tin Cá nhân --- #}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Personal Information</h5>
+    <div class="modal fade" id="avatarUploadModal" tabindex="-1" aria-labelledby="avatarUploadModalLabel"
+         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        {# Thêm data-bs-backdrop và data-bs-keyboard #}
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="avatarUploadModalLabel">Update Profile Picture</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            id="closeAvatarModalBtn"></button>
                 </div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">Date of Birth:</dt>
-                        <dd class="col-sm-8">{{ current_user.date_of_birth.strftime('%d/%m/%Y') if current_user.date_of_birth else 'Not updated yet' }}</dd>
-
-                        <dt class="col-sm-4">Gender:</dt>
-                        <dd class="col-sm-8">
-                            {% if current_user.gender == 'male' %} Male
-                            {% elif current_user.gender == 'female' %} Female
-                            {% else %} Not updated yet
-                            {% endif %}
-                         </dd>
-
-                         <dt class="col-sm-4">Phone:</dt>
-                         <dd class="col-sm-8">{{ current_user.phone_number or 'Not updated yet' }}</dd>
-
-                         <dt class="col-sm-4">Alternative Contact Email:</dt>
-                         <dd class="col-sm-8">{{ current_user.contact_email or 'Not updated yet' }}</dd>
-                    </dl>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="avatarUploadInput" class="form-label">Select an image file (jpg, png,
+                                    gif):</label>
+                                <input type="file" id="avatarUploadInput" class="form-control"
+                                       accept="image/jpeg,image/png,image/gif">
+                                <small class="form-text text-muted">Max file size: 2MB. For best results, use a square
+                                    image.</small>
+                            </div>
+                            <div class="col-12">
+                                <div id="avatarCropArea"
+                                     style="min-height: 250px; max-height: 450px; width:100%; overflow: hidden; background-color: #f8f9fa; border: 1px dashed #ced4da; display: none;">
+                                    <img id="imageToCrop" src="#" alt="Preview" style="max-width: 100%;">
+                                </div>
+                                <div id="avatarCropPlaceholder" class="text-center text-muted py-5"
+                                     style="min-height: 250px; border: 1px dashed #ced4da; background-color: #f8f9fa;">
+                                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                    <p>Image preview will appear here after selection.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-fit-outline-secondary" data-bs-dismiss="modal"
+                            id="cancelAvatarModalBtn">Cancel
+                    </button>
 
-            {# --- 3. Card Thông tin Học vấn (Chỉ cho Sinh viên) --- #}
-            {% if current_user.role == 'student' %}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Academic Information</h5>
-                </div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-4">Student ID:</dt>
-                        <dd class="col-sm-8">{{ current_user.student_id or 'Not updated yet' }}</dd>
-                        <dt class="col-sm-4">Class:</dt>
-                        <dd class="col-sm-8">{{ current_user.class_name or 'Not updated yet' }}</dd>
-                        <dt class="col-sm-4">Cohort:</dt>
-                        <dd class="col-sm-8">{{ cohort or 'N/A' }}</dd>
-                    </dl>
-                </div>
-            </div>
-            {% endif %}
-
-            {# --- 4. Card Giới thiệu Bản thân --- #}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">About Me</h5>
-                </div>
-                <div class="card-body">
-                    {% if current_user.about_me %}
-                         <p class="text-muted" style="white-space: pre-wrap;">{{ current_user.about_me }}</p>
-                    {% else %}
-                         <p class="text-muted"><i>Not updated yet...</i></p>
-                    {% endif %}
+                    <button type="button" class="btn btn-outline-warning me-auto" id="useDefaultAvatarButton">Use Default Avatar</button>
+                    <button type="button" class="btn btn-fit-primary" id="cropAndUploadButton" disabled>Save Picture
+                    </button>
+                    {# Disabled ban đầu #}
                 </div>
             </div>
-
-        </div> {# End col-lg-9 #}
-    </div> {# End row #}
-</div> {# End container #}
+        </div>
+    </div>
 {% endblock %}
