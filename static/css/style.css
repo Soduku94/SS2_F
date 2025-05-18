@@ -2411,3 +2411,82 @@ body {
 .cropper-face {
   border-radius: 50%; /* Làm cho khung crop trực quan cũng tròn */
 }
+
+
+
+
+/* Trong style.css */
+.pagination .page-item.active .page-link {
+    background-color: #990000; /* Màu chủ đạo của bạn */
+    border-color: #800000;   /* Màu viền đậm hơn */
+    color: #ffffff;
+}
+.pagination .page-link {
+    color: #990000; /* Màu chữ cho số trang không active */
+}
+.pagination .page-link:hover {
+    color: #7A0000; /* Màu chữ khi hover */
+}
+
+
+
+/* === Custom Badge Styles for FIT Research Connect === */
+
+.badge.rounded-pill { /* Áp dụng chung cho tất cả badge nếu muốn bo tròn mạnh */
+    padding: 0.35em 0.65em; /* Tăng nhẹ padding */
+    font-weight: 500; /* Có thể giảm font-weight nếu mặc định quá đậm */
+}
+
+/* --- Post Type Badges --- */
+.badge-fit-topic {
+    background-color: #C0392B; /* Đỏ nhạt hơn chút so với #990000 */
+    color: #ffffff;
+}
+.badge-fit-article {
+    background-color: #7F8C8D; /* Xám trung tính (Slate Gray) */
+    color: #ffffff;
+}
+
+/* --- Featured Badge --- */
+.badge-fit-featured {
+    background-color: #E67E22; /* Cam (Carrot) hoặc Vàng Gold #FFD700 với chữ đen */
+    color: #ffffff; /* Nếu dùng vàng gold thì color: #000000; */
+}
+.badge-fit-featured .bi { /* Đảm bảo icon cũng có màu phù hợp */
+    /* color: #ffffff; hoặc #000000 tùy nền */
+}
+
+
+/* --- Status Badges --- */
+.badge-fit-status-recruiting {
+    background-color: #2ECC71; /* Xanh lá (Emerald) */
+    color: #ffffff;
+}
+.badge-fit-status-pending {
+    background-color: #F39C12; /* Vàng cam (Orange) */
+    color: #ffffff; /* Hoặc #000000 nếu nền sáng */
+}
+.badge-fit-status-closed {
+    background-color: #34495E; /* Xám đậm (Wet Asphalt) */
+    color: #ffffff;
+}
+.badge-fit-status-working { /* In Progress */
+    background-color: #3498DB; /* Xanh dương (Peter River) */
+    color: #ffffff;
+}
+.badge-fit-status-published {
+    background-color: #BDC3C7; /* Xám sáng (Silver) */
+    color: #34495E; /* Chữ xám đậm */
+    /* Hoặc có thể thêm border: 1px solid #AAB0B5; */
+}
+
+/* --- Tag Badge (Giữ lại hoặc tùy chỉnh) --- */
+.badge-fit-tag {
+    background-color: #95A5A6; /* Xám nhạt hơn (Concrete) */
+    color: #ffffff;
+}
+.badge-fit-tag-more { /* Cho dấu "..." */
+    background-color: #ECF0F1; /* Xám rất sáng (Clouds) */
+    color: #7F8C8D;
+    border: 1px solid #BDC3C7;
+}

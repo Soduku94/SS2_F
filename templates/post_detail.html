@@ -9,12 +9,7 @@
             {# --- CỘT NỘI DUNG CHÍNH (TRÁI HOẶC GIỮA) --- #}
             <div class="col-lg-8">
                 <article class="post-detailed-content card shadow-sm">
-                    {# Nếu có ảnh bìa cho bài đăng, bạn có thể thêm ở đây #}
-                    {# Ví dụ:
-                {% if post.cover_image %}
-                    <img src="{{ url_for('static', filename='covers/' + post.cover_image) }}" class="card-img-top" alt="Cover image for {{ post.title }}">
-                {% endif %}
-                #}
+
                     <div class="card-body p-4"> {# Tăng padding cho card-body #}
                         <h1 class="card-title mb-3 display-6">{{ post.title }}</h1>
 
@@ -25,7 +20,7 @@
                             {# <img src="{{ author_avatar_url }}" alt="{{ post.author.full_name }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;"> #}
                             <div>
                                 <i class="bi bi-person-fill me-1"></i>Posted by
-                                <a href="#" class="text-decoration-none fw-semibold">{{ post.author.full_name }}</a>
+                                <span class="author-name">{{ post.author.full_name }}</span>
                                 <span class="mx-2">|</span>
                                 <i class="bi bi-calendar3 me-1"></i>Posted
                                 on {{ post.date_posted.strftime('%B %d, %Y at %H:%M') }} {# Định dạng ngày dễ đọc hơn #}
@@ -77,8 +72,6 @@
                                 </ul>
                             </div>
                         {% endif %}
-
-
 
 
                     </div>

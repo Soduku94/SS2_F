@@ -77,7 +77,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # (Tùy chọn) Giới hạn kích thước file upload
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 587  # Hoặc 465 nếu dùng SSL
 app.config['MAIL_USE_TLS'] = True
@@ -608,6 +607,7 @@ def view_post(post_id):
 # --- KẾT THÚC SỬA VIEW_POST ---
 
 
+
 # --- ROUTE UPDATE POST (ĐÃ SỬA HOÀN CHỈNH) ---
 @app.route('/post/<int:post_id>/update', methods=['GET', 'POST'])
 @login_required
@@ -816,7 +816,7 @@ def account():
         except:
             cohort = "N/A"
     # Nên dùng account_view.html
-    return render_template('account_view.html', title='Thông tin Tài khoản', cohort=cohort)
+    return render_template('account_view.html', title='My Account', cohort=cohort)
 
 
 # --- ĐẢM BẢO CÓ HÀM NÀY VÀ ĐẶT NÓ TRƯỚC CÁC ROUTE SỬ DỤNG NÓ ---
@@ -854,9 +854,6 @@ def save_picture(form_picture, old_picture_filename=None):
 # --- KẾT THÚC HÀM ---
 
 
-
-
-
 def save_cropped_avatar(file_storage):  # <--- ĐỊNH NGHĨA HÀM NÀY TRƯỚC
     """Lưu ảnh avatar đã được crop từ client."""
     random_hex = secrets.token_hex(8)
@@ -882,13 +879,6 @@ def save_cropped_avatar(file_storage):  # <--- ĐỊNH NGHĨA HÀM NÀY TRƯỚC
     except Exception as e:
         current_app.logger.error(f"Lỗi khi lưu ảnh cropped avatar: {e}", exc_info=True)
         return None
-
-
-
-
-
-
-
 
 
 @app.route('/upload-cropped-avatar', methods=['POST'])  # Endpoint sẽ là 'upload_cropped_avatar_route' (tên hàm)
@@ -921,14 +911,12 @@ def upload_cropped_avatar_route():  # Tên hàm này sẽ là endpoint
     return jsonify({'status': 'error', 'message': 'Invalid file or request.'}), 400
 
 
-
-
-
 @app.route('/account/set-default-avatar', methods=['POST'])
 @login_required
 def set_default_avatar_route():
     old_picture = current_user.image_file
-    user_pics_dir = current_app.config.get('USER_PICS_FOLDER', os.path.join(current_app.root_path, 'static', 'user_pics'))
+    user_pics_dir = current_app.config.get('USER_PICS_FOLDER',
+                                           os.path.join(current_app.root_path, 'static', 'user_pics'))
 
     # Chỉ xóa file vật lý nếu đó không phải là một trong các file mặc định
     # và file đó thực sự tồn tại trong thư mục user_pics
@@ -961,16 +949,6 @@ def set_default_avatar_route():
         db.session.rollback()
         current_app.logger.error(f"Lỗi DB khi đặt lại avatar mặc định: {e}", exc_info=True)
         return jsonify({'status': 'error', 'message': 'Database error while resetting avatar.'}), 500
-
-
-
-
-
-
-
-
-
-
 
 
 @app.route('/account/edit', methods=['GET', 'POST'])
@@ -1011,10 +989,7 @@ def account_edit():
             # <<< QUAN TRỌNG: XEM LỖI Ở ĐÂY >>>
             print(f"!!! DEBUG: Commit FAILED in account_edit! Error: {e}")
             flash(f'Lỗi khi cập nhật thông tin: {e}', 'danger')
-            # Nếu lỗi là do ảnh, có thể cần xóa file ảnh vật lý đã lưu?
-            # if new_image_filename: # Nếu đã lưu ảnh mới mà commit lỗi
-            #    file_path = os.path.join(app.config['USER_PICS_FOLDER'], new_image_filename)
-            #    if os.path.exists(file_path): os.remove(file_path)
+
 
         return redirect(url_for('account'))
     elif request.method == 'GET':
@@ -1026,10 +1001,7 @@ def account_edit():
         form.contact_email.data = current_user.contact_email
         form.about_me.data = current_user.about_me
         form.class_name.data = current_user.class_name
-    return render_template('account_edit.html', title='Chỉnh sửa Thông tin', form=form)
-
-
-
+    return render_template('account_edit.html', title='Update Information', form=form)
 
 
 @app.route('/application/<int:application_id>/withdraw', methods=['POST'])
@@ -1050,7 +1022,7 @@ def withdraw_application(application_id):
 
         # Tạo thông báo cho Giảng viên (tùy chọn)
         if post_author_id:
-            notification_content = f"Sinh viên {current_user.full_name} đã hủy đăng ký đề tài: '{post_title[:30]}...'"
+            notification_content = f"The registration for the topic '{post_title[:30]}...' by student {current_user.full_name} has been canceled."
             new_notification = Notification(
                 recipient_id=post_author_id, sender_id=current_user.id,
                 content=notification_content, notification_type='application_withdrawn',
@@ -1061,10 +1033,10 @@ def withdraw_application(application_id):
         db.session.commit()
         # flash('Đã hủy đăng ký đề tài thành công.', 'success') # Không dùng flash cho AJAX
         # Trả về JSON thành công cho JavaScript
-        return jsonify({'status': 'success', 'applied': False, 'message': 'Đã hủy đăng ký đề tài!', })
+        return jsonify({'status': 'success', 'applied': False, 'message': 'You have canceled the registration for the topic! ', })
     except Exception as e:
         db.session.rollback()
-        # flash(f'Đã xảy ra lỗi khi hủy đăng ký: {e}', 'danger') # Không dùng flash
+
         print(f"Error withdrawing application {application_id}: {e}")
         # Trả về JSON lỗi cho JavaScript
         return jsonify({'status': 'error', 'message': f'Lỗi khi hủy đăng ký: {e}'}), 500
@@ -1866,6 +1838,8 @@ def view_topic_applications(post_id):
         rejected_apps_count=rejected_apps_count,
         current_filter_status=current_filter_status
     )
+
+
 @app.route('/application/<int:application_id>/update_status', methods=['POST'])
 @login_required
 def update_application_status(application_id):
@@ -2150,6 +2124,7 @@ def my_applications():
     return render_template('my_applications.html',
                            title='Đề tài đã đăng ký',
                            applications_pagination=pagination)
+
 
 def send_password_reset_email(user):  # ĐỊNH NGHĨA HÀM NÀY Ở ĐÂY
     token = user.get_reset_password_token()

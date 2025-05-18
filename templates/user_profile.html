@@ -1,0 +1,203 @@
+{# templates/user_profile.html #}
+{#{% extends "base.html" %}#}
+{##}
+{#{% block title %}{{ title if title else "User Profile" }}{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#<div class="container mt-4 mb-5">#}
+{#    <div class="row justify-content-center">#}
+{#        <div class="col-lg-10 col-xl-9"> {# Tăng chiều rộng cột chính một chút #}
+{##}
+            {# --- 1. Card Header Hồ Sơ --- #}
+{#            <div class="card shadow-sm mb-4">#}
+{#                <div class="card-body p-4"> {# Thêm padding cho card body #}
+{#                    <div class="row align-items-center">#}
+{#                        <div class="col-md-3 text-center text-md-start mb-3 mb-md-0">#}
+                            {# Logic lấy avatar (tương tự account_view.html, nhưng dùng biến 'user') #}
+{#                            {% set image_filename = user.image_file if user.image_file else 'default.jpg' %}#}
+{#                            {% set image_folder = 'user_pics' %}#}
+{#                            {% if image_filename.startswith('default') %}#}
+{#                                {% set image_folder = 'profile_pics' %}#}
+{#                                {% if user.gender == 'female' %}{% set image_filename = 'default_female.jpg' %}#}
+{#                                {% elif user.gender == 'male' %}{% set image_filename = 'default_male.jpg' %}#}
+{#                                {% else %}{% set image_filename = 'default.jpg' %}{% endif %}#}
+{#                            {% endif %}#}
+{#                            {% set avatar_url = url_for('static', filename=image_folder + '/' + image_filename) %}#}
+{#                            <img class="rounded-circle img-thumbnail profile-page-avatar" src="{{ avatar_url }}" alt="Profile Picture of {{ user.full_name }}">#}
+{#                        </div>#}
+{#                        <div class="col-md-9">#}
+{#                            <h2 class="mb-1">{{ user.full_name }}</h2>#}
+{#                            <p class="text-muted mb-1 fs-6"> {# Tăng nhẹ kích thước chữ cho vai trò #}
+{#                                {% if user.role == 'student' %}#}
+{#                                    Student {% if user.class_name %}(Lớp: {{ user.class_name }}){% endif %}#}
+{#                                    {% if cohort %} - {{ cohort }} {% endif %}#}
+{#                                {% elif user.role == 'lecturer' %}#}
+{#                                    Lecturer#}
+{#                                {% elif user.role == 'admin' %}#}
+                                    {# Cân nhắc không hiển thị "Administrator" công khai nếu không cần thiết #}
+{#                                    Staff Member#}
+{#                                {% else %}#}
+{#                                    Member#}
+{#                                {% endif %}#}
+{#                            </p>#}
+{#                            {% if user.contact_email %}#}
+{#                            <p class="text-muted small mb-0">#}
+{#                                <i class="bi bi-envelope-at-fill me-1"></i> {# Đổi icon một chút #}
+{#                                <a href="mailto:{{ user.contact_email }}" class="text-decoration-none">{{ user.contact_email }}</a>#}
+{#                            </p>#}
+{#                            {% endif %}#}
+{##}
+                            {# Nút hành động nếu đây là profile của chính người dùng đang xem #}
+{#                            {% if current_user.is_authenticated and current_user.id == user.id %}#}
+{#                                <div class="mt-3">#}
+{#                                    <a href="{{ url_for('account_edit') }}" class="btn btn-fit-primary btn-sm me-2">#}
+{#                                        <i class="bi bi-pencil-square"></i> Edit My Information#}
+{#                                    </a>#}
+{#                                    <a href="{{ url_for('change_password') }}" class="btn btn-fit-outline-secondary btn-sm">#}
+{#                                        <i class="bi bi-key-fill"></i> Change My Password#}
+{#                                    </a>#}
+{#                                </div>#}
+{#                            {% endif %}#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+            {# --- 2. Card Giới thiệu Bản thân (Nếu có) --- #}
+{#            {% if user.about_me %}#}
+{#            <div class="card shadow-sm mb-4">#}
+{#                <div class="card-header bg-light border-bottom"> {# Thêm style cho card-header #}
+{#                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>About {{ user.full_name.split()[0] if user.full_name else "Me" }}</h5>#}
+{#                </div>#}
+{#                <div class="card-body">#}
+{#                    <p class="text-body" style="white-space: pre-wrap;">{{ user.about_me }}</p> {# Dùng text-body thay vì text-muted để dễ đọc hơn #}
+{#                </div>#}
+{#            </div>#}
+{#            {% endif %}#}
+{##}
+            {# --- 3. Danh sách Bài đăng/Đề tài của Giảng viên (CÓ PHÂN TRANG) --- #}
+{#            {% if user.role == 'lecturer' %}#}
+{#                <div class="card shadow-sm mb-4">#}
+{#                    <div class="card-header bg-light border-bottom">#}
+{#                        <h5 class="mb-0"><i class="bi bi-journal-richtext me-2"></i>Recent Topics/Posts</h5>#}
+{#                    </div>#}
+{#                    {% if posts_pagination and posts_pagination.items %}#}
+{#                        <div class="list-group list-group-flush">#}
+{#                            {% for post in posts_pagination.items %}#}
+{#                            <div class="list-group-item list-group-item-action py-3"> {# Thêm py-3 cho padding #}
+{#                                <div class="d-flex w-100 justify-content-between">#}
+{#                                    <h6 class="mb-1 fw-semibold">#}
+{#                                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="text-decoration-none stretched-link">{{ post.title }}</a>#}
+{#                                    </h6>#}
+{#                                    <small class="text-muted">{{ post.date_posted.strftime('%d/%m/%Y') }}</small>#}
+{#                                </div>#}
+{#                                <p class="mb-1 small text-muted">{{ post.content | striptags | truncate(120, True, '...') }}</p>#}
+{#                                <div>#}
+{#                                    {% if post.post_type == 'topic' %} <span class="badge rounded-pill bg-primary me-1">Topic</span>{% endif %}#}
+{#                                    {% if post.status == 'recruiting' %} <span class="badge rounded-pill text-bg-success me-1">Recruiting</span>{% endif %}#}
+{#                                    {% if post.status == 'published' and post.post_type == 'article'%} <span class="badge rounded-pill text-bg-info me-1">Published</span>{% endif %}#}
+{#                                    {% if post.status == 'closed' %} <span class="badge rounded-pill text-bg-secondary me-1">Closed</span>{% endif %}#}
+{#                                    {% if post.status == 'working_on' %} <span class="badge rounded-pill text-bg-warning me-1">In Progress</span>{% endif %}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            {% endfor %}#}
+{#                        </div>#}
+{#                        {% if posts_pagination.pages > 1 %}#}
+{#                        <div class="card-footer bg-light">#}
+{#                            <nav aria-label="User posts navigation">#}
+{#                                <ul class="pagination justify-content-center mb-0">#}
+{#                                    <li class="page-item {% if not posts_pagination.has_prev %}disabled{% endif %}">#}
+{#                                        <a class="page-link" href="{{ url_for('user_profile', user_id=user.id, page=posts_pagination.prev_num) if posts_pagination.has_prev else '#' }}">&laquo;</a>#}
+{#                                    </li>#}
+{#                                    {% for page_num in posts_pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}#}
+{#                                        {% if page_num %}#}
+{#                                            <li class="page-item {% if page_num == posts_pagination.page %}active{% endif %}">#}
+{#                                                <a class="page-link" href="{{ url_for('user_profile', user_id=user.id, page=page_num) }}">{{ page_num }}</a>#}
+{#                                            </li>#}
+{#                                        {% else %}#}
+{#                                            <li class="page-item disabled"><span class="page-link">…</span></li>#}
+{#                                        {% endif %}#}
+{#                                    {% endfor %}#}
+{#                                    <li class="page-item {% if not posts_pagination.has_next %}disabled{% endif %}">#}
+{#                                        <a class="page-link" href="{{ url_for('user_profile', user_id=user.id, page=posts_pagination.next_num) if posts_pagination.has_next else '#' }}">&raquo;</a>#}
+{#                                    </li>#}
+{#                                </ul>#}
+{#                            </nav>#}
+{#                        </div>#}
+{#                        {% endif %}#}
+{#                    {% else %}#}
+{#                        <div class="card-body">#}
+{#                            <p class="text-muted mb-0">This lecturer has no public posts or topics yet.</p>#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{#            {% endif %}#}
+{##}
+            {# --- 4. Danh sách Đề tài Sinh viên đã được Chấp thuận (CÓ PHÂN TRANG) --- #}
+{#            {% if user.role == 'student' %}#}
+{#                <div class="card shadow-sm mb-4">#}
+{#                    <div class="card-header bg-light border-bottom">#}
+{#                        <h5 class="mb-0"><i class="bi bi-check2-circle me-2"></i>Registered & Approved Topics</h5>#}
+{#                    </div>#}
+{#                    {% if accepted_applications_pagination and accepted_applications_pagination.items %}#}
+{#                        <div class="list-group list-group-flush">#}
+{#                            {% for app in accepted_applications_pagination.items %}#}
+{#                                {% if app.topic %}#}
+{#                                <div class="list-group-item list-group-item-action py-3">#}
+{#                                    <div class="d-flex w-100 justify-content-between">#}
+{#                                        <h6 class="mb-1 fw-semibold">#}
+{#                                            <a href="{{ url_for('view_post', post_id=app.topic.id) }}" class="text-decoration-none stretched-link">{{ app.topic.title }}</a>#}
+{#                                        </h6>#}
+{#                                        {% if app.topic.author %}#}
+{#                                        <small class="text-muted">Lecturer: {{ app.topic.author.full_name }}</small>#}
+{#                                        {% endif %}#}
+{#                                    </div>#}
+{#                                    <span class="badge rounded-pill text-bg-success me-1"><i class="bi bi-check-circle-fill"></i> Accepted</span>#}
+{#                                    <small class="text-muted d-block mt-1">Applied on: {{ app.application_date.strftime('%d/%m/%Y') }}</small>#}
+{#                                </div>#}
+{#                                {% endif %}#}
+{#                            {% endfor %}#}
+{#                        </div>#}
+{#                        {% if accepted_applications_pagination.pages > 1 %}#}
+{#                        <div class="card-footer bg-light">#}
+{#                            <nav aria-label="Student accepted applications navigation">#}
+{#                                <ul class="pagination justify-content-center mb-0">#}
+{#                                    <li class="page-item {% if not accepted_applications_pagination.has_prev %}disabled{% endif %}">#}
+{#                                        <a class="page-link" href="{{ url_for('user_profile', user_id=user.id, page=accepted_applications_pagination.prev_num) if accepted_applications_pagination.has_prev else '#' }}">&laquo;</a>#}
+{#                                    </li>#}
+{#                                    {% for page_num in accepted_applications_pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}#}
+{#                                        {% if page_num %}#}
+{#                                            <li class="page-item {% if page_num == accepted_applications_pagination.page %}active{% endif %}">#}
+{#                                                <a class="page-link" href="{{ url_for('user_profile', user_id=user.id, page=page_num) }}">{{ page_num }}</a>#}
+{#                                            </li>#}
+{#                                        {% else %}#}
+{#                                            <li class="page-item disabled"><span class="page-link">…</span></li>#}
+{#                                        {% endif %}#}
+{#                                    {% endfor %}#}
+{#                                    <li class="page-item {% if not accepted_applications_pagination.has_next %}disabled{% endif %}">#}
+{#                                        <a class="page-link" href="{{ url_for('user_profile', user_id=user.id, page=accepted_applications_pagination.next_num) if accepted_applications_pagination.has_next else '#' }}">&raquo;</a>#}
+{#                                    </li>#}
+{#                                </ul>#}
+{#                            </nav>#}
+{#                        </div>#}
+{#                        {% endif %}#}
+{#                    {% else %}#}
+{#                         <div class="card-body">#}
+{#                            <p class="text-muted mb-0">This student has no accepted research topics yet.</p>#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{##}
+                {# --- (Tùy chọn) Danh sách Academic Works của Sinh viên (nếu bạn muốn thêm sau) --- #}
+                {# {% if academic_works_by_user %} ... {% endif %} #}
+{#            {% endif %}#}
+{##}
+{#        </div> {# End col #}
+{#    </div> {# End row #}
+{#</div> {# End container #}
+{#{% endblock %}#}
+{##}
+{#{% block scripts %}#}
+{#{{ super() }}#}
+{# Thêm script nếu cần cho trang này, ví dụ: xử lý "Xem thêm" cho about_me nếu quá dài #}
+{#{% endblock %}#}
