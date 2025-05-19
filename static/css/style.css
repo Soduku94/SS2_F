@@ -2318,6 +2318,44 @@ body {
 }
 
 
+/* --- Nút Secondary (viền xám, chữ xám) --- */
+.btn-fit-outline-secondary {
+  color: #6c757d; /* Màu xám bootstrap-secondary cho chữ */
+  border-color: #6c757d; /* Viền xám */
+  background-color: transparent;
+}
+.btn-fit-outline-secondary:hover,
+.btn-fit-outline-secondary:focus,
+.btn-fit-outline-secondary.focus {
+  color: #ffffff; /* Chữ trắng khi hover */
+  background-color: #5a6268; /* Nền xám đậm hơn khi hover */
+  border-color: #545b62;
+}
+.btn-fit-outline-secondary:focus, .btn-fit-outline-secondary.focus {
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5); /* Shadow xám */
+}
+
+/* --- Hoặc nếu bạn muốn nút viền đỏ chữ đỏ (Primary Outline) --- */
+.btn-fit-outline-primary {
+  color: #990000;
+  border-color: #990000;
+  background-color: transparent;
+}
+.btn-fit-outline-primary:hover,
+.btn-fit-outline-primary:focus,
+.btn-fit-outline-primary.focus {
+  color: #ffffff;
+  background-color: #990000;
+  border-color: #990000;
+}
+.btn-fit-outline-primary:focus, .btn-fit-outline-primary.focus {
+  box-shadow: 0 0 0 0.25rem rgba(153, 0, 0, 0.3);
+}
+
+
+
+
+
 /* --- Custom Like Button States (using brand colors) --- */
 .btn-like-custom { /* Base for like button, not liked state */
   color: #990000;

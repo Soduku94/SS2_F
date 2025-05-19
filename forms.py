@@ -32,8 +32,8 @@ class RegistrationForm(FlaskForm):
                              validators=[DataRequired(message="Please enter your Student ID."),
                                          Length(min=7, max=10,
                                                 message="Student ID must be between 7 and 10 characters."),
-                                         # Optional: Add Regexp if you want numbers only
-                                         # Regexp('^[0-9]*$', message='Student ID must contain only digits.')
+
+                                         Regexp('^[0-9]*$', message='Student ID must contain only digits.')
                                          ])
     email = StringField('Email Address (for login)',
                         validators=[DataRequired(message="Please enter your email address."),
@@ -42,7 +42,8 @@ class RegistrationForm(FlaskForm):
                              validators=[DataRequired(message="Please enter your class name."), Length(max=50)])
     date_of_birth = DateField('Date of Birth',
                               validators=[DataRequired(message="Please enter your date of birth.")])
-    # Note: DateField requires YYYY-MM-DD format or a datepicker widget
+
+
     gender = SelectField('Gender', choices=[
         ('', '--- Select Gender ---'),
         ('male', 'Male'),
@@ -50,7 +51,9 @@ class RegistrationForm(FlaskForm):
     ], validators=[DataRequired(message="Please select your gender.")])
     phone_number = StringField('Phone Number',
                                validators=[DataRequired(message="Please enter your phone number."),
-                                           Length(min=9, max=15, message="Invalid phone number length.")])
+                                           Length(min=9, max=15, message="Invalid phone number length."),
+                                           Regexp('^[0-9]*$', message='Phone Number must contain only digits.')
+                                           ])
     # Optional: Add Regexp for specific phone number formats
     password = PasswordField('Password',
                              validators=[DataRequired(message="Please enter a password."),
@@ -122,7 +125,7 @@ class UpdateAccountForm(FlaskForm):
     delete_picture = BooleanField('Remove current profile picture and use default')
 
     def validate_contact_email(self, contact_email):
-        if contact_email.data and contact_email.data.strip():  # Check if data exists and is not just whitespace
+        if contact_email.data and contact_email.data.strip():
             if current_user.is_authenticated and contact_email.data == current_user.contact_email:
                 return  # No change, no validation needed
             if current_user.is_authenticated and contact_email.data == current_user.email:

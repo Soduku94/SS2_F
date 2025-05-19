@@ -530,15 +530,50 @@
                     });
                 }
             } // End Withdraw modal logic
-            {##}
-            {#// --- 4. Logic Nút Share (Nếu bạn có) ---#}
-            {#// const shareButton = document.getElementById('share-button');#}
-            {#// if (shareButton) {#}
-            {#//     // ... Share logic ...#}
-            {#// }#}
 
         }); // End DOMContentLoaded
 
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const shareButton = document.getElementById('share-button');
+            const fallbackLinks = document.getElementById('fallback-share-links');
+
+            if (shareButton) {
+                shareButton.addEventListener('click', async () => {
+                    // Dữ liệu cần chia sẻ
+                    const shareData = {
+                        // Dùng escapejs để xử lý ký tự đặc biệt trong JS string
+                        title: {{ post.title | tojson | safe }},
+                        text: {{ (post.abstract or post.title) | truncate(100) | tojson | safe }},
+                        // Dùng url_for với _external=True để có URL đầy đủ
+                      url: {{ url_for("view_post", post_id=post.id, _external=True) | tojson | safe }}
+                    };
+
+                    // Kiểm tra trình duyệt có hỗ trợ Web Share API không
+                    if (navigator.share) {
+                        try {
+                            // Gọi API chia sẻ của trình duyệt
+                            await navigator.share(shareData);
+                            console.log('Nội dung được chia sẻ thành công!');
+                        } catch (err) {
+                            // Báo lỗi nếu người dùng hủy hoặc có lỗi xảy ra
+                            console.error('Lỗi khi chia sẻ:', err);
+                            // Có thể hiển thị link fallback nếu người dùng hủy? (Tùy chọn)
+                            // if (fallbackLinks) fallbackLinks.classList.remove('d-none');
+                        }
+                    } else {
+                        // Nếu trình duyệt không hỗ trợ -> Hiển thị các link fallback
+                        console.log('Web Share API không được hỗ trợ, hiển thị fallback links.');
+                        if (fallbackLinks) {
+                            fallbackLinks.classList.remove('d-none'); // Hiện các link dự phòng
+                        }
+                        // Có thể ẩn nút Share chính đi nếu muốn
+                        // shareButton.style.display = 'none';
+                    }
+                });
+            } // end if(shareButton)
+        });
     </script>
 
 {% endblock scripts %}

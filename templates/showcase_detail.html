@@ -11,7 +11,7 @@
                     {# Breadcrumb nếu có #}
 
                     {# --- Tiêu đề --- #}
-                  <h2 class="display-5 mb-2 fw-bold">{{ item.title }}</h2>
+                    <h2 class="display-5 mb-2 fw-bold">{{ item.title }}</h2>
 
                     {# --- Metadata --- #}
                     <div class="text-muted mb-3 border-bottom pb-2">
@@ -27,7 +27,8 @@
                     {% if item.image_file %}
 
                         <img src="{{ url_for('static', filename=config.get('academic_work_images', 'static/academic_work_images').split('static/')[-1] + '/' + item.image_file) }}"
-                             class="img-fluid rounded mb-4 shadow-sm d-block mx-auto" alt="Ảnh minh họa cho {{ item.title }}">
+                             class="img-fluid rounded mb-4 shadow-sm d-block mx-auto"
+                             alt="Ảnh minh họa cho {{ item.title }}">
                     {% endif %}
 
                     {# --- Tóm tắt --- #}
@@ -114,8 +115,9 @@
                 </article>
 
                 {# Nút quay lại #}
-                <a href="{{ url_for('showcase') }}" class="btn btn-secondary mt-4"><i class="bi bi-arrow-left"></i> Quay
-                    lại danh sách</a>
+                <a href="{{ url_for('view_all_showcase_items_explicit') }}"
+                   class="btn btn-fit-outline-secondary mt-4"><i class="bi bi-arrow-left"></i> Back</a>
+                </a>
 
             </div>
             {# End col-lg-9 #}
