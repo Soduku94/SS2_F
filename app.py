@@ -607,7 +607,6 @@ def view_post(post_id):
 # --- KẾT THÚC SỬA VIEW_POST ---
 
 
-
 # --- ROUTE UPDATE POST (ĐÃ SỬA HOÀN CHỈNH) ---
 @app.route('/post/<int:post_id>/update', methods=['GET', 'POST'])
 @login_required
@@ -774,7 +773,7 @@ def update_post(post_id):
     # Cần truyền cả all_tag_names và current_tags_string cho GET và POST lỗi validation
     current_tags_string = ', '.join([tag.name for tag in post.tags]) if post.tags else ''  # Lấy lại giá trị mới nhất
 
-    return render_template('create_post.html', title='Cập nhật Bài đăng', form=form,
+    return render_template('create_post.html', title='Update Post', form=form,
                            legend=f'Cập nhật: {post.title}', post=post,  # Truyền post để hiển thị file cũ
                            all_tag_names=all_tag_names,  # <<< Cho Tagify whitelist
                            current_tags_string=current_tags_string)
@@ -983,13 +982,12 @@ def account_edit():
             print("DEBUG: Attempting db.session.commit()")
             db.session.commit()  # Cố gắng lưu tất cả thay đổi
             print("DEBUG: Commit successful.")
-            flash('Thông tin tài khoản của bạn đã được cập nhật!', 'success')
+            flash('Your account information has been updated!', 'success')
         except Exception as e:
             db.session.rollback()  # Rollback nếu lỗi
             # <<< QUAN TRỌNG: XEM LỖI Ở ĐÂY >>>
             print(f"!!! DEBUG: Commit FAILED in account_edit! Error: {e}")
             flash(f'Lỗi khi cập nhật thông tin: {e}', 'danger')
-
 
         return redirect(url_for('account'))
     elif request.method == 'GET':
@@ -1033,7 +1031,8 @@ def withdraw_application(application_id):
         db.session.commit()
         # flash('Đã hủy đăng ký đề tài thành công.', 'success') # Không dùng flash cho AJAX
         # Trả về JSON thành công cho JavaScript
-        return jsonify({'status': 'success', 'applied': False, 'message': 'You have canceled the registration for the topic! ', })
+        return jsonify(
+            {'status': 'success', 'applied': False, 'message': 'You have canceled the registration for the topic! ', })
     except Exception as e:
         db.session.rollback()
 
@@ -1155,7 +1154,7 @@ def search_results():
 
     # Render template và truyền đủ dữ liệu
     return render_template('search_results.html',
-                           title=f"Kết quả tìm kiếm cho '{search_query}'" if search_query else "Tìm kiếm",
+                           title=f"Search results for '{search_query}'" if search_query else "Search",
                            q=search_query,  # Truyền lại từ khóa
                            posts_pagination=search_pagination,  # Đổi tên biến này cho nhất quán với template
                            lecturers=lecturers,
@@ -1259,7 +1258,7 @@ def submit_idea():
                     notifications_to_add = []
                     for lecturer in lecturers_to_notify:
                         # Tạo nội dung thông báo (bạn có thể tùy chỉnh)
-                        notification_content = f"Sinh viên {current_user.full_name} đã gửi một ý tưởng mới: '{idea.title}'"
+                        notification_content = f"Student {current_user.full_name} has submitted a new idea: '{idea.title}'"
 
                         # Tạo đối tượng Notification
                         # !!! Quan trọng: Đảm bảo các tên trường khớp với model Notification của bạn !!!
@@ -1288,7 +1287,7 @@ def submit_idea():
                 # db.session.rollback()
                 flash('Gửi ý tưởng thành công, nhưng có lỗi xảy ra khi tạo thông báo cho giảng viên.', 'warning')
 
-            flash(f'Ý tưởng của bạn đã được gửi thành công! ({files_saved_count} tệp đính kèm).', 'success')
+            flash(f'Your idea has been submitted successfully! ({files_saved_count} attachments.', 'success')
             redirect_target = 'my_ideas' if 'my_ideas' in app.view_functions else 'dashboard'
             return redirect(url_for(redirect_target))
 
@@ -1308,7 +1307,7 @@ def submit_idea():
     if request.method == 'POST' and not form.validate_on_submit():
         print("Form validation errors (submit_idea):", form.errors)
 
-    return render_template('submit_idea.html', title='Gửi ý tưởng mới', form=form)
+    return render_template('submit_idea.html', title='New Idea', form=form)
 
 
 @app.route('/idea_uploads/<path:filename>')
@@ -1349,7 +1348,7 @@ def my_ideas():
         .paginate(page=page, per_page=PER_PAGE, error_out=False)  # Corrected query
     # Truyền cả 2 danh sách vào template
     return render_template('my_ideas.html',  # <<< Giữ nguyên tên template này
-                           title='Ý tưởng của tôi',
+                           title='My Ideas',
                            pending_ideas=pending_ideas,
                            responded_ideas=responded_ideas)
 
@@ -1413,7 +1412,7 @@ def view_pending_ideas():
         .paginate(page=page, per_page=PER_PAGE, error_out=False)
 
     return render_template('view_ideas_list.html',  # Đảm bảo đúng tên template
-                           title='Ý tưởng chờ duyệt',
+                           title='Pending Ideas',
                            ideas_pagination=pagination,
                            list_title='Danh sách ý tưởng chờ duyệt',
                            active_tab='pending')  # Truyền tab nếu template dùng tabs
@@ -1461,7 +1460,7 @@ def review_idea(idea_id):
             # Commit một lần duy nhất cho cả cập nhật Idea và thêm Notification
             db.session.commit()
             print("DEBUG: db.session.commit() successful.")  # DEBUG
-            flash(f'Đã cập nhật trạng thái và phản hồi cho ý tưởng "{idea.title}".', 'success')
+            flash(f'The status and feedback for the idea "{idea.title}" have been updated.', 'success')
 
             # Chuyển hướng dựa trên trạng thái MỚI
             if idea.status == 'pending':
@@ -1552,9 +1551,9 @@ def view_responded_ideas():
 
     # Render template
     return render_template('view_ideas_list.html',  # Dùng chung template
-                           title='Ý tưởng đã phản hồi',
+                           title='Responded idea',
                            ideas_pagination=pagination,
-                           list_title='Danh sách ý tưởng đã phản hồi',
+                           list_title='Responded idea List',
                            active_tab='responded')  # Truyền tab nếu template dùng tabs
 
 
@@ -1689,7 +1688,7 @@ def apply_to_topic(post_id):
     application = TopicApplication(user_id=current_user.id, post_id=post.id, message=message)  # <<< Truyền message
 
     # 7. Tạo thông báo cho Giảng viên (Giữ nguyên)
-    notification_content = f"Sinh viên {current_user.full_name} đã đăng ký đề tài: '{post.title}'"
+    notification_content = f"{current_user.full_name} has registered for the topic: '{post.title}'"
     new_notification = Notification(
         recipient_id=post.user_id,
         sender_id=current_user.id,
@@ -1704,7 +1703,7 @@ def apply_to_topic(post_id):
         db.session.add(new_notification)
         db.session.commit()
         # --- Trả về JSON thành công ---
-        return jsonify({'status': 'success', 'applied': True, 'message': 'Đăng ký thành công!'})  # Thêm applied=True
+        return jsonify({'status': 'success', 'applied': True, 'message': 'Apply Sucess!'})  # Thêm applied=True
     except Exception as e:
         db.session.rollback()
         print(f"Error applying to topic {post_id} for user {current_user.id}: {e}")
@@ -1766,7 +1765,7 @@ def my_posts():
 
     # Render template, truyền object pagination và dữ liệu like
     return render_template('my_posts.html',
-                           title='Bài đăng của tôi',
+                           title='My Post',
                            posts_pagination=pagination,  # <<< Truyền object pagination
                            like_counts=like_counts,  # <<< Truyền dict số lượt like
                            user_liked_posts=user_liked_posts)  # <<< Truyền set các post đã like
@@ -1879,7 +1878,7 @@ def update_application_status(application_id):
     student_recipient = application.student
     if student_recipient:
         status_text = "chấp thuận" if new_status == 'accepted' else "từ chối"
-        notif_content = f"Đăng ký của bạn cho đề tài \"{post.title[:30]}...\" đã được {status_text}."
+        notif_content = f"Your registration for the topic \"{post.title[:30]}...\" has been {status_text}."
 
         new_notification = Notification(
             recipient_id=student_recipient.id,
@@ -1964,7 +1963,7 @@ def showcase():
 
     # --- Render template, truyền cả carousel_items và items_pagination ---
     return render_template('showcase_list.html',
-                           title="Công trình tiêu biểu",
+                           title="Featured Works",
                            carousel_items=carousel_items,  # <<< TRUYỀN BIẾN NÀY
                            items_pagination=items_pagination,  # <<< Biến cũ cho lưới
                            distinct_types=[t[0] for t in distinct_types],
@@ -2122,7 +2121,7 @@ def my_applications():
 
     # CẦN TẠO TEMPLATE: 'my_applications.html'
     return render_template('my_applications.html',
-                           title='Đề tài đã đăng ký',
+                           title='Registered Topics',
                            applications_pagination=pagination)
 
 

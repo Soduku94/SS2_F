@@ -15,12 +15,12 @@
 
                     {# --- Metadata --- #}
                     <div class="text-muted mb-3 border-bottom pb-2">
-                        <p class="mb-1"><strong>Tác giả/Nhóm:</strong> {{ item.authors_text }}</p>
-                        <p class="mb-0"><strong>Năm:</strong> {{ item.year or 'N/A' }} | <strong>Loại:</strong>
-                            {% if item.item_type == 'thesis' %}Luận văn/Đồ án{% elif item.item_type == 'proceeding' %}
-                                Bài báo/Kỷ yếu{% elif item.item_type == 'project' %}Dự án khác{% else %}
-                                {{ item.item_type | title }}{% endif %} | <strong>Ngày
-                                đăng:</strong> {{ item.date_added.strftime('%d/%m/%Y') }}</p>
+                        <p class="mb-1"><strong>Author/Group:</strong> {{ item.authors_text }}</p>
+                        <p class="mb-0"><strong>Year:</strong> {{ item.year or 'N/A' }} | <strong>Type:</strong>
+                            {% if item.item_type == 'thesis' %}Thesis/Project{% elif item.item_type == 'proceeding' %}
+                                Article/Proceedings{% elif item.item_type == 'project' %}Other projects{% else %}
+                                {{ item.item_type | title }}{% endif %} | <strong>Date
+                                posted:</strong> {{ item.date_added.strftime('%d/%m/%Y') }}</p>
                     </div>
 
                     {# --- Ảnh minh họa --- #}
@@ -50,7 +50,7 @@
                         <p>
                             <a href="{{ item.external_link }}" target="_blank" rel="noopener noreferrer"
                                class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-box-arrow-up-right"></i> Xem tài liệu / Link gốc
+                                <i class="bi bi-box-arrow-up-right"></i> View document / Original link
                             </a>
                         </p>
                     {% endif %}
